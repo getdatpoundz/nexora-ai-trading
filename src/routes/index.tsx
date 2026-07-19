@@ -8,56 +8,27 @@ export const Route = createFileRoute("/")({
   component: Landing,
 });
 
-const LEVELS = [
-  {
-    key: "forsiktig",
-    name: "Försiktig",
-    risk: 2,
-    tagline: "Kapitalbevarande",
-    expected: "3–6%",
-    horizon: "3+ år",
-    desc: "Låg exponering mot volatila tillgångar. Fokus på stabilitet och kapitalbevarande.",
-    allocation: [
-      { name: "Stablecoins / Kontanter", v: 65 },
-      { name: "Bitcoin", v: 20 },
-      { name: "Ethereum", v: 15 },
-    ],
-    highlights: ["Lägsta volatilitet", "Skydd mot nedgång", "Månatlig rebalansering"],
-  },
-  {
-    key: "balanserad",
-    name: "Balanserad",
-    risk: 4,
-    tagline: "Populärast",
-    expected: "8–14%",
-    horizon: "1–3 år",
-    desc: "Balanserad fördelning som kombinerar marknadsexponering med riskkontroll.",
-    allocation: [
-      { name: "Bitcoin", v: 40 },
-      { name: "Ethereum", v: 30 },
-      { name: "Stablecoins", v: 20 },
-      { name: "Övrigt", v: 10 },
-    ],
-    highlights: ["Bred exponering", "Automatisk rebalansering", "Riskjusterad avkastning"],
-    featured: true,
-  },
-  {
-    key: "tillvaxt",
-    name: "Tillväxt",
-    risk: 6,
-    tagline: "Hög potential",
-    expected: "15–30%",
-    horizon: "1+ år",
-    desc: "Hög exponering mot marknadstillväxt. Större svängningar men högre potential.",
-    allocation: [
-      { name: "Bitcoin", v: 45 },
-      { name: "Ethereum", v: 30 },
-      { name: "Solana", v: 15 },
-      { name: "Övrigt", v: 10 },
-    ],
-    highlights: ["Aggressiv tillväxt", "Alt-coin exponering", "Momentum-signaler"],
-  },
+const INVESTMENT_TIERS: {
+  key: string;
+  name: string;
+  amount: number;
+  badge?: string;
+  featured?: boolean;
+  extendedKyc?: boolean;
+}[] = [
+  { key: "start", name: "Start", amount: 2500 },
+  { key: "bas", name: "Bas", amount: 5000 },
+  { key: "plus", name: "Plus", amount: 10000 },
+  { key: "advanced", name: "Advanced", amount: 25000, badge: "Populärt val", featured: true },
+  { key: "premium", name: "Premium", amount: 50000 },
+  { key: "private", name: "Private", amount: 100000, badge: "Utökad verifiering", extendedKyc: true },
+  { key: "private-plus", name: "Private Plus", amount: 250000, badge: "Utökad verifiering", extendedKyc: true },
+  { key: "wealth", name: "Wealth", amount: 500000, badge: "Utökad verifiering", extendedKyc: true },
+  { key: "wealth-one", name: "Wealth One", amount: 1000000, badge: "Utökad verifiering", extendedKyc: true },
 ];
+
+const formatSek = (n: number) => `${n.toLocaleString("sv-SE")} kr`;
+
 
 function Landing() {
   const chartData = useMemo(() => generatePortfolioHistory(180), []);
@@ -180,102 +151,87 @@ function Landing() {
       {/* Investeringsnivåer */}
       <section id="nivaer" className="border-b border-border bg-muted/40">
         <div className="mx-auto max-w-7xl px-6 py-20 lg:py-28">
-          <div className="mx-auto max-w-2xl text-center">
+          <div className="mx-auto max-w-3xl text-center">
             <p className="text-xs font-semibold uppercase tracking-wider text-primary">Investeringsnivåer</p>
             <h2 className="mt-3 font-display text-4xl font-bold tracking-tight sm:text-5xl">
-              Välj den nivå som matchar dig.
+              Välj din investeringsnivå
             </h2>
             <p className="mt-4 text-lg text-muted-foreground">
-              Tre AI-styrda strategier med tydlig riskmärkning på skalan 1–7. Byt när du vill.
+              Välj det belopp som passar din ekonomiska situation, erfarenhet och risktolerans.
+              Du kan förlora hela det investerade kapitalet.
             </p>
           </div>
 
-          <div className="mt-14 grid gap-6 lg:grid-cols-3">
-            {LEVELS.map((lvl) => (
+          <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {INVESTMENT_TIERS.map((tier) => (
               <div
-                key={lvl.key}
-                className={`relative flex flex-col rounded-2xl border bg-card p-7 shadow-sm ${
-                  lvl.featured ? "border-primary ring-2 ring-primary/20" : "border-border"
+                key={tier.key}
+                className={`relative flex flex-col rounded-2xl border bg-card p-7 shadow-sm transition hover:border-primary/60 hover:shadow-md ${
+                  tier.featured ? "border-primary ring-2 ring-primary/25" : "border-border"
                 }`}
               >
-                {lvl.featured && (
-                  <span className="absolute -top-3 left-7 rounded-full bg-primary px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-primary-foreground">
-                    {lvl.tagline}
+                {tier.badge && (
+                  <span
+                    className={`absolute -top-3 left-7 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider ${
+                      tier.featured
+                        ? "bg-primary text-primary-foreground"
+                        : "border border-border bg-background text-muted-foreground"
+                    }`}
+                  >
+                    {tier.badge}
                   </span>
                 )}
+
                 <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="font-display text-2xl font-bold">{lvl.name}</h3>
-                    {!lvl.featured && <p className="mt-1 text-xs uppercase tracking-wider text-muted-foreground">{lvl.tagline}</p>}
-                  </div>
-                  <RiskPill level={lvl.risk} />
+                  <h3 className="font-display text-xl font-bold uppercase tracking-wide">{tier.name}</h3>
+                  {tier.extendedKyc && (
+                    <ShieldCheck className="h-4 w-4 text-primary" aria-label="Utökad verifiering" />
+                  )}
                 </div>
 
-                <p className="mt-4 text-sm text-muted-foreground">{lvl.desc}</p>
-
-                <div className="mt-6 grid grid-cols-2 gap-3">
-                  <div className="rounded-lg border border-border bg-background p-3">
-                    <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Förv. avkastning</div>
-                    <div className="mt-0.5 font-display text-lg font-bold text-primary">{lvl.expected}</div>
-                  </div>
-                  <div className="rounded-lg border border-border bg-background p-3">
-                    <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Horisont</div>
-                    <div className="mt-0.5 font-display text-lg font-bold">{lvl.horizon}</div>
+                <div className="mt-4">
+                  <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Investeringsbelopp</div>
+                  <div className="mt-1 font-display text-3xl font-bold tabular-nums">
+                    {formatSek(tier.amount)}
                   </div>
                 </div>
 
-                {/* Allocation bar */}
-                <div className="mt-6">
-                  <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Fördelning</div>
-                  <div className="flex h-2 overflow-hidden rounded-full bg-muted">
-                    {lvl.allocation.map((a, i) => (
-                      <div
-                        key={a.name}
-                        style={{
-                          width: `${a.v}%`,
-                          background: ["oklch(0.62 0.16 155)", "oklch(0.72 0.14 195)", "oklch(0.55 0.02 90)", "oklch(0.78 0.15 75)"][i],
-                        }}
-                      />
-                    ))}
-                  </div>
-                  <ul className="mt-3 space-y-1 text-xs text-muted-foreground">
-                    {lvl.allocation.map((a) => (
-                      <li key={a.name} className="flex justify-between">
-                        <span>{a.name}</span>
-                        <span className="tabular-nums font-medium text-foreground">{a.v}%</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <ul className="mt-6 space-y-2 border-t border-border pt-5 text-sm">
-                  {lvl.highlights.map((h) => (
-                    <li key={h} className="flex items-center gap-2">
-                      <Check className="h-4 w-4 shrink-0 text-primary" /> {h}
-                    </li>
-                  ))}
+                <ul className="mt-6 space-y-2 border-t border-border pt-5 text-sm text-muted-foreground">
+                  <li className="flex items-center gap-2">
+                    <Check className="h-4 w-4 shrink-0 text-primary" /> Full tillgång till AI-strategier
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="h-4 w-4 shrink-0 text-primary" /> Automatisk rebalansering
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="h-4 w-4 shrink-0 text-primary" />
+                    {tier.extendedKyc ? "Dedikerad kontaktperson" : "Standardrapportering"}
+                  </li>
                 </ul>
 
                 <Link
                   to="/auth"
                   search={{ mode: "signup" }}
                   className={`mt-7 inline-flex items-center justify-center gap-2 rounded-md px-4 py-3 text-sm font-semibold ${
-                    lvl.featured
+                    tier.featured
                       ? "bg-primary text-primary-foreground hover:opacity-90"
                       : "border border-border bg-background hover:bg-muted"
                   }`}
                 >
-                  Välj {lvl.name} <ArrowRight className="h-4 w-4" />
+                  Välj {tier.name} <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
             ))}
           </div>
 
-          <p className="mx-auto mt-8 max-w-3xl text-center text-xs text-muted-foreground">
-            All data är simulerad i demoläget. Historisk eller simulerad utveckling är ingen garanti för framtida resultat.
+          <p className="mx-auto mt-10 max-w-3xl text-center text-xs text-muted-foreground">
+            Alla belopp är i SEK. I demoläget genomförs inga riktiga betalningar. Investeringar i krypto
+            innebär hög risk – du kan förlora hela ditt kapital. Utökad verifiering krävs för nivåer från
+            100 000 kr och uppåt.
           </p>
         </div>
       </section>
+
 
       {/* Plattform */}
       <section id="plattform" className="border-b border-border">
@@ -398,17 +354,3 @@ function Landing() {
   );
 }
 
-function RiskPill({ level }: { level: number }) {
-  const dots = Array.from({ length: 7 }, (_, i) => i < level);
-  const tone = level <= 2 ? "text-primary" : level <= 4 ? "text-warning" : "text-destructive";
-  return (
-    <div className="flex flex-col items-end gap-1.5">
-      <span className={`font-display text-xs font-bold uppercase tracking-wider ${tone}`}>Risk {level}/7</span>
-      <div className="flex gap-0.5">
-        {dots.map((on, i) => (
-          <span key={i} className={`h-1.5 w-3 rounded-full ${on ? (level <= 2 ? "bg-primary" : level <= 4 ? "bg-warning" : "bg-destructive") : "bg-muted"}`} />
-        ))}
-      </div>
-    </div>
-  );
-}
