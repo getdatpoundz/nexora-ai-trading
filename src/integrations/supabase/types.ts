@@ -52,10 +52,18 @@ export type Database = {
       investment_selections: {
         Row: {
           created_at: string
+          deposit_address: string | null
+          deposit_memo: string | null
           enhanced_review_required: boolean
+          funded_amount_sek: number | null
+          funded_at: string | null
           id: string
           level_name: string
           manual_review_required: boolean
+          onramp_currency: string | null
+          onramp_method: string | null
+          onramp_provider: string | null
+          onramp_status: string
           risk_acknowledged: boolean
           selected_amount_sek: number
           status: Database["public"]["Enums"]["investment_selection_status"]
@@ -65,10 +73,18 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          deposit_address?: string | null
+          deposit_memo?: string | null
           enhanced_review_required?: boolean
+          funded_amount_sek?: number | null
+          funded_at?: string | null
           id?: string
           level_name: string
           manual_review_required?: boolean
+          onramp_currency?: string | null
+          onramp_method?: string | null
+          onramp_provider?: string | null
+          onramp_status?: string
           risk_acknowledged?: boolean
           selected_amount_sek: number
           status?: Database["public"]["Enums"]["investment_selection_status"]
@@ -78,10 +94,18 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          deposit_address?: string | null
+          deposit_memo?: string | null
           enhanced_review_required?: boolean
+          funded_amount_sek?: number | null
+          funded_at?: string | null
           id?: string
           level_name?: string
           manual_review_required?: boolean
+          onramp_currency?: string | null
+          onramp_method?: string | null
+          onramp_provider?: string | null
+          onramp_status?: string
           risk_acknowledged?: boolean
           selected_amount_sek?: number
           status?: Database["public"]["Enums"]["investment_selection_status"]

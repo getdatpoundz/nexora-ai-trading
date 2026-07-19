@@ -16,6 +16,8 @@ import { AlertTriangle, Check, ShieldCheck, Info, CheckCircle2 } from "lucide-re
 import { sek } from "@/lib/format";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { OnrampFlow } from "./OnrampFlow";
+
 
 type Level = {
   key: string;
@@ -72,6 +74,8 @@ export function InvestmentLevels({ strategyId, verificationStatus, incomeRange }
   const [confirmations, setConfirmations] = useState({ risk: false, loss: false, situation: false, info: false });
   const [submitting, setSubmitting] = useState(false);
   const [savedId, setSavedId] = useState<string | null>(null);
+  const [onrampOpen, setOnrampOpen] = useState(false);
+
 
   const selectedLevel = useMemo(() => (selectedKey ? LEVELS.find((l) => l.key === selectedKey) ?? null : null), [selectedKey]);
   const displayName = selectedLevel?.name ?? (customMode && amount ? "Eget belopp" : null);
@@ -177,11 +181,13 @@ export function InvestmentLevels({ strategyId, verificationStatus, incomeRange }
         })
         .eq("id", savedId);
       if (error) throw error;
-      toast.success("Ditt val har registrerats i demoläget. Ingen betalning eller investering har genomförts.", {
-        duration: 6000,
+      toast.success("Val registrerat. Fortsätt till betalning för att aktivera portföljen.", {
+        duration: 5000,
       });
       setReviewOpen(false);
       setConfirmations({ risk: false, loss: false, situation: false, info: false });
+      setOnrampOpen(true);
+
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "Kunde inte bekräfta valet.";
       toast.error(msg);
@@ -454,9 +460,17 @@ export function InvestmentLevels({ strategyId, verificationStatus, incomeRange }
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <OnrampFlow
+        open={onrampOpen}
+        onOpenChange={setOnrampOpen}
+        selectionId={savedId}
+        amountSek={amount ?? 0}
+      />
     </section>
   );
 }
+
 
 function SummaryItem({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
   return (
