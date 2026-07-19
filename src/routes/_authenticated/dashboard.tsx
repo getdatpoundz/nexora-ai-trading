@@ -93,22 +93,23 @@ function Dashboard() {
               <AreaChart data={history} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="pv" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="oklch(0.72 0.18 230)" stopOpacity={0.4} />
-                    <stop offset="100%" stopColor="oklch(0.72 0.18 230)" stopOpacity={0} />
+                    <stop offset="0%" stopColor="var(--color-primary)" stopOpacity={0.35} />
+                    <stop offset="100%" stopColor="var(--color-primary)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid stroke="oklch(0.28 0.03 250)" strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="date" tick={{ fill: "oklch(0.68 0.02 245)", fontSize: 11 }} tickFormatter={(d) => new Date(d).toLocaleDateString("sv-SE", { month: "short", day: "numeric" })} minTickGap={40} />
-                <YAxis tick={{ fill: "oklch(0.68 0.02 245)", fontSize: 11 }} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} width={40} />
+                <CartesianGrid stroke="var(--color-border)" strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="date" tick={{ fill: "var(--color-muted-foreground)", fontSize: 11 }} tickFormatter={(d) => new Date(d).toLocaleDateString("sv-SE", { month: "short", day: "numeric" })} minTickGap={40} />
+                <YAxis tick={{ fill: "var(--color-muted-foreground)", fontSize: 11 }} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} width={40} />
                 <Tooltip
-                  contentStyle={{ background: "oklch(0.18 0.028 250)", border: "1px solid oklch(0.28 0.03 250)", borderRadius: 8, fontSize: 12 }}
+                  contentStyle={{ background: "var(--color-card)", border: "1px solid var(--color-border)", borderRadius: 8, fontSize: 12, color: "var(--color-foreground)" }}
                   labelFormatter={(l) => dateSv(String(l))}
                   formatter={(v: number, name) => [sek(v), name === "value" ? "Portfölj" : "BTC"]}
                 />
-                <Area type="monotone" dataKey="value" stroke="oklch(0.72 0.18 230)" strokeWidth={2} fill="url(#pv)" />
-                <Line type="monotone" dataKey="btc" stroke="oklch(0.78 0.15 75)" strokeWidth={1.5} dot={false} strokeDasharray="4 3" />
+                <Area type="monotone" dataKey="value" stroke="var(--color-primary)" strokeWidth={2} fill="url(#pv)" />
+                <Line type="monotone" dataKey="btc" stroke="var(--color-chart-3)" strokeWidth={1.5} dot={false} strokeDasharray="4 3" />
               </AreaChart>
             </ResponsiveContainer>
+
           </div>
         </div>
 
