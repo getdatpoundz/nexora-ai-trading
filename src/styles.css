@@ -49,118 +49,13 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
-  --shadow-glow: 0 0 30px oklch(0.72 0.18 220 / 0.25);
-  --shadow-card: 0 1px 3px oklch(0 0 0 / 0.4), 0 8px 24px oklch(0 0 0 / 0.2);
+  --shadow-glow: 0 0 30px oklch(0.62 0.16 155 / 0.18);
+  --shadow-card: 0 1px 3px oklch(0 0 0 / 0.06), 0 8px 24px oklch(0 0 0 / 0.06);
 }
 
-:root {
+/* Nordnet-inspired light theme as GLOBAL default */
+:root, .theme-nordnet, .dark {
   --radius: 0.75rem;
-  /* Deep navy / near-black background palette */
-  --background: oklch(0.14 0.025 250);
-  --foreground: oklch(0.97 0.005 240);
-  --card: oklch(0.18 0.028 250);
-  --card-foreground: oklch(0.97 0.005 240);
-  --popover: oklch(0.18 0.028 250);
-  --popover-foreground: oklch(0.97 0.005 240);
-  /* Electric blue primary */
-  --primary: oklch(0.72 0.18 230);
-  --primary-foreground: oklch(0.14 0.025 250);
-  --secondary: oklch(0.24 0.03 250);
-  --secondary-foreground: oklch(0.97 0.005 240);
-  --muted: oklch(0.22 0.025 250);
-  --muted-foreground: oklch(0.68 0.02 245);
-  /* Turquoise accent */
-  --accent: oklch(0.78 0.14 195);
-  --accent-foreground: oklch(0.14 0.025 250);
-  --destructive: oklch(0.65 0.22 25);
-  --destructive-foreground: oklch(0.98 0 0);
-  --success: oklch(0.7 0.16 155);
-  --success-foreground: oklch(0.14 0.025 250);
-  --warning: oklch(0.78 0.15 75);
-  --warning-foreground: oklch(0.14 0.025 250);
-  --border: oklch(0.28 0.03 250);
-  --input: oklch(0.24 0.028 250);
-  --ring: oklch(0.72 0.18 230);
-  --chart-1: oklch(0.72 0.18 230);
-  --chart-2: oklch(0.78 0.14 195);
-  --chart-3: oklch(0.7 0.16 155);
-  --chart-4: oklch(0.78 0.15 75);
-  --chart-5: oklch(0.65 0.2 320);
-  --sidebar: oklch(0.11 0.022 250);
-  --sidebar-foreground: oklch(0.9 0.01 240);
-  --sidebar-primary: oklch(0.72 0.18 230);
-  --sidebar-primary-foreground: oklch(0.14 0.025 250);
-  --sidebar-accent: oklch(0.2 0.028 250);
-  --sidebar-accent-foreground: oklch(0.97 0.005 240);
-  --sidebar-border: oklch(0.24 0.028 250);
-  --sidebar-ring: oklch(0.72 0.18 230);
-}
-
-.dark {
-  --background: oklch(0.14 0.025 250);
-  --foreground: oklch(0.97 0.005 240);
-  --card: oklch(0.18 0.028 250);
-  --card-foreground: oklch(0.97 0.005 240);
-  --popover: oklch(0.18 0.028 250);
-  --popover-foreground: oklch(0.97 0.005 240);
-  --primary: oklch(0.72 0.18 230);
-  --primary-foreground: oklch(0.14 0.025 250);
-  --secondary: oklch(0.24 0.03 250);
-  --secondary-foreground: oklch(0.97 0.005 240);
-  --muted: oklch(0.22 0.025 250);
-  --muted-foreground: oklch(0.68 0.02 245);
-  --accent: oklch(0.78 0.14 195);
-  --accent-foreground: oklch(0.14 0.025 250);
-  --destructive: oklch(0.65 0.22 25);
-  --destructive-foreground: oklch(0.98 0 0);
-  --border: oklch(0.28 0.03 250);
-  --input: oklch(0.24 0.028 250);
-  --ring: oklch(0.72 0.18 230);
-  --sidebar: oklch(0.11 0.022 250);
-  --sidebar-foreground: oklch(0.9 0.01 240);
-  --sidebar-primary: oklch(0.72 0.18 230);
-  --sidebar-primary-foreground: oklch(0.14 0.025 250);
-  --sidebar-accent: oklch(0.2 0.028 250);
-  --sidebar-accent-foreground: oklch(0.97 0.005 240);
-  --sidebar-border: oklch(0.24 0.028 250);
-  --sidebar-ring: oklch(0.72 0.18 230);
-}
-
-@layer base {
-  * {
-    border-color: var(--color-border);
-  }
-
-  html, body {
-    background-color: var(--color-background);
-    color: var(--color-foreground);
-    font-family: var(--font-sans);
-    -webkit-font-smoothing: antialiased;
-  }
-}
-
-@utility gradient-brand {
-  background-image: linear-gradient(135deg, oklch(0.72 0.18 230), oklch(0.78 0.14 195));
-}
-
-@utility text-gradient-brand {
-  background-image: linear-gradient(135deg, oklch(0.82 0.16 230), oklch(0.85 0.13 195));
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-}
-
-@utility glow-brand {
-  box-shadow: 0 0 40px oklch(0.72 0.18 230 / 0.3);
-}
-
-@utility font-display {
-  font-family: var(--font-display);
-  letter-spacing: -0.02em;
-}
-
-/* Nordnet-inspired light theme, scoped to landing page */
-.theme-nordnet {
   --background: oklch(1 0 0);
   --foreground: oklch(0.16 0.005 90);
   --card: oklch(0.985 0.006 90);
@@ -197,9 +92,37 @@
   --sidebar-accent-foreground: oklch(0.16 0.005 90);
   --sidebar-border: oklch(0.9 0.005 90);
   --sidebar-ring: oklch(0.62 0.16 155);
-  background-color: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans);
 }
 
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
 
+  html, body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@utility gradient-brand {
+  background-image: linear-gradient(135deg, oklch(0.62 0.16 155), oklch(0.7 0.14 165));
+}
+
+@utility text-gradient-brand {
+  background-image: linear-gradient(135deg, oklch(0.55 0.17 155), oklch(0.62 0.16 155));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+@utility glow-brand {
+  box-shadow: 0 0 40px oklch(0.62 0.16 155 / 0.25);
+}
+
+@utility font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
