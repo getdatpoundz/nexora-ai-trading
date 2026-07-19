@@ -8,56 +8,27 @@ export const Route = createFileRoute("/")({
   component: Landing,
 });
 
-const LEVELS = [
-  {
-    key: "forsiktig",
-    name: "Försiktig",
-    risk: 2,
-    tagline: "Kapitalbevarande",
-    expected: "3–6%",
-    horizon: "3+ år",
-    desc: "Låg exponering mot volatila tillgångar. Fokus på stabilitet och kapitalbevarande.",
-    allocation: [
-      { name: "Stablecoins / Kontanter", v: 65 },
-      { name: "Bitcoin", v: 20 },
-      { name: "Ethereum", v: 15 },
-    ],
-    highlights: ["Lägsta volatilitet", "Skydd mot nedgång", "Månatlig rebalansering"],
-  },
-  {
-    key: "balanserad",
-    name: "Balanserad",
-    risk: 4,
-    tagline: "Populärast",
-    expected: "8–14%",
-    horizon: "1–3 år",
-    desc: "Balanserad fördelning som kombinerar marknadsexponering med riskkontroll.",
-    allocation: [
-      { name: "Bitcoin", v: 40 },
-      { name: "Ethereum", v: 30 },
-      { name: "Stablecoins", v: 20 },
-      { name: "Övrigt", v: 10 },
-    ],
-    highlights: ["Bred exponering", "Automatisk rebalansering", "Riskjusterad avkastning"],
-    featured: true,
-  },
-  {
-    key: "tillvaxt",
-    name: "Tillväxt",
-    risk: 6,
-    tagline: "Hög potential",
-    expected: "15–30%",
-    horizon: "1+ år",
-    desc: "Hög exponering mot marknadstillväxt. Större svängningar men högre potential.",
-    allocation: [
-      { name: "Bitcoin", v: 45 },
-      { name: "Ethereum", v: 30 },
-      { name: "Solana", v: 15 },
-      { name: "Övrigt", v: 10 },
-    ],
-    highlights: ["Aggressiv tillväxt", "Alt-coin exponering", "Momentum-signaler"],
-  },
+const INVESTMENT_TIERS: {
+  key: string;
+  name: string;
+  amount: number;
+  badge?: string;
+  featured?: boolean;
+  extendedKyc?: boolean;
+}[] = [
+  { key: "start", name: "Start", amount: 2500 },
+  { key: "bas", name: "Bas", amount: 5000 },
+  { key: "plus", name: "Plus", amount: 10000 },
+  { key: "advanced", name: "Advanced", amount: 25000, badge: "Populärt val", featured: true },
+  { key: "premium", name: "Premium", amount: 50000 },
+  { key: "private", name: "Private", amount: 100000, badge: "Utökad verifiering", extendedKyc: true },
+  { key: "private-plus", name: "Private Plus", amount: 250000, badge: "Utökad verifiering", extendedKyc: true },
+  { key: "wealth", name: "Wealth", amount: 500000, badge: "Utökad verifiering", extendedKyc: true },
+  { key: "wealth-one", name: "Wealth One", amount: 1000000, badge: "Utökad verifiering", extendedKyc: true },
 ];
+
+const formatSek = (n: number) => `${n.toLocaleString("sv-SE")} kr`;
+
 
 function Landing() {
   const chartData = useMemo(() => generatePortfolioHistory(180), []);
