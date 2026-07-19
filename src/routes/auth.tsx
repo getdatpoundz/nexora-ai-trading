@@ -75,7 +75,7 @@ function AuthPage() {
   };
 
   return (
-    <div className="grid min-h-screen lg:grid-cols-2">
+    <div className="theme-nordnet grid min-h-screen lg:grid-cols-2">
       <div className="relative hidden overflow-hidden bg-sidebar lg:block">
         <div className="absolute inset-0 bg-[radial-gradient(80%_60%_at_20%_20%,oklch(0.72_0.18_230/0.25),transparent)]" />
         <div className="relative flex h-full flex-col justify-between p-12">
