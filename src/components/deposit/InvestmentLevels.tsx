@@ -497,5 +497,3 @@ function Confirm({
   );
 }
 
-// Prevent unused import warnings in strict setups
-void useEffect;
