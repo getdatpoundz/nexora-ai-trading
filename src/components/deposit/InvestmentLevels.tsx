@@ -74,6 +74,8 @@ export function InvestmentLevels({ strategyId, verificationStatus, incomeRange }
   const [confirmations, setConfirmations] = useState({ risk: false, loss: false, situation: false, info: false });
   const [submitting, setSubmitting] = useState(false);
   const [savedId, setSavedId] = useState<string | null>(null);
+  const [onrampOpen, setOnrampOpen] = useState(false);
+
 
   const selectedLevel = useMemo(() => (selectedKey ? LEVELS.find((l) => l.key === selectedKey) ?? null : null), [selectedKey]);
   const displayName = selectedLevel?.name ?? (customMode && amount ? "Eget belopp" : null);
