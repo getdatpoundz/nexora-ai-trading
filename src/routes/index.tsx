@@ -354,17 +354,3 @@ function Landing() {
   );
 }
 
-function RiskPill({ level }: { level: number }) {
-  const dots = Array.from({ length: 7 }, (_, i) => i < level);
-  const tone = level <= 2 ? "text-primary" : level <= 4 ? "text-warning" : "text-destructive";
-  return (
-    <div className="flex flex-col items-end gap-1.5">
-      <span className={`font-display text-xs font-bold uppercase tracking-wider ${tone}`}>Risk {level}/7</span>
-      <div className="flex gap-0.5">
-        {dots.map((on, i) => (
-          <span key={i} className={`h-1.5 w-3 rounded-full ${on ? (level <= 2 ? "bg-primary" : level <= 4 ? "bg-warning" : "bg-destructive") : "bg-muted"}`} />
-        ))}
-      </div>
-    </div>
-  );
-}
