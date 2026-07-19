@@ -171,7 +171,7 @@ function AuthPage() {
                 </div>
               </>
             )}
-            <Button type="submit" className="mt-2 w-full gradient-brand text-primary-foreground" disabled={loading}>
+            <Button type="submit" className="mt-2 w-full bg-primary text-primary-foreground hover:opacity-90" disabled={loading}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {mode === "login" ? "Logga in" : mode === "signup" ? "Skapa konto" : "Skicka återställningslänk"}
             </Button>
