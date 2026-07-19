@@ -150,7 +150,7 @@ function Landing() {
                         <stop offset="100%" stopColor="oklch(0.62 0.16 155)" stopOpacity={0} />
                       </linearGradient>
                     </defs>
-                    <XAxis dataKey="label" hide />
+                    <XAxis dataKey="date" hide />
                     <YAxis hide domain={["auto", "auto"]} />
                     <Tooltip
                       contentStyle={{ background: "white", border: "1px solid oklch(0.9 0.005 90)", borderRadius: 8, fontSize: 12 }}
