@@ -140,10 +140,10 @@ export function OnrampFlow({ open, onOpenChange, selectionId, amountSek, onFunde
               onramp_status: "funded",
               funded_amount_sek: amountSek,
               funded_at: new Date().toISOString(),
-              status: "funded",
             })
             .eq("id", selectionId);
         }
+
         toast.success("Insättning bekräftad i demoläget – ditt saldo har uppdaterats.");
         onFunded?.();
       }
