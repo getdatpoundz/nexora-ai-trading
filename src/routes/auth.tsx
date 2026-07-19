@@ -76,24 +76,24 @@ function AuthPage() {
 
   return (
     <div className="theme-nordnet grid min-h-screen lg:grid-cols-2">
-      <div className="relative hidden overflow-hidden bg-sidebar lg:block">
-        <div className="absolute inset-0 bg-[radial-gradient(80%_60%_at_20%_20%,oklch(0.72_0.18_230/0.25),transparent)]" />
+      <div className="relative hidden overflow-hidden bg-foreground text-background lg:block">
+        <div className="absolute inset-0 bg-[radial-gradient(80%_60%_at_20%_20%,oklch(0.62_0.16_155/0.35),transparent)]" />
         <div className="relative flex h-full flex-col justify-between p-12">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="grid h-10 w-10 place-items-center rounded-xl gradient-brand glow-brand">
-              <span className="text-lg font-black text-primary-foreground">N</span>
+          <Link to="/" className="flex items-center gap-2.5">
+            <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary">
+              <span className="font-display text-lg font-bold text-primary-foreground">N</span>
             </div>
-            <span className="text-lg font-bold">Nexora AI</span>
+            <span className="font-display text-lg font-bold">Nexora AI</span>
           </Link>
           <div>
-            <h2 className="max-w-md text-4xl font-black leading-tight">
-              Din <span className="text-gradient-brand">AI-drivna</span> kryptoplattform.
+            <h2 className="max-w-md font-display text-4xl font-bold leading-tight tracking-tight">
+              Din <span className="text-primary">AI-drivna</span> kryptoplattform.
             </h2>
-            <p className="mt-4 max-w-md text-sm text-muted-foreground">
+            <p className="mt-4 max-w-md text-sm text-background/70">
               Alla belopp visas i demoläge. Inga riktiga tillgångar hanteras i den här versionen.
             </p>
           </div>
-          <p className="max-w-md text-xs text-muted-foreground">
+          <p className="max-w-md text-xs text-background/60">
             Handel med kryptotillgångar innebär hög risk. Du kan förlora hela det investerade kapitalet.
           </p>
         </div>
