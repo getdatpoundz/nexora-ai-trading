@@ -16,6 +16,8 @@ import { AlertTriangle, Check, ShieldCheck, Info, CheckCircle2 } from "lucide-re
 import { sek } from "@/lib/format";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { OnrampFlow } from "./OnrampFlow";
+
 
 type Level = {
   key: string;
