@@ -460,9 +460,17 @@ export function InvestmentLevels({ strategyId, verificationStatus, incomeRange }
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <OnrampFlow
+        open={onrampOpen}
+        onOpenChange={setOnrampOpen}
+        selectionId={savedId}
+        amountSek={amount ?? 0}
+      />
     </section>
   );
 }
+
 
 function SummaryItem({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
   return (
