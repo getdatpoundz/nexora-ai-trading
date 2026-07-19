@@ -14,6 +14,83 @@ export type Database = {
   }
   public: {
     Tables: {
+      investment_amount_audit: {
+        Row: {
+          amount_sek: number
+          created_at: string
+          id: string
+          reason: string
+          selection_id: string | null
+          user_id: string
+        }
+        Insert: {
+          amount_sek: number
+          created_at?: string
+          id?: string
+          reason: string
+          selection_id?: string | null
+          user_id: string
+        }
+        Update: {
+          amount_sek?: number
+          created_at?: string
+          id?: string
+          reason?: string
+          selection_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "investment_amount_audit_selection_id_fkey"
+            columns: ["selection_id"]
+            isOneToOne: false
+            referencedRelation: "investment_selections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      investment_selections: {
+        Row: {
+          created_at: string
+          enhanced_review_required: boolean
+          id: string
+          level_name: string
+          manual_review_required: boolean
+          risk_acknowledged: boolean
+          selected_amount_sek: number
+          status: Database["public"]["Enums"]["investment_selection_status"]
+          strategy_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          enhanced_review_required?: boolean
+          id?: string
+          level_name: string
+          manual_review_required?: boolean
+          risk_acknowledged?: boolean
+          selected_amount_sek: number
+          status?: Database["public"]["Enums"]["investment_selection_status"]
+          strategy_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          enhanced_review_required?: boolean
+          id?: string
+          level_name?: string
+          manual_review_required?: boolean
+          risk_acknowledged?: boolean
+          selected_amount_sek?: number
+          status?: Database["public"]["Enums"]["investment_selection_status"]
+          strategy_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           active_strategy: string | null
@@ -125,6 +202,12 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      investment_selection_status:
+        | "draft"
+        | "pending_review"
+        | "approved"
+        | "rejected"
+        | "cancelled"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -253,6 +336,13 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      investment_selection_status: [
+        "draft",
+        "pending_review",
+        "approved",
+        "rejected",
+        "cancelled",
+      ],
     },
   },
 } as const
