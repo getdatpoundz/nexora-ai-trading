@@ -181,11 +181,13 @@ export function InvestmentLevels({ strategyId, verificationStatus, incomeRange }
         })
         .eq("id", savedId);
       if (error) throw error;
-      toast.success("Ditt val har registrerats i demoläget. Ingen betalning eller investering har genomförts.", {
-        duration: 6000,
+      toast.success("Val registrerat. Fortsätt till betalning för att aktivera portföljen.", {
+        duration: 5000,
       });
       setReviewOpen(false);
       setConfirmations({ risk: false, loss: false, situation: false, info: false });
+      setOnrampOpen(true);
+
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "Kunde inte bekräfta valet.";
       toast.error(msg);
