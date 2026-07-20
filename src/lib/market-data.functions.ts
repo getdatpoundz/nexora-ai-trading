@@ -122,7 +122,7 @@ export const getTimeSeries = createServerFn({ method: "GET" })
     } catch (error) {
       console.warn("Twelve Data series fallback", { symbol: asset.symbol, error });
     }
-    const values = res.values ?? [];
+    const values = res?.values ?? [];
     if (values.length === 0) {
       return buildFallbackSeries(asset.symbol, Number(outputsize)).map((point) => ({
         date: point.date,
