@@ -603,7 +603,102 @@ function Landing() {
         </div>
       </section>
 
+      {/* Snart tillgänglig i App Store & Google Play */}
+      <section id="app" className="border-b border-border bg-muted/40">
+        <div className="mx-auto max-w-7xl px-6 py-20 lg:py-24">
+          <div className="grid gap-12 lg:grid-cols-[1.05fr_1fr] lg:items-center">
+            <div>
+              <span className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+                <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+                Snart tillgänglig
+              </span>
+              <h2 className="mt-5 font-display text-4xl font-bold tracking-tight sm:text-5xl">
+                Håll koll på portföljen direkt från mobilen
+              </h2>
+              <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
+                Snart lanserar vi Nexora AI som app – följ dina AI-strategier, se innehav, sätt in och
+                handla direkt från fickan. Släpps under 2026 för iOS och Android.
+              </p>
+
+              <div className="mt-8 flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  disabled
+                  className="inline-flex cursor-not-allowed items-center gap-3 rounded-xl bg-foreground px-5 py-3 text-background opacity-90"
+                >
+                  <Apple className="h-7 w-7" />
+                  <div className="text-left leading-tight">
+                    <div className="text-[10px] uppercase tracking-wider opacity-70">Snart i</div>
+                    <div className="font-display text-base font-semibold">App Store</div>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  disabled
+                  className="inline-flex cursor-not-allowed items-center gap-3 rounded-xl bg-foreground px-5 py-3 text-background opacity-90"
+                >
+                  <Play className="h-7 w-7 fill-background" />
+                  <div className="text-left leading-tight">
+                    <div className="text-[10px] uppercase tracking-wider opacity-70">Snart på</div>
+                    <div className="font-display text-base font-semibold">Google Play</div>
+                  </div>
+                </button>
+              </div>
+
+              <p className="mt-4 text-xs text-muted-foreground">
+                Vill du få besked när appen släpps? Skapa ett konto så hör vi av oss först.
+              </p>
+            </div>
+
+            {/* Mobilmockups */}
+            <div className="relative mx-auto h-[520px] w-full max-w-md">
+              {/* Bakre telefon */}
+              <div className="absolute right-0 top-4 h-[460px] w-[220px] rotate-[8deg] rounded-[38px] border-[10px] border-foreground bg-background shadow-2xl">
+                <div className="mx-auto mt-1 h-4 w-20 rounded-b-2xl bg-foreground" />
+                <div className="p-4">
+                  <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Portfölj</div>
+                  <div className="mt-1 font-display text-lg font-bold tabular-nums">284 500 kr</div>
+                  <div className="mt-0.5 text-xs font-semibold text-primary">+16,78%</div>
+                  <div className="mt-4 h-24 rounded-lg bg-gradient-to-t from-primary/25 to-transparent" />
+                  <div className="mt-4 space-y-2">
+                    {[["BTC", "+2,1%"], ["ETH", "+1,4%"], ["AAPL", "-0,3%"]].map(([s, p]) => (
+                      <div key={s} className="flex items-center justify-between rounded-md border border-border px-2 py-1.5 text-[11px]">
+                        <span className="font-semibold">{s}</span>
+                        <span className={p.startsWith("+") ? "text-primary" : "text-destructive"}>{p}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              {/* Främre telefon */}
+              <div className="absolute left-0 top-0 h-[480px] w-[230px] -rotate-[6deg] rounded-[38px] border-[10px] border-foreground bg-card shadow-2xl">
+                <div className="mx-auto mt-1 h-4 w-20 rounded-b-2xl bg-foreground" />
+                <div className="p-4">
+                  <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Nexora Balanserad</div>
+                  <div className="mt-1 font-display text-xl font-bold tabular-nums">1 284 500 kr</div>
+                  <div className="mt-0.5 text-xs font-semibold text-primary">+18,4% i år</div>
+                  <div className="relative mt-4 h-28 overflow-hidden rounded-lg bg-gradient-to-t from-primary/30 to-transparent">
+                    <svg viewBox="0 0 200 100" className="h-full w-full" preserveAspectRatio="none">
+                      <path d="M0 80 L20 70 L40 74 L60 55 L80 60 L100 40 L120 45 L140 30 L160 35 L180 20 L200 15" fill="none" stroke="oklch(0.62 0.16 155)" strokeWidth="2" />
+                    </svg>
+                  </div>
+                  <div className="mt-4 grid grid-cols-3 gap-1.5">
+                    {["1M", "6M", "1Å"].map((l) => (
+                      <div key={l} className="rounded border border-border py-1 text-center text-[10px] font-semibold">{l}</div>
+                    ))}
+                  </div>
+                  <button className="mt-4 w-full rounded-lg bg-primary py-2.5 text-xs font-semibold text-primary-foreground">
+                    Sätt in
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA */}
+
       <section className="border-b border-border">
         <div className="mx-auto max-w-4xl px-6 py-20 text-center lg:py-24">
           <h2 className="font-display text-4xl font-bold tracking-tight sm:text-5xl">
