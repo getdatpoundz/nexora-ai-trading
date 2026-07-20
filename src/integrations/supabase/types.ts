@@ -115,11 +115,45 @@ export type Database = {
         }
         Relationships: []
       }
+      portfolio_holdings: {
+        Row: {
+          asset_type: string
+          avg_cost_sek: number
+          created_at: string
+          id: string
+          quantity: number
+          symbol: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          asset_type?: string
+          avg_cost_sek?: number
+          created_at?: string
+          id?: string
+          quantity?: number
+          symbol: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          asset_type?: string
+          avg_cost_sek?: number
+          created_at?: string
+          id?: string
+          quantity?: number
+          symbol?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           active_strategy: string | null
           address: string | null
           birth_date: string | null
+          cash_balance_sek: number
           city: string | null
           country: string | null
           created_at: string
@@ -137,6 +171,7 @@ export type Database = {
           planned_investment: string | null
           postal_code: string | null
           risk_profile: string | null
+          tour_completed: boolean
           updated_at: string
           verification_status: string
         }
@@ -144,6 +179,7 @@ export type Database = {
           active_strategy?: string | null
           address?: string | null
           birth_date?: string | null
+          cash_balance_sek?: number
           city?: string | null
           country?: string | null
           created_at?: string
@@ -161,6 +197,7 @@ export type Database = {
           planned_investment?: string | null
           postal_code?: string | null
           risk_profile?: string | null
+          tour_completed?: boolean
           updated_at?: string
           verification_status?: string
         }
@@ -168,6 +205,7 @@ export type Database = {
           active_strategy?: string | null
           address?: string | null
           birth_date?: string | null
+          cash_balance_sek?: number
           city?: string | null
           country?: string | null
           created_at?: string
@@ -185,8 +223,51 @@ export type Database = {
           planned_investment?: string | null
           postal_code?: string | null
           risk_profile?: string | null
+          tour_completed?: boolean
           updated_at?: string
           verification_status?: string
+        }
+        Relationships: []
+      }
+      trades: {
+        Row: {
+          asset_type: string
+          created_at: string
+          executed_at: string
+          fee_sek: number
+          id: string
+          price_sek: number
+          quantity: number
+          side: string
+          symbol: string
+          total_sek: number
+          user_id: string
+        }
+        Insert: {
+          asset_type?: string
+          created_at?: string
+          executed_at?: string
+          fee_sek?: number
+          id?: string
+          price_sek: number
+          quantity: number
+          side: string
+          symbol: string
+          total_sek: number
+          user_id: string
+        }
+        Update: {
+          asset_type?: string
+          created_at?: string
+          executed_at?: string
+          fee_sek?: number
+          id?: string
+          price_sek?: number
+          quantity?: number
+          side?: string
+          symbol?: string
+          total_sek?: number
+          user_id?: string
         }
         Relationships: []
       }
