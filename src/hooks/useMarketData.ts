@@ -5,10 +5,12 @@ export function useQuote(symbol: string) {
   return useQuery({
     queryKey: ["quote", symbol],
     queryFn: () => getQuote({ data: { symbol } }),
+    enabled: symbol.length > 0,
     refetchInterval: 3 * 60_000,
     staleTime: 2 * 60_000,
     placeholderData: keepPreviousData,
-    retry: 1,
+    retry: false,
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -20,7 +22,8 @@ export function useQuotes(symbols: string[]) {
     refetchInterval: 3 * 60_000,
     staleTime: 2 * 60_000,
     placeholderData: keepPreviousData,
-    retry: 1,
+    retry: false,
+    refetchOnWindowFocus: false,
   });
 }
 
@@ -30,6 +33,7 @@ export function useTimeSeries(symbol: string, interval = "1day", outputsize = 90
     queryFn: () => getTimeSeries({ data: { symbol, interval, outputsize } }),
     staleTime: 10 * 60_000,
     placeholderData: keepPreviousData,
-    retry: 1,
+    retry: false,
+    refetchOnWindowFocus: false,
   });
 }

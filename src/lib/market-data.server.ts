@@ -6,10 +6,7 @@ const cache = new Map<string, CacheEntry>();
 function getCached<T>(key: string): T | null {
   const e = cache.get(key);
   if (!e) return null;
-  if (Date.now() - e.at > e.ttl) {
-    cache.delete(key);
-    return null;
-  }
+  if (Date.now() - e.at > e.ttl) return null;
   return e.value as T;
 }
 function setCached(key: string, value: unknown, ttlMs: number) {
@@ -47,7 +44,13 @@ export async function tdFetch<T>(path: string, params: Record<string, string>, t
 // Convert a USD/EUR price into SEK via Twelve Data FX quote.
 export async function getFxToSek(from: "USD" | "EUR" | "SEK"): Promise<number> {
   if (from === "SEK") return 1;
+  const { fallbackFxToSek } = await import("./market-data.shared");
   const symbol = `${from}/SEK`;
-  const data = await tdFetch<{ price: string }>("/price", { symbol }, 5 * 60_000);
-  return Number(data.price);
+  try {
+    const data = await tdFetch<{ price: string }>("/price", { symbol }, 5 * 60_000);
+    const price = Number(data.price);
+    return Number.isFinite(price) && price > 0 ? price : fallbackFxToSek(from);
+  } catch {
+    return fallbackFxToSek(from);
+  }
 }

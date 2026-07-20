@@ -8,7 +8,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import type { MarketAsset } from "@/lib/market-data.functions";
+import type { MarketAsset } from "@/lib/market-data.shared";
 import { useQueryClient } from "@tanstack/react-query";
 
 type Props = {
