@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, ShieldCheck, TrendingUp, Sparkles, Check, LineChart, Lock, Wallet } from "lucide-react";
+import { ArrowRight, ShieldCheck, TrendingUp, Sparkles, Check, LineChart, Lock, Wallet, PiggyBank, BarChart3, Bot, Apple, Play } from "lucide-react";
 import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts";
 import { useEffect, useMemo, useState } from "react";
 import { generatePortfolioHistory } from "@/lib/demo-data";
@@ -106,6 +106,9 @@ function Landing() {
 
   return (
     <div className="theme-nordnet min-h-screen">
+      {/* Top ticker (twelvedata-stil, ovanför navigationen) */}
+      <MarketTicker />
+
       {/* Nav */}
       <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
@@ -119,8 +122,8 @@ function Landing() {
           <nav className="hidden items-center gap-8 text-sm font-medium text-muted-foreground md:flex">
             <a href="#om" className="hover:text-foreground">Om</a>
             <a href="#nivaer" className="hover:text-foreground">Investeringsnivåer</a>
-            <a href="#sa-fungerar" className="hover:text-foreground">Så fungerar det</a>
-            <a href="#varfor" className="hover:text-foreground">Varför Nexora</a>
+            <a href="#igang" className="hover:text-foreground">Kom igång</a>
+            <a href="#app" className="hover:text-foreground">App</a>
             <a href="#sakerhet" className="hover:text-foreground">Säkerhet</a>
           </nav>
           <div className="flex items-center gap-2">
@@ -134,7 +137,7 @@ function Landing() {
         </div>
       </header>
 
-      <MarketTicker />
+
 
       {/* Hero */}
       <section className="border-b border-border">
@@ -345,7 +348,60 @@ function Landing() {
         </div>
       </section>
 
-      {/* Så fungerar Nexora AI */}
+      {/* Så kommer du igång — 3 enkla kort (Nordnet-inspirerat) */}
+      <section id="igang" className="border-b border-border">
+        <div className="mx-auto max-w-7xl px-6 py-20 lg:py-24">
+          <div className="mx-auto max-w-3xl text-center">
+            <p className="text-xs font-semibold uppercase tracking-wider text-primary">Kom igång</p>
+            <h2 className="mt-3 font-display text-4xl font-bold tracking-tight sm:text-5xl">
+              Så kommer du igång
+            </h2>
+            <p className="mt-4 text-lg text-muted-foreground">
+              Alla har olika förutsättningar och mål med sitt sparande – men en sak har vi gemensamt:
+              möjligheten att komma igång redan idag.
+            </p>
+          </div>
+
+          <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              {
+                icon: PiggyBank,
+                title: "Buffra upp",
+                desc: "Börja smått med 2 500 kr. Perfekt för att lära känna plattformen och bygga en trygg start.",
+              },
+              {
+                icon: Bot,
+                title: "Låt AI:n sköta det",
+                desc: "Välj en färdig strategi – Försiktig, Balanserad eller Tillväxt. Boten balanserar automatiskt.",
+              },
+              {
+                icon: BarChart3,
+                title: "Handla själv",
+                desc: "Föredrar du kontroll? Använd våra smarta verktyg för att handla krypto, aktier och index i realtid.",
+              },
+            ].map((c) => (
+              <div key={c.title} className="rounded-2xl border border-border bg-card p-8 text-center shadow-sm transition hover:border-primary/50 hover:shadow-md">
+                <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-primary/10 text-primary">
+                  <c.icon className="h-8 w-8" strokeWidth={1.6} />
+                </div>
+                <h3 className="mt-6 font-display text-xl font-bold">{c.title}</h3>
+                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{c.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-12 text-center">
+            <Link
+              to="/auth"
+              search={{ mode: "signup" }}
+              className="inline-flex items-center gap-2 rounded-md bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground hover:opacity-90"
+            >
+              Skapa konto på under en minut <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
       <section id="sa-fungerar" className="border-b border-border">
         <div className="mx-auto max-w-7xl px-6 py-20 lg:py-28">
           <div className="mx-auto max-w-3xl text-center">
@@ -547,7 +603,102 @@ function Landing() {
         </div>
       </section>
 
+      {/* Snart tillgänglig i App Store & Google Play */}
+      <section id="app" className="border-b border-border bg-muted/40">
+        <div className="mx-auto max-w-7xl px-6 py-20 lg:py-24">
+          <div className="grid gap-12 lg:grid-cols-[1.05fr_1fr] lg:items-center">
+            <div>
+              <span className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+                <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+                Snart tillgänglig
+              </span>
+              <h2 className="mt-5 font-display text-4xl font-bold tracking-tight sm:text-5xl">
+                Håll koll på portföljen direkt från mobilen
+              </h2>
+              <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
+                Snart lanserar vi Nexora AI som app – följ dina AI-strategier, se innehav, sätt in och
+                handla direkt från fickan. Släpps under 2026 för iOS och Android.
+              </p>
+
+              <div className="mt-8 flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  disabled
+                  className="inline-flex cursor-not-allowed items-center gap-3 rounded-xl bg-foreground px-5 py-3 text-background opacity-90"
+                >
+                  <Apple className="h-7 w-7" />
+                  <div className="text-left leading-tight">
+                    <div className="text-[10px] uppercase tracking-wider opacity-70">Snart i</div>
+                    <div className="font-display text-base font-semibold">App Store</div>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  disabled
+                  className="inline-flex cursor-not-allowed items-center gap-3 rounded-xl bg-foreground px-5 py-3 text-background opacity-90"
+                >
+                  <Play className="h-7 w-7 fill-background" />
+                  <div className="text-left leading-tight">
+                    <div className="text-[10px] uppercase tracking-wider opacity-70">Snart på</div>
+                    <div className="font-display text-base font-semibold">Google Play</div>
+                  </div>
+                </button>
+              </div>
+
+              <p className="mt-4 text-xs text-muted-foreground">
+                Vill du få besked när appen släpps? Skapa ett konto så hör vi av oss först.
+              </p>
+            </div>
+
+            {/* Mobilmockups */}
+            <div className="relative mx-auto h-[520px] w-full max-w-md">
+              {/* Bakre telefon */}
+              <div className="absolute right-0 top-4 h-[460px] w-[220px] rotate-[8deg] rounded-[38px] border-[10px] border-foreground bg-background shadow-2xl">
+                <div className="mx-auto mt-1 h-4 w-20 rounded-b-2xl bg-foreground" />
+                <div className="p-4">
+                  <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Portfölj</div>
+                  <div className="mt-1 font-display text-lg font-bold tabular-nums">284 500 kr</div>
+                  <div className="mt-0.5 text-xs font-semibold text-primary">+16,78%</div>
+                  <div className="mt-4 h-24 rounded-lg bg-gradient-to-t from-primary/25 to-transparent" />
+                  <div className="mt-4 space-y-2">
+                    {[["BTC", "+2,1%"], ["ETH", "+1,4%"], ["AAPL", "-0,3%"]].map(([s, p]) => (
+                      <div key={s} className="flex items-center justify-between rounded-md border border-border px-2 py-1.5 text-[11px]">
+                        <span className="font-semibold">{s}</span>
+                        <span className={p.startsWith("+") ? "text-primary" : "text-destructive"}>{p}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              {/* Främre telefon */}
+              <div className="absolute left-0 top-0 h-[480px] w-[230px] -rotate-[6deg] rounded-[38px] border-[10px] border-foreground bg-card shadow-2xl">
+                <div className="mx-auto mt-1 h-4 w-20 rounded-b-2xl bg-foreground" />
+                <div className="p-4">
+                  <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Nexora Balanserad</div>
+                  <div className="mt-1 font-display text-xl font-bold tabular-nums">1 284 500 kr</div>
+                  <div className="mt-0.5 text-xs font-semibold text-primary">+18,4% i år</div>
+                  <div className="relative mt-4 h-28 overflow-hidden rounded-lg bg-gradient-to-t from-primary/30 to-transparent">
+                    <svg viewBox="0 0 200 100" className="h-full w-full" preserveAspectRatio="none">
+                      <path d="M0 80 L20 70 L40 74 L60 55 L80 60 L100 40 L120 45 L140 30 L160 35 L180 20 L200 15" fill="none" stroke="oklch(0.62 0.16 155)" strokeWidth="2" />
+                    </svg>
+                  </div>
+                  <div className="mt-4 grid grid-cols-3 gap-1.5">
+                    {["1M", "6M", "1Å"].map((l) => (
+                      <div key={l} className="rounded border border-border py-1 text-center text-[10px] font-semibold">{l}</div>
+                    ))}
+                  </div>
+                  <button className="mt-4 w-full rounded-lg bg-primary py-2.5 text-xs font-semibold text-primary-foreground">
+                    Sätt in
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA */}
+
       <section className="border-b border-border">
         <div className="mx-auto max-w-4xl px-6 py-20 text-center lg:py-24">
           <h2 className="font-display text-4xl font-bold tracking-tight sm:text-5xl">
