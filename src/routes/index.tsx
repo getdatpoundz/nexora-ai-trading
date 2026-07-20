@@ -312,13 +312,78 @@ function Landing() {
         </div>
       </section>
 
+      {/* Så fungerar Nexora AI */}
+      <section id="sa-fungerar" className="border-b border-border">
+        <div className="mx-auto max-w-7xl px-6 py-20 lg:py-28">
+          <div className="mx-auto max-w-3xl text-center">
+            <p className="text-xs font-semibold uppercase tracking-wider text-primary">Så fungerar det</p>
+            <h2 className="mt-3 font-display text-4xl font-bold tracking-tight sm:text-5xl">
+              Så fungerar Nexora AI
+            </h2>
+            <p className="mt-4 text-lg text-muted-foreground">
+              Inga komplicerade installationer eller tekniska förkunskaper krävs. Det intuitiva
+              gränssnittet guidar dig genom varje steg – från första inloggning till aktiv portfölj.
+            </p>
+          </div>
 
-      {/* Plattform */}
-      <section id="plattform" className="border-b border-border">
-        <div className="mx-auto max-w-7xl px-6 py-20 lg:py-24">
-          <div className="grid gap-10 lg:grid-cols-3">
+          <div className="mt-16 grid gap-8 lg:grid-cols-2">
             {[
-              { icon: Sparkles, title: "AI-driven analys", desc: "Realtidsmodeller väger volatilitet, momentum och korrelation för att balansera din portfölj." },
+              {
+                step: "01",
+                title: "Välj investeringsnivå och skapa konto",
+                desc: "Välj den nivå som passar din ekonomi och risktolerans. Skapa kontot på under en minut och slutför en enkel verifiering.",
+              },
+              {
+                step: "02",
+                title: "Sätt in via kort, Swish eller krypto",
+                desc: "Vår guidade on-ramp visar exakt hur du sätter in – med kort, banköverföring eller genom att skicka krypto till din personliga adress.",
+              },
+              {
+                step: "03",
+                title: "Konfigurera din bot",
+                desc: "Föredrar du en hands-off-approach? Låt Nexora AI handla åt dig. Vill du ha mer kontroll? Justera parametrar och sätt egna regler.",
+              },
+              {
+                step: "04",
+                title: "Luta dig tillbaka – följ i realtid",
+                desc: "Boten lär sig och anpassar strategin efter dina resultat och marknadens rörelser. Följ prestanda och gör justeringar när du vill.",
+              },
+            ].map((s) => (
+              <div key={s.step} className="grid gap-6 rounded-2xl border border-border bg-card p-6 sm:grid-cols-[1fr_1.1fr] sm:p-8">
+                {/* Bildplats – byt ut mot skärmdump/illustration */}
+                <div className="relative aspect-[4/3] overflow-hidden rounded-xl border border-border bg-gradient-to-br from-primary/10 via-muted to-background">
+                  <div className="absolute inset-0 grid place-items-center text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    Bild kommer här
+                  </div>
+                </div>
+                <div className="flex flex-col justify-center">
+                  <span className="font-display text-sm font-bold text-primary">{s.step}</span>
+                  <h3 className="mt-2 font-display text-xl font-bold tracking-tight">{s.title}</h3>
+                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{s.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Plattform / Teknik bakom */}
+      <section id="plattform" className="border-b border-border bg-muted/40">
+        <div className="mx-auto max-w-7xl px-6 py-20 lg:py-24">
+          <div className="mx-auto max-w-3xl text-center">
+            <p className="text-xs font-semibold uppercase tracking-wider text-primary">Tekniken bakom</p>
+            <h2 className="mt-3 font-display text-4xl font-bold tracking-tight">
+              Avancerad AI som aldrig sover
+            </h2>
+            <p className="mt-4 text-lg text-muted-foreground">
+              Bakom kulisserna drivs Nexora AI av modern artificiell intelligens och sofistikerade
+              maskininlärningsmodeller som bearbetar enorma datamängder på sekunder – något ingen
+              människa kan göra ensam.
+            </p>
+          </div>
+          <div className="mt-14 grid gap-6 lg:grid-cols-3">
+            {[
+              { icon: Sparkles, title: "AI-driven analys", desc: "Realtidsmodeller väger volatilitet, momentum och korrelation. Systemet reagerar inte bara – det förutser." },
               { icon: LineChart, title: "Professionell översikt", desc: "Portfölj, marknad och risk i ett gränssnitt byggt för både nybörjare och erfarna traders." },
               { icon: ShieldCheck, title: "Transparent risk", desc: "Varje strategi märks på skalan 1–7 med tydlig information om nedgångar och volatilitet." },
             ].map((f) => (
@@ -333,6 +398,69 @@ function Landing() {
           </div>
         </div>
       </section>
+
+      {/* Varför Nexora AI */}
+      <section id="varfor" className="border-b border-border">
+        <div className="mx-auto max-w-7xl px-6 py-20 lg:py-24">
+          <div className="grid gap-12 lg:grid-cols-[1fr_1.2fr] lg:items-start">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-primary">Varför Nexora AI</p>
+              <h2 className="mt-3 font-display text-4xl font-bold tracking-tight sm:text-5xl">
+                Transparens, kontroll och support – dygnet runt.
+              </h2>
+              <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
+                Nexora AI växer varje dag och har redan hjälpt tusentals användare i Sverige att uppnå
+                mer konsekventa resultat, minska känslostyrda misstag och frigöra tid för det som
+                betyder mest.
+              </p>
+              <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+                Vi garanterar inga vinster – men kombinationen av avancerad AI, realtidsanalys och
+                robust riskhantering ger dig en tydlig fördel.
+              </p>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              {[
+                {
+                  title: "Inga dolda avgifter",
+                  desc: "Transparent prissättning utan överraskningar. Du behåller full äganderätt över ditt kapital.",
+                },
+                {
+                  title: "Börja litet, skala upp",
+                  desc: "Starta med en liten insättning och öka gradvis när du ser resultaten.",
+                },
+                {
+                  title: "Support 24/7",
+                  desc: "Live-chatt bemannad dygnet runt. Vårt team finns här – dag som natt.",
+                },
+                {
+                  title: "Full kontroll",
+                  desc: "Sätt riskprofil, anpassa strategier eller använd rekommenderade inställningar.",
+                },
+                {
+                  title: "Höggradig kryptering",
+                  desc: "Din data och dina medel skyddas med säkerhet i institutionell klass.",
+                },
+                {
+                  title: "Fullt spårbart",
+                  desc: "Varje handel botten utför loggas och visas i din personliga dashboard.",
+                },
+              ].map((b) => (
+                <div key={b.title} className="rounded-2xl border border-border bg-card p-6">
+                  <div className="flex items-start gap-3">
+                    <Check className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+                    <div>
+                      <h3 className="font-display text-base font-bold">{b.title}</h3>
+                      <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{b.desc}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
 
       {/* Säkerhet + priser */}
       <section id="sakerhet" className="border-b border-border bg-muted/40">
