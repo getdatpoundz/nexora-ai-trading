@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { generatePortfolioHistory } from "@/lib/demo-data";
 import avanzaLogo from "@/assets/avanza.png";
 import nordnetLogo from "@/assets/nordnet.png";
+import { MarketTicker } from "@/components/landing/MarketTicker";
 
 export const Route = createFileRoute("/")({
   component: Landing,
@@ -103,6 +104,8 @@ function Landing() {
           </div>
         </div>
       </header>
+
+      <MarketTicker />
 
       {/* Hero */}
       <section className="border-b border-border">
