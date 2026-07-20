@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 import { useMemo, useState } from "react";
-import { MARKET_UNIVERSE, type MarketAsset } from "@/lib/market-data.functions";
+import { MARKET_UNIVERSE, type MarketAsset } from "@/lib/market-data.shared";
 import { useQuotes } from "@/hooks/useMarketData";
 import { TradeDialog } from "@/components/markets/TradeDialog";
 import { useAuth } from "@/hooks/useAuth";
@@ -59,7 +59,7 @@ function MarketsPage() {
             <p className="text-2xl font-bold tabular-nums">{sek(cash)}</p>
           </div>
           <p className="text-xs text-muted-foreground">
-            Livepriser via Twelve Data · uppdateras var 60:e sekund
+            Livepriser via Twelve Data · uppdateras var 3:e minut
           </p>
         </div>
 
