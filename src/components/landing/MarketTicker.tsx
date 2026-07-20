@@ -1,4 +1,10 @@
 import { useQuotes } from "@/hooks/useMarketData";
+import {
+  fallbackChangePct,
+  fallbackFxToSek,
+  fallbackNativePrice,
+  findMarketAsset,
+} from "@/lib/market-data.shared";
 
 const TICKER_SYMBOLS = [
   "BTC", "ETH", "SOL", "XRP", "DOGE",
@@ -13,20 +19,25 @@ function fmtPrice(p: number) {
   return p.toLocaleString("sv-SE", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
 }
 
+const FALLBACK_QUOTES = TICKER_SYMBOLS.map((symbol) => {
+  const asset = findMarketAsset(symbol);
+  const native = fallbackNativePrice(symbol);
+  const fx = fallbackFxToSek(asset.currency);
+  return {
+    symbol,
+    name: asset.name,
+    priceNative: native,
+    priceSek: native * fx,
+    currency: asset.currency,
+    changePct24h: fallbackChangePct(symbol),
+  };
+});
+
 export function MarketTicker() {
-  const { data, isLoading, error } = useQuotes(TICKER_SYMBOLS);
+  const { data } = useQuotes(TICKER_SYMBOLS);
+  const quotes = data && data.length > 0 ? data : FALLBACK_QUOTES;
+  const items = [...quotes, ...quotes]; // duplicate for seamless loop
 
-  if (isLoading || error || !data || data.length === 0) {
-    return (
-      <div className="border-y border-border bg-card">
-        <div className="mx-auto flex h-11 max-w-7xl items-center px-6 text-xs text-muted-foreground">
-          {error ? "Kunde inte ladda livekurser" : "Laddar livekurser…"}
-        </div>
-      </div>
-    );
-  }
-
-  const items = [...data, ...data]; // duplicate for seamless loop
 
   return (
     <div className="group relative overflow-hidden border-y border-border bg-card">
