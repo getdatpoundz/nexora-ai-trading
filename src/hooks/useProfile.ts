@@ -11,6 +11,8 @@ export type Profile = {
   onboarding_completed: boolean;
   risk_profile: string | null;
   active_strategy: string | null;
+  cash_balance_sek: number | null;
+  tour_completed: boolean | null;
 };
 
 export function useProfile(userId: string | undefined) {

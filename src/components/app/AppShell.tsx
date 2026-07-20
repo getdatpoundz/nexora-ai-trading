@@ -127,7 +127,7 @@ export function AppShell({ title, children }: { title: string; children: ReactNo
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Desktop sidebar */}
-      <aside className="fixed inset-y-0 left-0 hidden w-64 border-r border-sidebar-border lg:block">
+      <aside data-tour="sidebar" className="fixed inset-y-0 left-0 hidden w-64 border-r border-sidebar-border lg:block">
         <SidebarInner pathname={pathname} />
       </aside>
 
@@ -164,9 +164,14 @@ export function AppShell({ title, children }: { title: string; children: ReactNo
                 <Bell className="h-4 w-4" />
                 <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-accent" />
               </Link>
-              <Link to="/support" aria-label="Support" className="hidden sm:grid h-9 w-9 place-items-center rounded-lg border border-border text-muted-foreground hover:text-foreground">
+              <button
+                data-tour="help-button"
+                aria-label="Starta guiden"
+                onClick={() => (window as unknown as { __startNexoraTour?: () => void }).__startNexoraTour?.()}
+                className="hidden sm:grid h-9 w-9 place-items-center rounded-lg border border-border text-muted-foreground hover:text-foreground"
+              >
                 <HelpCircle className="h-4 w-4" />
-              </Link>
+              </button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="grid h-9 w-9 place-items-center rounded-full gradient-brand text-sm font-bold text-primary-foreground">
