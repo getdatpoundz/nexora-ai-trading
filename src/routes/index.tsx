@@ -348,7 +348,60 @@ function Landing() {
         </div>
       </section>
 
-      {/* Så fungerar Nexora AI */}
+      {/* Så kommer du igång — 3 enkla kort (Nordnet-inspirerat) */}
+      <section id="igang" className="border-b border-border">
+        <div className="mx-auto max-w-7xl px-6 py-20 lg:py-24">
+          <div className="mx-auto max-w-3xl text-center">
+            <p className="text-xs font-semibold uppercase tracking-wider text-primary">Kom igång</p>
+            <h2 className="mt-3 font-display text-4xl font-bold tracking-tight sm:text-5xl">
+              Så kommer du igång
+            </h2>
+            <p className="mt-4 text-lg text-muted-foreground">
+              Alla har olika förutsättningar och mål med sitt sparande – men en sak har vi gemensamt:
+              möjligheten att komma igång redan idag.
+            </p>
+          </div>
+
+          <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              {
+                icon: PiggyBank,
+                title: "Buffra upp",
+                desc: "Börja smått med 2 500 kr. Perfekt för att lära känna plattformen och bygga en trygg start.",
+              },
+              {
+                icon: Bot,
+                title: "Låt AI:n sköta det",
+                desc: "Välj en färdig strategi – Försiktig, Balanserad eller Tillväxt. Boten balanserar automatiskt.",
+              },
+              {
+                icon: BarChart3,
+                title: "Handla själv",
+                desc: "Föredrar du kontroll? Använd våra smarta verktyg för att handla krypto, aktier och index i realtid.",
+              },
+            ].map((c) => (
+              <div key={c.title} className="rounded-2xl border border-border bg-card p-8 text-center shadow-sm transition hover:border-primary/50 hover:shadow-md">
+                <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-primary/10 text-primary">
+                  <c.icon className="h-8 w-8" strokeWidth={1.6} />
+                </div>
+                <h3 className="mt-6 font-display text-xl font-bold">{c.title}</h3>
+                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{c.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-12 text-center">
+            <Link
+              to="/auth"
+              search={{ mode: "signup" }}
+              className="inline-flex items-center gap-2 rounded-md bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground hover:opacity-90"
+            >
+              Skapa konto på under en minut <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
       <section id="sa-fungerar" className="border-b border-border">
         <div className="mx-auto max-w-7xl px-6 py-20 lg:py-28">
           <div className="mx-auto max-w-3xl text-center">
