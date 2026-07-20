@@ -94,7 +94,7 @@ export const getQuotes = createServerFn({ method: "GET" })
     const raw = await tdFetch<Record<string, { close: string; percent_change: string; symbol?: string }>>(
       "/quote",
       { symbol: symbols },
-      60_000,
+      180_000,
     );
     // When only one symbol is requested, Twelve Data returns a flat object.
     const map: Record<string, { close: string; percent_change: string }> =
