@@ -68,7 +68,7 @@ export const getQuote = createServerFn({ method: "GET" })
     const q = await tdFetch<{
       close: string;
       percent_change: string;
-    }>("/quote", { symbol: asset.td }, 60_000);
+    }>("/quote", { symbol: asset.td }, 180_000);
     const priceNative = Number(q.close);
     const fx = await getFxToSek(asset.currency);
     return {
