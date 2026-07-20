@@ -126,3 +126,12 @@
   font-family: var(--font-display);
   letter-spacing: -0.02em;
 }
+
+@keyframes ticker {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@utility animate-ticker {
+  animation: ticker linear infinite;
+}
