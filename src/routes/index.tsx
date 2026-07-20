@@ -189,7 +189,7 @@ function Landing() {
         </div>
       </section>
 
-      <PartnersSection>{/* rotating partner logos */}</PartnersSection>
+      <PartnersSection />
 
       {/* Investeringsnivåer */}
       <section id="nivaer" className="border-b border-border bg-muted/40">
