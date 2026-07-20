@@ -87,10 +87,11 @@ function Landing() {
             <span className="ml-2 rounded-full border border-border bg-muted px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Demo</span>
           </div>
           <nav className="hidden items-center gap-8 text-sm font-medium text-muted-foreground md:flex">
+            <a href="#om" className="hover:text-foreground">Om</a>
             <a href="#nivaer" className="hover:text-foreground">Investeringsnivåer</a>
-            <a href="#plattform" className="hover:text-foreground">Plattform</a>
+            <a href="#sa-fungerar" className="hover:text-foreground">Så fungerar det</a>
+            <a href="#varfor" className="hover:text-foreground">Varför Nexora</a>
             <a href="#sakerhet" className="hover:text-foreground">Säkerhet</a>
-            <a href="#priser" className="hover:text-foreground">Priser</a>
           </nav>
           <div className="flex items-center gap-2">
             <Link to="/auth" className="rounded-md px-3 py-2 text-sm font-medium text-foreground hover:bg-muted">
