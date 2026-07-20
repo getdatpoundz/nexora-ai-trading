@@ -45,7 +45,7 @@ export function MarketTicker() {
       <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-card to-transparent" />
       <div
         className="flex whitespace-nowrap py-3 animate-ticker group-hover:[animation-play-state:paused]"
-        style={{ animationDuration: `${data.length * 4}s` }}
+        style={{ animationDuration: `${quotes.length * 4}s` }}
       >
         {items.map((q, i) => {
           const up = q.changePct24h >= 0;
