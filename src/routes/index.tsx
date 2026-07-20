@@ -106,6 +106,9 @@ function Landing() {
 
   return (
     <div className="theme-nordnet min-h-screen">
+      {/* Top ticker (twelvedata-stil, ovanför navigationen) */}
+      <MarketTicker />
+
       {/* Nav */}
       <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
@@ -119,8 +122,8 @@ function Landing() {
           <nav className="hidden items-center gap-8 text-sm font-medium text-muted-foreground md:flex">
             <a href="#om" className="hover:text-foreground">Om</a>
             <a href="#nivaer" className="hover:text-foreground">Investeringsnivåer</a>
-            <a href="#sa-fungerar" className="hover:text-foreground">Så fungerar det</a>
-            <a href="#varfor" className="hover:text-foreground">Varför Nexora</a>
+            <a href="#igang" className="hover:text-foreground">Kom igång</a>
+            <a href="#app" className="hover:text-foreground">App</a>
             <a href="#sakerhet" className="hover:text-foreground">Säkerhet</a>
           </nav>
           <div className="flex items-center gap-2">
@@ -134,7 +137,7 @@ function Landing() {
         </div>
       </header>
 
-      <MarketTicker />
+
 
       {/* Hero */}
       <section className="border-b border-border">
