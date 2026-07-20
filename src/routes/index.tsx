@@ -189,6 +189,8 @@ function Landing() {
         </div>
       </section>
 
+      <PartnersSection>{/* rotating partner logos */}</PartnersSection>
+
       {/* Investeringsnivåer */}
       <section id="nivaer" className="border-b border-border bg-muted/40">
         <div className="mx-auto max-w-7xl px-6 py-20 lg:py-28">
