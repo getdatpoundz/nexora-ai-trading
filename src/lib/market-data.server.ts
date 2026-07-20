@@ -28,9 +28,18 @@ export async function tdFetch<T>(path: string, params: Record<string, string>, t
   if (cached) return cached;
 
   const res = await fetch(url);
-  if (!res.ok) throw new Error(`Twelve Data ${res.status}`);
-  const json = (await res.json()) as { status?: string; message?: string } & T;
-  if (json.status === "error") throw new Error(json.message || "Twelve Data error");
+  if (!res.ok) {
+    // Serve stale cache on rate-limit / upstream errors instead of throwing.
+    const stale = cache.get(cacheKey);
+    if (stale) return stale.value as T;
+    throw new Error(`Twelve Data ${res.status}`);
+  }
+  const json = (await res.json()) as { status?: string; code?: number; message?: string } & T;
+  if (json.status === "error") {
+    const stale = cache.get(cacheKey);
+    if (stale) return stale.value as T;
+    throw new Error(json.message || "Twelve Data error");
+  }
   setCached(cacheKey, json, ttlMs);
   return json;
 }
