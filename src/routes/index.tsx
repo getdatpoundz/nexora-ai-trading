@@ -11,40 +11,69 @@ export const Route = createFileRoute("/")({
   component: Landing,
 });
 
-const PARTNERS = [
+// Wordmark-style partners — renderas som svartvit text-logotyp i marquee.
+// Blandning av nordiska mäklare, globala börser/plattformar, plånböcker och betalpartners.
+const PARTNERS: { name: string; logo?: string; font?: string; weight?: string; tracking?: string }[] = [
   { name: "Avanza", logo: avanzaLogo },
   { name: "Nordnet", logo: nordnetLogo },
+  { name: "eToro", weight: "font-bold", tracking: "tracking-tight" },
+  { name: "TradeZero", weight: "font-extrabold", tracking: "tracking-tight" },
+  { name: "Interactive Brokers", weight: "font-semibold" },
+  { name: "Saxo", weight: "font-bold", tracking: "tracking-wide" },
+  { name: "Trade Republic", weight: "font-semibold" },
+  { name: "Revolut", weight: "font-bold", tracking: "tracking-tight" },
+  { name: "Coinbase", weight: "font-bold" },
+  { name: "Binance", weight: "font-extrabold", tracking: "tracking-tight" },
+  { name: "Kraken", weight: "font-bold" },
+  { name: "MetaMask", weight: "font-semibold" },
+  { name: "Ledger", weight: "font-bold", tracking: "tracking-widest" },
+  { name: "Trezor", weight: "font-bold" },
+  { name: "TradingView", weight: "font-semibold" },
+  { name: "Chainlink", weight: "font-semibold" },
+  { name: "Stripe", weight: "font-bold", tracking: "tracking-tight" },
+  { name: "Klarna", weight: "font-bold" },
+  { name: "Swish", weight: "font-bold" },
+  { name: "Visa", weight: "font-black", tracking: "tracking-wider" },
+  { name: "Mastercard", weight: "font-semibold" },
 ];
 
 function PartnersSection() {
-  const [i, setI] = useState(0);
-  useEffect(() => {
-    const t = setInterval(() => setI((v) => (v + 1) % PARTNERS.length), 2500);
-    return () => clearInterval(t);
-  }, []);
+  const items = [...PARTNERS, ...PARTNERS]; // duplicera för sömlös loop
   return (
     <section className="border-b border-border bg-background">
-      <div className="mx-auto max-w-7xl px-6 py-12">
-        <p className="text-center text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-          Samarbetspartners
+      <div className="mx-auto max-w-7xl px-6 py-10">
+        <p className="text-center text-sm text-muted-foreground">
+          Fungerar med dina favoritplattformar och plånböcker
         </p>
-        <div className="mt-6 flex items-center justify-center">
-          <div className="relative h-16 w-56 sm:h-20 sm:w-72">
-            {PARTNERS.map((p, idx) => (
-              <img
-                key={p.name}
-                src={p.logo}
-                alt={`${p.name} logotyp`}
-                className={`absolute inset-0 m-auto max-h-full max-w-full object-contain transition-opacity duration-700 ${
-                  idx === i ? "opacity-100" : "opacity-0"
-                }`}
-              />
+        <div className="group relative mt-6 overflow-hidden">
+          <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-gradient-to-r from-background to-transparent" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-gradient-to-l from-background to-transparent" />
+          <div
+            className="flex items-center whitespace-nowrap animate-ticker group-hover:[animation-play-state:paused]"
+            style={{ animationDuration: `${PARTNERS.length * 3.5}s` }}
+          >
+            {items.map((p, idx) => (
+              <div
+                key={`${p.name}-${idx}`}
+                className="flex h-14 shrink-0 items-center justify-center px-10 grayscale opacity-60 transition hover:opacity-100"
+              >
+                {p.logo ? (
+                  <img
+                    src={p.logo}
+                    alt={`${p.name} logotyp`}
+                    className="max-h-8 w-auto object-contain"
+                  />
+                ) : (
+                  <span
+                    className={`text-2xl text-foreground/80 ${p.weight ?? "font-semibold"} ${p.tracking ?? ""}`}
+                  >
+                    {p.name}
+                  </span>
+                )}
+              </div>
             ))}
           </div>
         </div>
-        <p className="mt-4 text-center text-xs text-muted-foreground">
-          Nexora AI arbetar tillsammans med ledande nordiska aktörer.
-        </p>
       </div>
     </section>
   );
