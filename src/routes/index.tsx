@@ -1,12 +1,53 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, ShieldCheck, TrendingUp, Sparkles, Check, LineChart, Lock, Wallet } from "lucide-react";
 import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { generatePortfolioHistory } from "@/lib/demo-data";
+import avanzaLogo from "@/assets/avanza.png";
+import nordnetLogo from "@/assets/nordnet.png";
 
 export const Route = createFileRoute("/")({
   component: Landing,
 });
+
+const PARTNERS = [
+  { name: "Avanza", logo: avanzaLogo },
+  { name: "Nordnet", logo: nordnetLogo },
+];
+
+function PartnersSection() {
+  const [i, setI] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setI((v) => (v + 1) % PARTNERS.length), 2500);
+    return () => clearInterval(t);
+  }, []);
+  return (
+    <section className="border-b border-border bg-background">
+      <div className="mx-auto max-w-7xl px-6 py-12">
+        <p className="text-center text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+          Samarbetspartners
+        </p>
+        <div className="mt-6 flex items-center justify-center">
+          <div className="relative h-16 w-56 sm:h-20 sm:w-72">
+            {PARTNERS.map((p, idx) => (
+              <img
+                key={p.name}
+                src={p.logo}
+                alt={`${p.name} logotyp`}
+                className={`absolute inset-0 m-auto max-h-full max-w-full object-contain transition-opacity duration-700 ${
+                  idx === i ? "opacity-100" : "opacity-0"
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+        <p className="mt-4 text-center text-xs text-muted-foreground">
+          Nexora AI arbetar tillsammans med ledande nordiska aktörer.
+        </p>
+      </div>
+    </section>
+  );
+}
 
 const INVESTMENT_TIERS: {
   key: string;
@@ -147,6 +188,8 @@ function Landing() {
           </div>
         </div>
       </section>
+
+      <PartnersSection />
 
       {/* Investeringsnivåer */}
       <section id="nivaer" className="border-b border-border bg-muted/40">
