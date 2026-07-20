@@ -191,6 +191,43 @@ function Landing() {
 
       <PartnersSection />
 
+      {/* Vad är Nexora AI */}
+      <section id="om" className="border-b border-border">
+        <div className="mx-auto max-w-7xl px-6 py-20 lg:py-28">
+          <div className="grid gap-12 lg:grid-cols-[1fr_1.15fr] lg:items-center">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-primary">Om Nexora AI</p>
+              <h2 className="mt-3 font-display text-4xl font-bold tracking-tight sm:text-5xl">
+                Ett nytt sätt att handla på finansmarknaderna.
+              </h2>
+              <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
+                Nexora AI är en AI-driven tradingbot skapad för alla som vill delta i marknaderna –
+                oavsett om du är nybörjare eller erfaren trader. Systemet arbetar dygnet runt och
+                analyserar globala finansmarknader inklusive kryptovalutor, valutor, aktier och råvaror.
+              </p>
+              <p className="mt-4 text-base leading-relaxed text-muted-foreground">
+                Traditionell handel kan kännas överväldigande. Nexora AI tar bort komplexiteten så att
+                du kan investera lugnt och effektivt – med intelligenta algoritmer, blixtsnabb exekvering
+                och en användarupplevelse som fungerar även medan du sover.
+              </p>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {[
+                { t: "Avancerad AI", d: "Maskininlärning som scannar marknaden efter mönster i realtid." },
+                { t: "Dygnet runt", d: "Boten sover aldrig – analyserar och agerar 24/7." },
+                { t: "Alla nivåer", d: "Från nybörjare till erfaren trader – samma verktyg." },
+                { t: "Multi-asset", d: "Krypto, forex, aktier och råvaror i ett gränssnitt." },
+              ].map((c) => (
+                <div key={c.t} className="rounded-2xl border border-border bg-card p-6">
+                  <h3 className="font-display text-lg font-bold">{c.t}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{c.d}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Investeringsnivåer */}
       <section id="nivaer" className="border-b border-border bg-muted/40">
         <div className="mx-auto max-w-7xl px-6 py-20 lg:py-28">
