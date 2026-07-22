@@ -1,72 +1,24 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import {
+  type Currency,
+  getConfig,
+  fetchPriceSek,
+  roundCrypto,
+  uniqueSuffix,
+  findMatchingTx,
+} from "./crypto-deposit.server";
 
-// ============================================================
-// Nexora – Krypto-inbetalning
-// Kunden får en QR-kod + adress + unikt belopp.
-// Vi pollar blockchain-API:er (Blockstream/Trongrid – gratis, ingen nyckel)
-// och krediterar kontot automatiskt när betalningen är bekräftad.
-// ============================================================
-
-type Currency = "BTC";
-
-interface DepositConfig {
-  currency: Currency;
-  network: string;
-  address: string;
-  label: string;
-  minConfirmations: number;
-  explorerTx: (h: string) => string;
-}
-
-function getConfig(_currency: Currency): DepositConfig {
-  return {
-    currency: "BTC",
-    network: "Bitcoin",
-    address:
-      process.env.NEXORA_BTC_ADDRESS ||
-      "bc1qdemoaddressreplacewithrealbtcaddr0000",
-    label: "Bitcoin (BTC)",
-    minConfirmations: 1,
-    explorerTx: (h) => `https://blockstream.info/tx/${h}`,
-  };
-}
-
-async function fetchPriceSek(): Promise<number> {
-  try {
-    const r = await fetch(
-      `https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=sek`,
-      { headers: { accept: "application/json" } },
-    );
-    const j = (await r.json()) as Record<string, { sek: number }>;
-    const p = j?.bitcoin?.sek;
-    if (p && p > 0) return p;
-  } catch {
-    /* fallthrough */
-  }
-  // Fallback så flödet inte dör
-  return 700000;
-}
-
-function roundCrypto(amount: number): number {
-  // 8 decimaler
-  return Math.round(amount * 1e8) / 1e8;
-}
-
-function uniqueSuffix(): number {
-  // 100–9 999 satoshi
-  return (100 + Math.floor(Math.random() * 9900)) / 1e8;
-}
-
-// ---------------- createDeposit ----------------
 export const createCryptoDeposit = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { currency?: "BTC"; amountSek?: number }) =>
-    z.object({
-      currency: z.enum(["BTC"]).optional(),
-      amountSek: z.number().int().positive().optional(),
-    }).parse(d ?? {}),
+    z
+      .object({
+        currency: z.enum(["BTC"]).optional(),
+        amountSek: z.number().int().positive().optional(),
+      })
+      .parse(d ?? {}),
   )
   .handler(async ({ context, data }) => {
     const { supabaseAdmin } = await import(
@@ -89,8 +41,6 @@ export const createCryptoDeposit = createServerFn({ method: "POST" })
     const base = sek / price;
     const expected = roundCrypto(base + uniqueSuffix());
 
-
-    // Hitta eller skapa aktiv selection
     const { data: existing } = await supabaseAdmin
       .from("investment_selections")
       .select("id, onramp_status")
@@ -140,7 +90,6 @@ export const createCryptoDeposit = createServerFn({ method: "POST" })
         .eq("id", selectionId);
     }
 
-
     return {
       selectionId,
       currency,
@@ -154,56 +103,6 @@ export const createCryptoDeposit = createServerFn({ method: "POST" })
     };
   });
 
-// ---------------- Blockchain lookup ----------------
-async function findMatchingTx(opts: {
-  address: string;
-  expected: number;
-  sinceIso: string;
-}): Promise<{ txHash: string; confirmations: number } | null> {
-  const { address, expected, sinceIso } = opts;
-  const sinceMs = new Date(sinceIso).getTime();
-
-  try {
-    const r = await fetch(
-      `https://blockstream.info/api/address/${address}/txs`,
-    );
-    if (!r.ok) return null;
-    const txs = (await r.json()) as Array<{
-      txid: string;
-      status: { confirmed: boolean; block_time?: number; block_height?: number };
-      vout: Array<{ value: number; scriptpubkey_address?: string }>;
-    }>;
-
-    // aktuell topp för att räkna confirmations
-    let tip = 0;
-    try {
-      const rt = await fetch(`https://blockstream.info/api/blocks/tip/height`);
-      tip = parseInt(await rt.text(), 10) || 0;
-    } catch {
-      /* noop */
-    }
-
-    for (const tx of txs) {
-      const blockTimeMs = (tx.status.block_time ?? Date.now() / 1000) * 1000;
-      if (blockTimeMs < sinceMs - 15 * 60 * 1000) continue;
-      const receivedSat = tx.vout
-        .filter((v) => v.scriptpubkey_address === address)
-        .reduce((s, v) => s + v.value, 0);
-      const receivedBtc = receivedSat / 1e8;
-      if (Math.abs(receivedBtc - expected) <= 0.00000001) {
-        const conf = tx.status.confirmed && tx.status.block_height
-          ? Math.max(1, tip - tx.status.block_height + 1)
-        : 0;
-        return { txHash: tx.txid, confirmations: conf };
-      }
-    }
-  } catch {
-    return null;
-  }
-  return null;
-}
-
-// ---------------- pollDeposit ----------------
 export const pollCryptoDeposit = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
@@ -251,7 +150,6 @@ export const pollCryptoDeposit = createServerFn({ method: "POST" })
       return { status: "waiting" as const };
     }
 
-    // Uppdatera confirmations även om vi inte är klara
     if (match.confirmations < cfg.minConfirmations) {
       await supabaseAdmin
         .from("investment_selections")
@@ -269,7 +167,6 @@ export const pollCryptoDeposit = createServerFn({ method: "POST" })
       };
     }
 
-    // Kreditera kontot
     const sek = sel.selected_amount_sek ?? 0;
     await supabaseAdmin
       .from("investment_selections")
@@ -282,7 +179,6 @@ export const pollCryptoDeposit = createServerFn({ method: "POST" })
       })
       .eq("id", sel.id);
 
-    // Öka cash_balance
     const { data: prof } = await supabaseAdmin
       .from("profiles")
       .select("cash_balance_sek")
