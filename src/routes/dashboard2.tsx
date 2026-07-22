@@ -233,6 +233,7 @@ function Dashboard2Page() {
                 <Detail label="Antal" value={num(selected.quantity, 4)} />
                 <Detail label="Insats" value={sek(selected.invested)} />
                 <Detail label="Utfall" value={sek(selected.proceeds)} />
+                <Detail label="Multipel" value={`${(selected.proceeds / selected.invested).toFixed(1)}x`} />
                 <Detail label="Avgifter" value={sek(selected.fees)} />
                 <Detail label="Öppnad" value={dateSv(selected.date)} />
                 <Detail label="Stängd" value={dateSv(selected.closedDate)} />
