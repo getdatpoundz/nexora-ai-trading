@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
 
 const NAV = [
   { to: "/portfolio", label: "Min portfölj", icon: Wallet },
-  { to: "/strategies", label: "AI-strategier", icon: Brain },
+  { to: "/strategies", label: "AI-bot", icon: Brain },
   { to: "/markets", label: "Marknader", icon: LineChart },
   { to: "/transactions", label: "Transaktioner", icon: ArrowLeftRight },
   { to: "/deposit", label: "Sätt in", icon: ArrowDownToLine },
@@ -28,7 +28,7 @@ const NAV = [
 
 const MOBILE_NAV = [
   { to: "/portfolio", label: "Portfölj", icon: Wallet },
-  { to: "/strategies", label: "Strategier", icon: Brain },
+  { to: "/strategies", label: "AI-bot", icon: Brain },
   { to: "/markets", label: "Marknader", icon: LineChart },
   { to: "/transactions", label: "Historik", icon: ArrowLeftRight },
   { to: "/settings", label: "Mer", icon: Settings },
