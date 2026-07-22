@@ -351,3 +351,107 @@ function Info({
     </div>
   );
 }
+
+function ExodusGuide({
+  amount,
+  onDone,
+}: {
+  amount: number;
+  onDone: () => void;
+}) {
+  const [checked, setChecked] = useState(false);
+  const steps = [
+    {
+      icon: <Download className="h-5 w-5" />,
+      title: "1. Ladda ner Exodus Wallet",
+      body: "Exodus är en gratis, säker och lättanvänd krypto-plånbok för mobil och dator. Ladda ner den från den officiella sidan.",
+      cta: (
+        <a
+          href="https://www.exodus.com/download/"
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+        >
+          Ladda ner Exodus <ExternalLink className="h-3.5 w-3.5" />
+        </a>
+      ),
+    },
+    {
+      icon: <Wallet className="h-5 w-5" />,
+      title: "2. Skapa din plånbok",
+      body: "Öppna appen, skapa en ny plånbok och spara din återställningsfras (12 ord) på ett säkert ställe. Detta är din enda backup – dela den aldrig med någon.",
+    },
+    {
+      icon: <CreditCard className="h-5 w-5" />,
+      title: `3. Köp Bitcoin för ${fmtSek(amount)}`,
+      body: "I Exodus-appen: tryck på 'Buy Crypto', välj Bitcoin (BTC), ange beloppet och betala med kort eller banköverföring. Köpet tar oftast 5–15 minuter innan din BTC dyker upp i plånboken.",
+    },
+    {
+      icon: <Send className="h-5 w-5" />,
+      title: "4. Kom tillbaka hit för att skicka",
+      body: "När din Bitcoin syns i Exodus, kom tillbaka till denna sida och klicka 'Fortsätt till betalning'. Vi visar dig då exakt belopp, QR-kod och adress att skicka till.",
+    },
+  ];
+
+  return (
+    <div className="mt-8 space-y-4">
+      <div className="rounded-2xl border border-primary/30 bg-primary/5 p-4">
+        <p className="text-sm font-semibold text-primary">
+          Har du ingen Bitcoin än? Följ guiden nedan.
+        </p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Vi rekommenderar Exodus – enklast att komma igång med för nya
+          användare. Du köper BTC direkt i appen och skickar sedan hit.
+        </p>
+      </div>
+
+      <ol className="space-y-3">
+        {steps.map((s, i) => (
+          <li
+            key={i}
+            className="rounded-2xl border border-border bg-card p-5"
+          >
+            <div className="flex items-start gap-4">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                {s.icon}
+              </div>
+              <div className="flex-1">
+                <h3 className="font-display text-base font-semibold">
+                  {s.title}
+                </h3>
+                <p className="mt-1 text-sm text-muted-foreground">{s.body}</p>
+                {s.cta && <div className="mt-2">{s.cta}</div>}
+              </div>
+            </div>
+          </li>
+        ))}
+      </ol>
+
+      <div className="rounded-2xl border border-border bg-card p-5">
+        <label className="flex cursor-pointer items-start gap-3">
+          <input
+            type="checkbox"
+            checked={checked}
+            onChange={(e) => setChecked(e.target.checked)}
+            className="mt-1 h-4 w-4 rounded border-border accent-primary"
+          />
+          <span className="text-sm">
+            Jag har laddat ner Exodus och köpt Bitcoin för{" "}
+            <strong>{fmtSek(amount)}</strong>. Jag är redo att skicka till
+            Nexoras adress.
+          </span>
+        </label>
+        <Button
+          className="mt-4 w-full"
+          disabled={!checked}
+          onClick={onDone}
+        >
+          Fortsätt till betalning <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
+        <p className="mt-2 text-center text-[11px] text-muted-foreground">
+          Har du redan Bitcoin i en annan plånbok? Bocka i rutan och fortsätt.
+        </p>
+      </div>
+    </div>
+  );
+}
