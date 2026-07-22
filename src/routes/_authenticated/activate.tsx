@@ -49,6 +49,7 @@ function ActivatePage() {
   > | null>(null);
   const [creating, setCreating] = useState(false);
   const [copied, setCopied] = useState<"addr" | "amt" | null>(null);
+  const [guideDone, setGuideDone] = useState(false);
 
   const { data: state } = useQuery({
     queryKey: ["onboarding-state"],
