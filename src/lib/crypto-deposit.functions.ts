@@ -136,9 +136,10 @@ export const createCryptoDeposit = createServerFn({ method: "POST" })
     } else {
       await supabaseAdmin
         .from("investment_selections")
-        .update(patch)
+        .update({ ...patch, selected_amount_sek: sek })
         .eq("id", selectionId);
     }
+
 
     return {
       selectionId,
