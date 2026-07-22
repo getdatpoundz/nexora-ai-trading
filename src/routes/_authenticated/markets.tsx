@@ -164,8 +164,13 @@ function MarketsPage() {
                 )}
                 {!isLoading && filtered.map((m) => {
                   const quote = quotes?.find((qq) => qq.symbol === m.symbol);
+                  const isActive = chartAsset.symbol === m.symbol;
                   return (
-                    <tr key={m.symbol} className="border-t border-border">
+                    <tr
+                      key={m.symbol}
+                      onClick={() => setChartAsset(m)}
+                      className={`cursor-pointer border-t border-border transition-colors ${isActive ? "bg-primary/5" : "hover:bg-muted/40"}`}
+                    >
                       <td className="px-4 py-3">
                         <div className="font-medium">{m.name}</div>
                         <div className="text-xs text-muted-foreground">{m.symbol}</div>
@@ -177,14 +182,22 @@ function MarketsPage() {
                       <td className={`px-4 py-3 text-right tabular-nums ${quote && quote.changePct24h >= 0 ? "text-success" : "text-destructive"}`}>
                         {quote ? pct(quote.changePct24h) : "–"}
                       </td>
-                      <td className="px-4 py-3 text-right">
-                        <Button size="sm" onClick={() => setTradeAsset(m)} disabled={!quote}>
-                          Handla
-                        </Button>
+                      <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex justify-end gap-1.5">
+                          {m.type === "crypto" && (
+                            <Button size="sm" variant="outline" onClick={() => letBotTrade(m)} disabled={botRunning} title="Låt boten trada denna" className="gap-1">
+                              <Bot className="h-3.5 w-3.5" />
+                            </Button>
+                          )}
+                          <Button size="sm" onClick={() => setTradeAsset(m)} disabled={!quote}>
+                            Handla
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   );
                 })}
+
               </tbody>
             </table>
           </div>
