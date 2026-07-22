@@ -35,9 +35,15 @@ const TYPES = [
 function MarketsPage() {
   const { user } = useAuth();
   const { profile } = useProfile(user?.id);
+  const { session } = useBotStatus(user?.id);
+  const navigate = useNavigate();
+  const startFn = useServerFn(startBot);
   const [q, setQ] = useState("");
   const [type, setType] = useState<(typeof TYPES)[number]["key"]>("all");
   const [tradeAsset, setTradeAsset] = useState<MarketAsset | null>(null);
+  const [chartAsset, setChartAsset] = useState<MarketAsset>(
+    () => MARKET_UNIVERSE.find((m) => m.symbol === "BTC") ?? MARKET_UNIVERSE[0]
+  );
 
   const filtered = useMemo(
     () =>
@@ -51,11 +57,31 @@ function MarketsPage() {
 
   const { data: quotes, isLoading } = useQuotes(filtered.map((f) => f.symbol));
   const cash = profile?.cash_balance_sek ?? 0;
+  const botRunning = session?.status === "running";
+
+  async function letBotTrade(asset: MarketAsset) {
+    if (asset.type !== "crypto") {
+      toast.error("Boten stödjer endast krypto för tillfället");
+      return;
+    }
+    try {
+      await startFn({ data: {
+        allowed_assets: [asset.symbol],
+        strategy: "ai_hybrid",
+        aggressiveness: 5,
+      } });
+      toast.success(`Boten tradar nu ${asset.symbol}`, { description: "Öppna AI-bot-sidan för att följa live." });
+      navigate({ to: "/strategies" });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Kunde inte starta boten");
+    }
+  }
 
   return (
     <AppShell title="Marknader">
       <div className="space-y-6">
         <DemoBanner compact />
+
 
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-card p-4">
           <div>
