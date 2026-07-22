@@ -49,7 +49,7 @@ export function useBotStatus(userId: string | undefined) {
     load();
 
     const ch = supabase
-      .channel(`bot-status-${userId}`)
+      .channel(`bot-status-${userId}-${Math.random().toString(36).slice(2)}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "bot_sessions", filter: `user_id=eq.${userId}` }, () => load())
       .on("postgres_changes", { event: "*", schema: "public", table: "bot_monthly_usage", filter: `user_id=eq.${userId}` }, () => load())
       .subscribe();
