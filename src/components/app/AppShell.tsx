@@ -143,10 +143,6 @@ export function AppShell({ title, children }: { title: string; children: ReactNo
                 <Menu className="h-4 w-4" />
               </button>
               <h1 className="truncate text-lg font-semibold tracking-tight sm:text-xl">{title}</h1>
-              <span className="hidden sm:inline-flex items-center gap-1 rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary">
-                <span className="h-1 w-1 rounded-full bg-primary" />
-                Demo
-              </span>
             </div>
             <div className="flex items-center gap-2">
               <Link to="/notifications" aria-label="Notifikationer" className="relative grid h-9 w-9 place-items-center rounded-lg border border-border text-muted-foreground hover:text-foreground">
