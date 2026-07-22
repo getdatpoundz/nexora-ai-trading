@@ -184,7 +184,7 @@ export const adminMarkFunded = createServerFn({ method: "POST" })
           level_name: "Manuell kreditering",
           selected_amount_sek: amount,
           risk_acknowledged: true,
-          status: "confirmed",
+          status: "approved",
           onramp_status: "funded",
           funded_amount_sek: amount,
           funded_at: new Date().toISOString(),
@@ -200,7 +200,7 @@ export const adminMarkFunded = createServerFn({ method: "POST" })
           onramp_status: "funded",
           funded_amount_sek: amount,
           funded_at: new Date().toISOString(),
-          status: "confirmed",
+          status: "approved",
         })
         .eq("id", selectionId);
     }

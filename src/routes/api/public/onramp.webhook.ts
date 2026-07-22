@@ -97,7 +97,7 @@ export const Route = createFileRoute("/api/public/onramp/webhook")({
                 ? {
                     funded_amount_sek: selection.selected_amount_sek,
                     funded_at: new Date().toISOString(),
-                    status: "confirmed",
+                    status: "approved",
                   }
                 : {}),
             })

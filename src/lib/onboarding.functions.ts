@@ -101,7 +101,7 @@ export const buildOnrampUrl = createServerFn({ method: "POST" })
           level_name: profile.assigned_level_name || "Tilldelad nivå",
           selected_amount_sek: amount,
           risk_acknowledged: true,
-          status: "confirmed",
+          status: "approved",
           onramp_status: "provider_open",
           onramp_provider: transakApiKey ? "transak" : "sandbox",
           onramp_currency: currency,
