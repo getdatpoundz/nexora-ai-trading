@@ -153,37 +153,42 @@ function Dashboard2Page() {
                   <th className="px-4 py-3 text-left font-medium">Strategi</th>
                   <th className="px-4 py-3 text-right font-medium">Insats</th>
                   <th className="px-4 py-3 text-right font-medium">Vinst</th>
-                  <th className="px-4 py-3 text-right font-medium">Avkastning</th>
+                  <th className="px-4 py-3 text-right font-medium">Multipel</th>
                   <th className="px-4 py-3 text-right font-medium">Stängd</th>
                   <th className="px-4 py-3 text-right font-medium"></th>
                 </tr>
               </thead>
               <tbody>
-                {TRADES.map((t) => (
-                  <tr
-                    key={t.id}
-                    onClick={() => setSelected(t)}
-                    className="cursor-pointer border-t border-border transition-colors hover:bg-muted/40"
-                  >
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-3">
-                        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-primary/10 text-xs font-bold text-primary">{t.symbol}</span>
-                        <div>
-                          <div className="font-medium">{t.name}</div>
-                          <div className="text-xs text-muted-foreground">{t.side} · {t.id}</div>
+                {TRADES.map((t) => {
+                  const multiple = t.proceeds / t.invested;
+                  return (
+                    <tr
+                      key={t.id}
+                      onClick={() => setSelected(t)}
+                      className="cursor-pointer border-t border-border transition-colors hover:bg-muted/40"
+                    >
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-3">
+                          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-primary/10 text-xs font-bold text-primary">{t.symbol}</span>
+                          <div>
+                            <div className="font-medium">{t.name}</div>
+                            <div className="text-xs text-muted-foreground">{t.side} · {t.id}</div>
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-muted-foreground">{t.strategy}</td>
-                    <td className="px-4 py-3 text-right tabular-nums">{sek(t.invested)}</td>
-                    <td className="px-4 py-3 text-right font-semibold tabular-nums text-success">+{sek(t.pnl)}</td>
-                    <td className="px-4 py-3 text-right">
-                      <span className="inline-flex items-center gap-1 rounded-full bg-success/10 px-2 py-0.5 text-xs font-medium text-success">
-                        <ArrowUpRight className="h-3 w-3" />
-                        {pct(t.pnlPct)}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-right text-muted-foreground">{dateSv(t.closedDate)}</td>
+                      </td>
+                      <td className="px-4 py-3 text-muted-foreground">{t.strategy}</td>
+                      <td className="px-4 py-3 text-right tabular-nums">{sek(t.invested)}</td>
+                      <td className="px-4 py-3 text-right font-semibold tabular-nums text-success">+{sek(t.pnl)}</td>
+                      <td className="px-4 py-3 text-right">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-success/10 px-2 py-0.5 text-xs font-medium text-success">
+                          <ArrowUpRight className="h-3 w-3" />
+                          {multiple.toFixed(1)}x
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-right text-muted-foreground">{dateSv(t.closedDate)}</td>
+                    </tr>
+                  );
+                })}
                     <td className="px-4 py-3 text-right">
                       <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); setSelected(t); }}>
                         Detaljer
