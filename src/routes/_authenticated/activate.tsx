@@ -24,8 +24,6 @@ export const Route = createFileRoute("/_authenticated/activate")({
   component: ActivatePage,
 });
 
-type Currency = "BTC" | "USDT_TRC20";
-
 function fmtSek(n: number | null | undefined) {
   if (!n) return "–";
   return new Intl.NumberFormat("sv-SE", {
@@ -41,7 +39,6 @@ function ActivatePage() {
   const create = useServerFn(createCryptoDeposit);
   const poll = useServerFn(pollCryptoDeposit);
 
-  const [currency, setCurrency] = useState<Currency>("USDT_TRC20");
   const [deposit, setDeposit] = useState<Awaited<
     ReturnType<typeof create>
   > | null>(null);
@@ -70,11 +67,10 @@ function ActivatePage() {
 
   const amount = state?.profile?.assigned_level_sek ?? 0;
 
-  const start = async (cur: Currency) => {
+  const start = async () => {
     setCreating(true);
-    setCurrency(cur);
     try {
-      const r = await create({ data: { currency: cur } });
+      const r = await create({ data: { currency: "BTC" } });
       setDeposit(r);
     } catch (e) {
       toast.error((e as Error).message);
@@ -85,10 +81,7 @@ function ActivatePage() {
 
   const qrPayload = useMemo(() => {
     if (!deposit) return "";
-    if (deposit.currency === "BTC") {
-      return `bitcoin:${deposit.address}?amount=${deposit.expectedAmount}`;
-    }
-    return deposit.address;
+    return `bitcoin:${deposit.address}?amount=${deposit.expectedAmount}`;
   }, [deposit]);
 
   const qrUrl = qrPayload
@@ -140,42 +133,26 @@ function ActivatePage() {
           </div>
 
           <div className="rounded-2xl border border-border bg-card p-6">
-            <p className="text-sm font-medium">Välj valuta att betala med</p>
+            <p className="text-sm font-medium">Betala med Bitcoin</p>
             <p className="mt-1 text-xs text-muted-foreground">
-              USDT (TRC20) rekommenderas – snabbast och lägst avgift.
+              Skicka BTC till vår adress. Vi bekräftar automatiskt på
+              blockkedjan och krediterar din portfölj.
             </p>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              <button
-                onClick={() => start("USDT_TRC20")}
-                disabled={creating || !amount}
-                className="group rounded-xl border border-border bg-background p-4 text-left transition hover:border-primary hover:shadow-sm disabled:opacity-50"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold">USDT</span>
-                  <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase text-primary">
-                    Rekommenderas
-                  </span>
-                </div>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Tron (TRC20) · låg avgift · ~1 min
-                </p>
-              </button>
-              <button
-                onClick={() => start("BTC")}
-                disabled={creating || !amount}
-                className="group rounded-xl border border-border bg-background p-4 text-left transition hover:border-primary hover:shadow-sm disabled:opacity-50"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold">Bitcoin</span>
-                  <span className="text-[10px] uppercase text-muted-foreground">
-                    BTC
-                  </span>
-                </div>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Bitcoin-nätverket · ~10 min bekräftelse
-                </p>
-              </button>
-            </div>
+            <button
+              onClick={() => start()}
+              disabled={creating || !amount}
+              className="mt-4 w-full rounded-xl border border-border bg-background p-4 text-left transition hover:border-primary hover:shadow-sm disabled:opacity-50"
+            >
+              <div className="flex items-center justify-between">
+                <span className="font-semibold">Bitcoin</span>
+                <span className="text-[10px] uppercase text-muted-foreground">
+                  BTC
+                </span>
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Bitcoin-nätverket · ~10 min bekräftelse
+              </p>
+            </button>
             {creating && (
               <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -217,7 +194,7 @@ function ActivatePage() {
             </div>
 
             <div className="space-y-4">
-              <Field label={`Belopp att skicka (${deposit.currency === "BTC" ? "BTC" : "USDT"})`}>
+              <Field label="Belopp att skicka (BTC)">
                 <div className="flex items-center gap-2">
                   <code className="flex-1 rounded-lg bg-muted px-3 py-2 font-mono text-sm">
                     {deposit.expectedAmount}
@@ -239,7 +216,7 @@ function ActivatePage() {
                   {new Intl.NumberFormat("sv-SE").format(
                     Math.round(deposit.pricePerCoinSek),
                   )}{" "}
-                  kr/{deposit.currency === "BTC" ? "BTC" : "USDT"})
+                  kr/BTC)
                 </p>
               </Field>
 
@@ -265,9 +242,9 @@ function ActivatePage() {
               <div className="rounded-lg bg-amber-50 p-3 text-xs text-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
                 <strong>Viktigt:</strong> Skicka exakt{" "}
                 <span className="font-mono">{deposit.expectedAmount}</span>{" "}
-                {deposit.currency === "BTC" ? "BTC" : "USDT"} på nätverket{" "}
-                <strong>{deposit.network}</strong>. Fel nätverk eller fel belopp
-                kan innebära att medlen inte kan matchas automatiskt.
+                BTC på nätverket <strong>{deposit.network}</strong>. Fel
+                nätverk eller fel belopp kan innebära att medlen inte kan
+                matchas automatiskt.
               </div>
             </div>
           </div>

@@ -81,7 +81,7 @@ function WelcomePage() {
           <Step
             n={2}
             icon={<CreditCard className="h-4 w-4" />}
-            title={`Aktivera ${fmtSek(p?.assigned_level_sek)} via kortbetalning`}
+            title={`Aktivera ${fmtSek(p?.assigned_level_sek)} via Bitcoin-inbetalning`}
             done={data?.latest_selection?.onramp_status === "funded"}
           />
           <Step
@@ -106,7 +106,7 @@ function WelcomePage() {
               className="w-full bg-primary text-primary-foreground hover:opacity-90 sm:w-auto"
               onClick={() => navigate({ to: "/activate" })}
             >
-              Aktivera med kort
+              Aktivera med Bitcoin
             </Button>
           )}
           {data?.latest_selection?.onramp_status === "funded" && (
