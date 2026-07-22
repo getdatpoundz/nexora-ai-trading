@@ -34,6 +34,13 @@ type BotConfig = {
   strategy: "dca" | "momentum" | "mean_reversion" | "grid" | "ai_hybrid";
   aggressiveness: number;
   assets: string[];
+  stopLossPct: number;
+  takeProfitPct: number;
+  maxPositionPct: number;
+  minConfidence: number;
+  tradingHours: "always" | "market_hours";
+  reinvestProfits: boolean;
+  notifyOnTrade: boolean;
 };
 
 const DEFAULT_CONFIG: BotConfig = {
@@ -41,6 +48,13 @@ const DEFAULT_CONFIG: BotConfig = {
   strategy: "ai_hybrid",
   aggressiveness: 5,
   assets: ["BTC", "ETH", "SOL"],
+  stopLossPct: 5,
+  takeProfitPct: 12,
+  maxPositionPct: 15,
+  minConfidence: 65,
+  tradingHours: "always",
+  reinvestProfits: true,
+  notifyOnTrade: true,
 };
 
 const AVAILABLE_ASSETS = ["BTC", "ETH", "SOL", "ADA", "DOT", "AVAX", "MATIC", "LINK", "XRP", "DOGE"];
