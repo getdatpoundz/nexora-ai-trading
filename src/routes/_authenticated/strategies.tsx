@@ -298,6 +298,15 @@ function StrategiesPage() {
                 <LimitCard label="Målmultiplikator" value={`${userLevel.targetMultiplier.toFixed(1)}x`} />
               </div>
             </div>
+
+            {/* Live markets — bot's watchlist */}
+            <LiveMarketsPanel
+              assets={session?.allowed_assets ?? config.assets}
+              onSelect={(sym) => {
+                const asset = MARKET_UNIVERSE.find((m) => m.symbol === sym);
+                if (asset) toast(`${asset.name} · Öppna Marknader för att handla manuellt`);
+              }}
+            />
           </TabsContent>
 
           <TabsContent value="settings" className="mt-6 space-y-6">
