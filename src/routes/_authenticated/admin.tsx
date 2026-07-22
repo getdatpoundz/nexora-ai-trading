@@ -7,7 +7,7 @@ import { useServerFn } from "@tanstack/react-start";
 import {
   adminCreateCustomer,
   adminListCustomers,
-  adminRegenerateLink,
+  adminResetPassword,
   adminMarkFunded,
 } from "@/lib/admin.functions";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Copy, Loader2, UserPlus, RefreshCw, CheckCircle2 } from "lucide-react";
+import { Copy, Loader2, UserPlus, RefreshCw, CheckCircle2, KeyRound } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminPage,
