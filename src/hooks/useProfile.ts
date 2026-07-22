@@ -28,15 +28,22 @@ export function useProfile(userId: string | undefined) {
       return;
     }
     let cancelled = false;
-    (async () => {
-      const { data } = await supabase.from("profiles").select("*").eq("id", userId).maybeSingle();
+    async function load() {
+      const { data } = await supabase.from("profiles").select("*").eq("id", userId as string).maybeSingle();
       if (!cancelled) {
         setProfile(data as unknown as Profile | null);
         setLoading(false);
       }
-    })();
+    }
+    load();
+    // Live refresh when bot updates cash balance
+    const ch = supabase
+      .channel(`profile-${userId}`)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "profiles", filter: `id=eq.${userId}` }, () => load())
+      .subscribe();
     return () => {
       cancelled = true;
+      supabase.removeChannel(ch);
     };
   }, [userId]);
 

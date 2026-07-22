@@ -9,58 +9,38 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useEffect, useState } from "react";
-import { Bot, Play, Pause, Save, Sparkles, Shield, TrendingUp, Zap, Clock, Coins, AlertTriangle, RotateCcw } from "lucide-react";
+import { Bot, Play, Pause, Save, Sparkles, Shield, TrendingUp, Zap, Clock, Coins, AlertTriangle, RotateCcw, StopCircle, Radio } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
+import { useBotStatus } from "@/hooks/useBotStatus";
+import { useServerFn } from "@tanstack/react-start";
+import { startBot, pauseBot, resumeBot, stopBot } from "@/lib/bot.functions";
+import { getLevelByAmount, INVESTMENT_LEVELS } from "@/lib/investment-levels";
+import { TradingViewWidget, toTradingViewSymbol } from "@/components/markets/TradingViewWidget";
+import { supabase } from "@/integrations/supabase/client";
+import { sek } from "@/lib/format";
+import { formatDistanceToNow } from "date-fns";
+import { sv } from "date-fns/locale";
 
 export const Route = createFileRoute("/_authenticated/strategies")({
   component: StrategiesPage,
 });
 
 type BotConfig = {
-  enabled: boolean;
   preset: "forsiktig" | "balanserad" | "tillvaxt" | "anpassad";
   strategy: "dca" | "momentum" | "mean_reversion" | "grid" | "ai_hybrid";
-  aggressiveness: number; // 1-10
-  maxPositionPct: number; // % av portfölj per trade
-  stopLossPct: number;
-  takeProfitPct: number;
-  maxDailyTrades: number;
-  maxDrawdownPct: number;
-  minConfidence: number; // AI signal confidence %
+  aggressiveness: number;
   assets: string[];
-  tradingHours: "always" | "market" | "custom";
-  hoursFrom: string;
-  hoursTo: string;
-  reinvestProfits: boolean;
-  notifyOnTrade: boolean;
-  emergencyStop: boolean;
 };
 
 const DEFAULT_CONFIG: BotConfig = {
-  enabled: false,
   preset: "balanserad",
   strategy: "ai_hybrid",
   aggressiveness: 5,
-  maxPositionPct: 10,
-  stopLossPct: 5,
-  takeProfitPct: 12,
-  maxDailyTrades: 8,
-  maxDrawdownPct: 20,
-  minConfidence: 70,
   assets: ["BTC", "ETH", "SOL"],
-  tradingHours: "always",
-  hoursFrom: "09:00",
-  hoursTo: "21:00",
-  reinvestProfits: true,
-  notifyOnTrade: true,
-  emergencyStop: false,
-};
-
-const PRESETS: Record<string, Partial<BotConfig>> = {
-  forsiktig: { aggressiveness: 2, maxPositionPct: 5, stopLossPct: 3, takeProfitPct: 6, maxDailyTrades: 3, maxDrawdownPct: 10, minConfidence: 85 },
-  balanserad: { aggressiveness: 5, maxPositionPct: 10, stopLossPct: 5, takeProfitPct: 12, maxDailyTrades: 8, maxDrawdownPct: 20, minConfidence: 70 },
-  tillvaxt: { aggressiveness: 8, maxPositionPct: 20, stopLossPct: 8, takeProfitPct: 25, maxDailyTrades: 15, maxDrawdownPct: 35, minConfidence: 55 },
 };
 
 const AVAILABLE_ASSETS = ["BTC", "ETH", "SOL", "ADA", "DOT", "AVAX", "MATIC", "LINK", "XRP", "DOGE"];
@@ -75,48 +55,102 @@ const STRATEGY_INFO: Record<BotConfig["strategy"], { name: string; desc: string;
 
 const STORAGE_KEY = "nexora_bot_config";
 
+type TradeRow = {
+  id: string; symbol: string; side: "buy" | "sell";
+  quantity: number; price_sek: number; total_sek: number; executed_at: string;
+};
+
 function StrategiesPage() {
+  const { user } = useAuth();
+  const { profile } = useProfile(user?.id);
+  const { session } = useBotStatus(user?.id);
   const [config, setConfig] = useState<BotConfig>(DEFAULT_CONFIG);
   const [loaded, setLoaded] = useState(false);
+  const [starting, setStarting] = useState(false);
+  const [trades, setTrades] = useState<TradeRow[]>([]);
+  const [tab, setTab] = useState<"overview" | "settings">("overview");
+
+  const startFn = useServerFn(startBot);
+  const pauseFn = useServerFn(pauseBot);
+  const resumeFn = useServerFn(resumeBot);
+  const stopFn = useServerFn(stopBot);
+
+  // Load user's assigned level → derive limits shown on this page
+  const userLevel = profile?.assigned_level_name
+    ? INVESTMENT_LEVELS.find((l) => l.name === profile.assigned_level_name) ?? getLevelByAmount(profile?.assigned_level_sek ?? undefined)
+    : getLevelByAmount(profile?.assigned_level_sek ?? undefined);
 
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) setConfig({ ...DEFAULT_CONFIG, ...JSON.parse(raw) });
-    } catch {}
+    } catch { /* ignore */ }
     setLoaded(true);
   }, []);
 
-  const update = <K extends keyof BotConfig>(key: K, value: BotConfig[K]) => {
-    setConfig((c) => ({ ...c, [key]: value, preset: key === "preset" ? (value as BotConfig["preset"]) : "anpassad" }));
-  };
+  // Load recent trades + realtime
+  useEffect(() => {
+    if (!user?.id) return;
+    let cancelled = false;
+    async function load() {
+      const { data } = await supabase.from("trades")
+        .select("id, symbol, side, quantity, price_sek, total_sek, executed_at")
+        .eq("user_id", user!.id).order("executed_at", { ascending: false }).limit(30);
+      if (!cancelled) setTrades((data as TradeRow[] | null) ?? []);
+    }
+    load();
+    const ch = supabase.channel(`bot-trades-${user.id}`)
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "trades", filter: `user_id=eq.${user.id}` },
+        (payload) => setTrades((cur) => [payload.new as TradeRow, ...cur].slice(0, 30)))
+      .subscribe();
+    return () => { cancelled = true; supabase.removeChannel(ch); };
+  }, [user?.id]);
 
-  const applyPreset = (preset: "forsiktig" | "balanserad" | "tillvaxt") => {
-    setConfig((c) => ({ ...c, ...PRESETS[preset], preset }));
-    toast.success(`Förinställning "${preset}" laddad`);
+  const update = <K extends keyof BotConfig>(key: K, value: BotConfig[K]) => {
+    setConfig((c) => ({ ...c, [key]: value }));
   };
 
   const toggleAsset = (a: string) => {
-    setConfig((c) => ({
-      ...c,
-      preset: "anpassad",
-      assets: c.assets.includes(a) ? c.assets.filter((x) => x !== a) : [...c.assets, a],
-    }));
+    setConfig((c) => ({ ...c, preset: "anpassad", assets: c.assets.includes(a) ? c.assets.filter((x) => x !== a) : [...c.assets, a] }));
   };
 
-  const save = () => {
+  const saveLocal = () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
-    toast.success("Botens inställningar sparade", { description: config.enabled ? "Boten tradar nu enligt dina regler." : "Aktivera boten för att börja handla." });
+    toast.success("Inställningar sparade");
   };
 
-  const reset = () => {
-    setConfig(DEFAULT_CONFIG);
-    toast("Inställningar återställda");
-  };
+  async function handleStart() {
+    if (config.assets.length === 0) { toast.error("Välj minst en tillgång"); return; }
+    setStarting(true);
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+      await startFn({ data: { allowed_assets: config.assets, strategy: config.strategy, aggressiveness: config.aggressiveness } });
+      toast.success("AI-boten är aktiverad", { description: "Den tradar nu åt dig — även när du lämnar sidan." });
+      setTab("overview");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Kunde inte starta boten");
+    } finally { setStarting(false); }
+  }
+
+  async function handlePause() { await pauseFn(); toast("Boten pausad"); }
+  async function handleResume() { await resumeFn(); toast.success("Boten återupptagen"); }
+  async function handleStop() {
+    if (!confirm("Stoppa boten permanent? Du kan starta en ny session närsomhelst.")) return;
+    await stopFn(); toast("Boten stoppad");
+  }
 
   if (!loaded) return <AppShell title="AI-bot"><div /></AppShell>;
 
-  const StrategyIcon = STRATEGY_INFO[config.strategy].icon;
+  const running = session?.status === "running";
+  const paused = session?.status === "paused";
+  const limitReached = session?.status === "limit_reached";
+  const hasSession = !!session && session.status !== "stopped";
+
+  const displaySymbol = (session?.allowed_assets?.[0] ?? config.assets[0] ?? "BTC").toUpperCase();
+  const tvSymbol = toTradingViewSymbol(displaySymbol, "crypto");
+
+  const targetProgress = session ? Math.min(100, Math.round((session.trades_generated / session.target_trades) * 100)) : 0;
+  const multProgress = session ? Math.min(100, Math.round(((session.current_multiplier - 1) / (session.target_multiplier - 1)) * 100)) : 0;
 
   return (
     <AppShell title="AI-bot">
@@ -125,64 +159,135 @@ function StrategiesPage() {
         <div className="rounded-2xl border border-border bg-card p-6">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="flex items-start gap-4">
-              <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${config.enabled ? "bg-success/15 text-success" : "bg-muted text-muted-foreground"}`}>
+              <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${running ? "bg-success/15 text-success" : limitReached ? "bg-destructive/15 text-destructive" : paused ? "bg-warning/15 text-warning" : "bg-muted text-muted-foreground"}`}>
                 <Bot className="h-6 w-6" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
                   <h2 className="text-xl font-bold">Din AI-bot</h2>
-                  <Badge variant={config.enabled ? "default" : "secondary"} className={config.enabled ? "bg-success text-success-foreground" : ""}>
-                    {config.enabled ? "Aktiv" : "Pausad"}
+                  <Badge className={running ? "bg-success text-success-foreground" : limitReached ? "bg-destructive text-destructive-foreground" : paused ? "bg-warning text-warning-foreground" : ""}>
+                    {running ? "Aktiv" : paused ? "Pausad" : limitReached ? "Månadsgräns nådd" : "Inaktiv"}
                   </Badge>
+                  {running && <Radio className="h-3 w-3 animate-pulse text-success" />}
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {config.enabled
-                    ? `Handlar automatiskt enligt din strategi: ${STRATEGY_INFO[config.strategy].name}`
-                    : "Aktivera boten när du är klar med dina inställningar."}
+                  {running && `Tradar automatiskt · Nivå ${userLevel.name} · ${session?.allowed_assets.length} tillgångar`}
+                  {paused && "Pausad manuellt — tryck fortsätt för att återuppta"}
+                  {limitReached && "Månadens trade- eller hävstångsgräns är nådd. Boten återupptas automatiskt nästa månad."}
+                  {!hasSession && `Konfigurera reglerna nedan och starta boten. Din nivå: ${userLevel.name}`}
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <Label htmlFor="bot-toggle" className="text-sm font-medium">{config.enabled ? "På" : "Av"}</Label>
-              <Switch id="bot-toggle" checked={config.enabled} onCheckedChange={(v) => setConfig((c) => ({ ...c, enabled: v }))} />
+            <div className="flex flex-wrap items-center gap-2">
+              {!hasSession && (
+                <Button size="lg" onClick={() => setTab("settings")} className="gap-2">
+                  <Play className="h-4 w-4" /> Kom igång
+                </Button>
+              )}
+              {running && (
+                <>
+                  <Button variant="outline" onClick={handlePause} className="gap-2"><Pause className="h-4 w-4" /> Pausa</Button>
+                  <Button variant="outline" onClick={handleStop} className="gap-2 text-destructive"><StopCircle className="h-4 w-4" /> Stoppa</Button>
+                </>
+              )}
+              {paused && (
+                <>
+                  <Button onClick={handleResume} className="gap-2"><Play className="h-4 w-4" /> Fortsätt</Button>
+                  <Button variant="outline" onClick={handleStop} className="gap-2 text-destructive"><StopCircle className="h-4 w-4" /> Stoppa</Button>
+                </>
+              )}
+              {limitReached && <Button variant="outline" onClick={handleStop}>Avsluta session</Button>}
             </div>
           </div>
+
+          {hasSession && (
+            <div className="mt-6 grid gap-4 sm:grid-cols-3">
+              <ProgressCard label="Portfölj-utveckling"
+                value={`${session!.current_multiplier.toFixed(2)}x`}
+                sub={`Mål ${session!.target_multiplier.toFixed(1)}x`} percent={multProgress} tone="success" />
+              <ProgressCard label="Trades genererade"
+                value={`${session!.trades_generated}`}
+                sub={`Mål ${session!.target_trades}`} percent={targetProgress} />
+              <ProgressCard label="Startvärde"
+                value={sek(session!.starting_portfolio_sek)}
+                sub={`Startade ${formatDistanceToNow(new Date(session!.started_at), { locale: sv, addSuffix: true })}`}
+                percent={0} showBar={false} />
+            </div>
+          )}
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-3">
-          {/* Left: main config */}
-          <div className="space-y-6 lg:col-span-2">
-            {/* Presets */}
-            <section className="rounded-2xl border border-border bg-card p-6">
-              <div className="mb-4 flex items-center gap-2">
-                <Shield className="h-4 w-4 text-primary" />
-                <h3 className="font-semibold">Riskprofil</h3>
-              </div>
-              <div className="grid gap-3 sm:grid-cols-3">
-                {(["forsiktig", "balanserad", "tillvaxt"] as const).map((p) => (
-                  <button
-                    key={p}
-                    onClick={() => applyPreset(p)}
-                    className={`rounded-xl border p-4 text-left transition ${config.preset === p ? "border-primary bg-primary/5 ring-2 ring-primary/20" : "border-border hover:border-primary/40"}`}
-                  >
-                    <div className="text-sm font-semibold capitalize">{p}</div>
-                    <div className="mt-1 text-xs text-muted-foreground">
-                      {p === "forsiktig" && "Låg risk, små positioner"}
-                      {p === "balanserad" && "Balanserad exponering"}
-                      {p === "tillvaxt" && "Hög risk, hög potential"}
-                    </div>
-                  </button>
-                ))}
-              </div>
-              {config.preset === "anpassad" && (
-                <p className="mt-3 text-xs text-muted-foreground">✏️ Du har egna inställningar aktiva</p>
-              )}
-            </section>
+        <Tabs value={tab} onValueChange={(v) => setTab(v as "overview" | "settings")}>
+          <TabsList>
+            <TabsTrigger value="overview">Översikt & Live</TabsTrigger>
+            <TabsTrigger value="settings">Regler & Konfiguration</TabsTrigger>
+          </TabsList>
 
-            {/* Strategy */}
+          <TabsContent value="overview" className="mt-6 space-y-6">
+            <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
+              {/* Chart */}
+              <div className="rounded-2xl border border-border bg-card p-4">
+                <div className="mb-3 flex items-center justify-between">
+                  <div>
+                    <h3 className="font-semibold">Live-marknad · {displaySymbol}</h3>
+                    <p className="text-xs text-muted-foreground">Boten övervakar denna marknad just nu</p>
+                  </div>
+                  <Badge variant="outline" className="gap-1"><Radio className="h-3 w-3" /> Realtid</Badge>
+                </div>
+                <TradingViewWidget symbol={tvSymbol} height={420} interval="15" />
+              </div>
+
+              {/* Trade feed */}
+              <div className="rounded-2xl border border-border bg-card p-4">
+                <div className="mb-3 flex items-center justify-between">
+                  <h3 className="font-semibold">Live trade-flöde</h3>
+                  <Badge variant="outline">{trades.length}</Badge>
+                </div>
+                <div className="max-h-[420px] space-y-2 overflow-y-auto pr-1">
+                  {trades.length === 0 && (
+                    <p className="rounded-lg border border-dashed border-border p-6 text-center text-xs text-muted-foreground">
+                      Inga trades ännu. Starta boten så börjar den arbeta.
+                    </p>
+                  )}
+                  {trades.map((t) => (
+                    <div key={t.id} className="flex items-center justify-between rounded-lg border border-border/60 bg-background/40 px-3 py-2 text-xs">
+                      <div className="flex items-center gap-2">
+                        <span className={`grid h-6 w-6 place-items-center rounded ${t.side === "buy" ? "bg-success/15 text-success" : "bg-primary/15 text-primary"}`}>
+                          {t.side === "buy" ? "K" : "S"}
+                        </span>
+                        <div>
+                          <div className="font-semibold">{t.symbol}</div>
+                          <div className="text-[10px] text-muted-foreground">
+                            {formatDistanceToNow(new Date(t.executed_at), { locale: sv, addSuffix: true })}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-semibold tabular-nums">{sek(t.total_sek)}</div>
+                        <div className="text-[10px] text-muted-foreground tabular-nums">
+                          {t.quantity.toFixed(6)} @ {sek(t.price_sek)}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Level limits card */}
+            <div className="rounded-2xl border border-border bg-card p-6">
+              <h3 className="font-semibold">Regler för din nivå: {userLevel.name}</h3>
+              <div className="mt-4 grid gap-4 sm:grid-cols-3">
+                <LimitCard label="Max trades / månad" value={userLevel.maxTradesPerMonth.toString()} />
+                <LimitCard label="Max hävstång" value={userLevel.maxLeveragePct === 0 ? "Ingen" : `${userLevel.maxLeveragePct}%`} />
+                <LimitCard label="Målmultiplikator" value={`${userLevel.targetMultiplier.toFixed(1)}x`} />
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="settings" className="mt-6 space-y-6">
             <section className="rounded-2xl border border-border bg-card p-6">
               <div className="mb-4 flex items-center gap-2">
-                <StrategyIcon className="h-4 w-4 text-primary" />
+                <Sparkles className="h-4 w-4 text-primary" />
                 <h3 className="font-semibold">Handelsstrategi</h3>
               </div>
               <Select value={config.strategy} onValueChange={(v) => update("strategy", v as BotConfig["strategy"])}>
@@ -196,35 +301,20 @@ function StrategiesPage() {
               <p className="mt-2 text-xs text-muted-foreground">{STRATEGY_INFO[config.strategy].desc}</p>
             </section>
 
-            {/* Risk parameters */}
             <section className="rounded-2xl border border-border bg-card p-6">
               <div className="mb-4 flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4 text-warning" />
-                <h3 className="font-semibold">Riskregler</h3>
+                <Shield className="h-4 w-4 text-primary" />
+                <h3 className="font-semibold">AI-aggressivitet</h3>
               </div>
-              <div className="space-y-6">
-                <SliderRow label="AI-aggressivitet" value={config.aggressiveness} min={1} max={10} step={1} unit="/10"
-                  onChange={(v) => update("aggressiveness", v)} hint="Hur ofta boten agerar på svaga signaler" />
-                <SliderRow label="Max positionsstorlek" value={config.maxPositionPct} min={1} max={50} step={1} unit="%"
-                  onChange={(v) => update("maxPositionPct", v)} hint="Andel av portföljen per enskild trade" />
-                <SliderRow label="Stop-loss" value={config.stopLossPct} min={1} max={30} step={1} unit="%"
-                  onChange={(v) => update("stopLossPct", v)} hint="Sälj automatiskt vid förlust" />
-                <SliderRow label="Take-profit" value={config.takeProfitPct} min={2} max={100} step={1} unit="%"
-                  onChange={(v) => update("takeProfitPct", v)} hint="Sälj automatiskt vid vinst" />
-                <SliderRow label="Max drawdown" value={config.maxDrawdownPct} min={5} max={60} step={5} unit="%"
-                  onChange={(v) => update("maxDrawdownPct", v)} hint="Boten pausar sig själv om portföljen faller mer än detta" />
-                <SliderRow label="Min AI-konfidens" value={config.minConfidence} min={30} max={99} step={1} unit="%"
-                  onChange={(v) => update("minConfidence", v)} hint="Endast trades där AI:n är minst så här säker" />
-                <div>
-                  <Label className="text-sm">Max antal trades per dygn</Label>
-                  <Input type="number" min={1} max={100} value={config.maxDailyTrades}
-                    onChange={(e) => update("maxDailyTrades", Math.max(1, Number(e.target.value) || 1))}
-                    className="mt-2 max-w-xs" />
-                </div>
+              <div className="flex items-center justify-between">
+                <Label className="text-sm">Hur ofta boten agerar</Label>
+                <span className="text-sm font-semibold tabular-nums text-primary">{config.aggressiveness}/10</span>
               </div>
+              <Slider value={[config.aggressiveness]} min={1} max={10} step={1}
+                onValueChange={([v]) => update("aggressiveness", v)} className="mt-2" />
+              <p className="mt-1 text-xs text-muted-foreground">Lägre = färre trades, högre = mer aktiv (inom din nivås gränser)</p>
             </section>
 
-            {/* Assets */}
             <section className="rounded-2xl border border-border bg-card p-6">
               <div className="mb-4 flex items-center gap-2">
                 <Coins className="h-4 w-4 text-primary" />
@@ -238,130 +328,60 @@ function StrategiesPage() {
                   </label>
                 ))}
               </div>
-              {config.assets.length === 0 && (
-                <p className="mt-3 text-xs text-destructive">Välj minst en tillgång</p>
-              )}
+              {config.assets.length === 0 && <p className="mt-3 text-xs text-destructive">Välj minst en tillgång</p>}
             </section>
 
-            {/* Trading hours */}
-            <section className="rounded-2xl border border-border bg-card p-6">
-              <div className="mb-4 flex items-center gap-2">
-                <Clock className="h-4 w-4 text-primary" />
-                <h3 className="font-semibold">Handelstider</h3>
-              </div>
-              <RadioGroup value={config.tradingHours} onValueChange={(v) => update("tradingHours", v as BotConfig["tradingHours"])} className="space-y-2">
-                <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-border p-3">
-                  <RadioGroupItem value="always" />
-                  <div><div className="text-sm font-medium">Alltid (24/7)</div><div className="text-xs text-muted-foreground">Kryptomarknaden stänger aldrig</div></div>
-                </label>
-                <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-border p-3">
-                  <RadioGroupItem value="market" />
-                  <div><div className="text-sm font-medium">Endast under hög likviditet</div><div className="text-xs text-muted-foreground">08:00–22:00 CET</div></div>
-                </label>
-                <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-border p-3">
-                  <RadioGroupItem value="custom" className="mt-1" />
-                  <div className="flex-1">
-                    <div className="text-sm font-medium">Egna tider</div>
-                    {config.tradingHours === "custom" && (
-                      <div className="mt-2 flex items-center gap-2">
-                        <Input type="time" value={config.hoursFrom} onChange={(e) => update("hoursFrom", e.target.value)} className="w-32" />
-                        <span className="text-xs text-muted-foreground">till</span>
-                        <Input type="time" value={config.hoursTo} onChange={(e) => update("hoursTo", e.target.value)} className="w-32" />
-                      </div>
-                    )}
-                  </div>
-                </label>
-              </RadioGroup>
-            </section>
-
-            {/* Advanced */}
-            <section className="rounded-2xl border border-border bg-card p-6">
-              <h3 className="mb-4 font-semibold">Övrigt</h3>
-              <div className="space-y-4">
-                <ToggleRow label="Återinvestera vinster automatiskt" hint="Lägger vinster tillbaka i handeln"
-                  checked={config.reinvestProfits} onChange={(v) => update("reinvestProfits", v)} />
-                <ToggleRow label="Notifiera vid varje trade" hint="E-post och push vid köp/sälj"
-                  checked={config.notifyOnTrade} onChange={(v) => update("notifyOnTrade", v)} />
-                <ToggleRow label="Nödstopp vid extrem volatilitet" hint="Pausar boten vid marknadskrasch"
-                  checked={config.emergencyStop} onChange={(v) => update("emergencyStop", v)} />
+            <section className="rounded-2xl border border-warning/40 bg-warning/5 p-6">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
+                <div className="text-sm">
+                  <p className="font-semibold">Regler från din nivå ({userLevel.name}) tillämpas automatiskt</p>
+                  <ul className="mt-1 space-y-0.5 text-xs text-muted-foreground">
+                    <li>• Max {userLevel.maxTradesPerMonth} trades per månad</li>
+                    <li>• Max hävstång: {userLevel.maxLeveragePct === 0 ? "Ingen" : `${userLevel.maxLeveragePct}%`}</li>
+                    <li>• Boten stannar automatiskt när gränsen är nådd</li>
+                  </ul>
+                </div>
               </div>
             </section>
-          </div>
 
-          {/* Right: summary */}
-          <aside className="space-y-6">
-            <div className="sticky top-4 space-y-4 rounded-2xl border border-border bg-card p-6">
-              <h3 className="font-semibold">Sammanfattning</h3>
-              <dl className="space-y-3 text-sm">
-                <Row label="Strategi" value={STRATEGY_INFO[config.strategy].name} />
-                <Row label="Riskprofil" value={config.preset} className="capitalize" />
-                <Row label="Aggressivitet" value={`${config.aggressiveness}/10`} />
-                <Row label="Max position" value={`${config.maxPositionPct}%`} />
-                <Row label="Stop-loss / Take-profit" value={`${config.stopLossPct}% / ${config.takeProfitPct}%`} />
-                <Row label="Max trades/dygn" value={String(config.maxDailyTrades)} />
-                <Row label="Tillgångar" value={config.assets.length > 0 ? config.assets.join(", ") : "—"} />
-                <Row label="Handelstider" value={config.tradingHours === "always" ? "24/7" : config.tradingHours === "market" ? "08–22" : `${config.hoursFrom}–${config.hoursTo}`} />
-              </dl>
-              <div className="space-y-2 pt-2">
-                <Button onClick={save} className="w-full" disabled={config.assets.length === 0}>
-                  <Save className="mr-2 h-4 w-4" /> Spara inställningar
-                </Button>
-                <Button
-                  variant={config.enabled ? "outline" : "default"}
-                  onClick={() => { const next = !config.enabled; setConfig((c) => ({ ...c, enabled: next })); toast[next ? "success" : "message"](next ? "Boten är aktiverad" : "Boten pausad"); }}
-                  className="w-full"
-                  disabled={config.assets.length === 0}
-                >
-                  {config.enabled ? <><Pause className="mr-2 h-4 w-4" /> Pausa boten</> : <><Play className="mr-2 h-4 w-4" /> Aktivera boten</>}
-                </Button>
-                <Button variant="ghost" onClick={reset} className="w-full text-muted-foreground">
-                  <RotateCcw className="mr-2 h-4 w-4" /> Återställ
-                </Button>
-              </div>
-              <p className="text-[11px] leading-relaxed text-muted-foreground">
-                Historisk utveckling är ingen garanti för framtida resultat. Handel med krypto innebär risk för kapitalförlust.
-              </p>
+            <div className="flex flex-wrap gap-3">
+              <Button size="lg" onClick={handleStart} disabled={starting || running || paused || config.assets.length === 0} className="gap-2">
+                <Play className="h-4 w-4" /> {running ? "Boten kör redan" : starting ? "Startar…" : "Starta AI-boten"}
+              </Button>
+              <Button size="lg" variant="outline" onClick={saveLocal} className="gap-2">
+                <Save className="h-4 w-4" /> Spara utan att starta
+              </Button>
             </div>
-          </aside>
-        </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </AppShell>
   );
 }
 
-function SliderRow({ label, value, min, max, step, unit, onChange, hint }: {
-  label: string; value: number; min: number; max: number; step: number; unit: string;
-  onChange: (v: number) => void; hint?: string;
+function ProgressCard({ label, value, sub, percent, tone, showBar = true }: {
+  label: string; value: string; sub: string; percent: number; tone?: "success"; showBar?: boolean;
 }) {
   return (
-    <div>
-      <div className="flex items-center justify-between">
-        <Label className="text-sm">{label}</Label>
-        <span className="text-sm font-semibold tabular-nums text-primary">{value}{unit}</span>
-      </div>
-      <Slider value={[value]} min={min} max={max} step={step} onValueChange={([v]) => onChange(v)} className="mt-2" />
-      {hint && <p className="mt-1 text-xs text-muted-foreground">{hint}</p>}
+    <div className="rounded-xl border border-border bg-background/40 p-4">
+      <div className="text-xs text-muted-foreground">{label}</div>
+      <div className={`mt-1 text-2xl font-bold tabular-nums ${tone === "success" ? "text-success" : ""}`}>{value}</div>
+      <div className="text-xs text-muted-foreground">{sub}</div>
+      {showBar && (
+        <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
+          <div className={`h-full ${tone === "success" ? "bg-success" : "bg-primary"}`} style={{ width: `${percent}%` }} />
+        </div>
+      )}
     </div>
   );
 }
 
-function ToggleRow({ label, hint, checked, onChange }: { label: string; hint?: string; checked: boolean; onChange: (v: boolean) => void }) {
+function LimitCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-start justify-between gap-4">
-      <div>
-        <div className="text-sm font-medium">{label}</div>
-        {hint && <div className="text-xs text-muted-foreground">{hint}</div>}
-      </div>
-      <Switch checked={checked} onCheckedChange={onChange} />
-    </div>
-  );
-}
-
-function Row({ label, value, className }: { label: string; value: string; className?: string }) {
-  return (
-    <div className="flex items-start justify-between gap-3">
-      <dt className="text-xs text-muted-foreground">{label}</dt>
-      <dd className={`text-right text-xs font-medium ${className ?? ""}`}>{value}</dd>
+    <div className="rounded-xl border border-border p-4">
+      <div className="text-xs text-muted-foreground">{label}</div>
+      <div className="mt-1 text-xl font-bold tabular-nums">{value}</div>
     </div>
   );
 }

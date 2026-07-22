@@ -14,6 +14,102 @@ export type Database = {
   }
   public: {
     Tables: {
+      bot_monthly_usage: {
+        Row: {
+          created_at: string
+          id: string
+          leverage_used_pct: number
+          trades_count: number
+          updated_at: string
+          user_id: string
+          year_month: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          leverage_used_pct?: number
+          trades_count?: number
+          updated_at?: string
+          user_id: string
+          year_month: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          leverage_used_pct?: number
+          trades_count?: number
+          updated_at?: string
+          user_id?: string
+          year_month?: string
+        }
+        Relationships: []
+      }
+      bot_sessions: {
+        Row: {
+          aggressiveness: number
+          allowed_assets: string[]
+          created_at: string
+          current_multiplier: number
+          id: string
+          last_tick_at: string | null
+          level_key: string | null
+          max_leverage_pct: number
+          max_trades_month: number
+          started_at: string
+          starting_portfolio_sek: number
+          status: string
+          stopped_at: string | null
+          strategy: string
+          target_multiplier: number
+          target_trades: number
+          trades_generated: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          aggressiveness?: number
+          allowed_assets?: string[]
+          created_at?: string
+          current_multiplier?: number
+          id?: string
+          last_tick_at?: string | null
+          level_key?: string | null
+          max_leverage_pct?: number
+          max_trades_month?: number
+          started_at?: string
+          starting_portfolio_sek?: number
+          status?: string
+          stopped_at?: string | null
+          strategy?: string
+          target_multiplier?: number
+          target_trades?: number
+          trades_generated?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          aggressiveness?: number
+          allowed_assets?: string[]
+          created_at?: string
+          current_multiplier?: number
+          id?: string
+          last_tick_at?: string | null
+          level_key?: string | null
+          max_leverage_pct?: number
+          max_trades_month?: number
+          started_at?: string
+          starting_portfolio_sek?: number
+          status?: string
+          stopped_at?: string | null
+          strategy?: string
+          target_multiplier?: number
+          target_trades?: number
+          trades_generated?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       investment_amount_audit: {
         Row: {
           amount_sek: number
