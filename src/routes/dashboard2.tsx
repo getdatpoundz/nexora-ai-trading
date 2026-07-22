@@ -186,16 +186,14 @@ function Dashboard2Page() {
                         </span>
                       </td>
                       <td className="px-4 py-3 text-right text-muted-foreground">{dateSv(t.closedDate)}</td>
+                      <td className="px-4 py-3 text-right">
+                        <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); setSelected(t); }}>
+                          Detaljer
+                        </Button>
+                      </td>
                     </tr>
                   );
                 })}
-                    <td className="px-4 py-3 text-right">
-                      <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); setSelected(t); }}>
-                        Detaljer
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
               </tbody>
             </table>
           </div>
