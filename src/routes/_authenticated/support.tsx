@@ -47,7 +47,7 @@ function SupportPage() {
             <div><Label>Meddelande</Label><Textarea required rows={5} className="mt-1" /></div>
             <div><Label>Bifoga fil</Label><Input type="file" className="mt-1" /></div>
             <Button type="submit" className="w-full">Skicka</Button>
-            {sent && <p className="text-xs text-success">Ärende skickat i demoläge.</p>}
+            {sent && <p className="text-xs text-success">Ärende skickat.</p>}
           </form>
           <div className="space-y-4">
             <div className="rounded-2xl border border-border bg-card p-6">

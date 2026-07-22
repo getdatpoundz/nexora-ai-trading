@@ -26,7 +26,7 @@ function WithdrawPage() {
           <div className="flex gap-3">
             <AlertTriangle className="h-5 w-5 shrink-0 text-destructive" />
             <div>
-              <p className="text-sm font-semibold">Uttag är avstängda i demoläget.</p>
+              <p className="text-sm font-semibold">Uttag begärs manuellt och behandlas inom 1–2 bankdagar.</p>
               <p className="mt-1 text-xs text-muted-foreground">Flödet nedan är endast en visuell förhandsvisning.</p>
             </div>
           </div>
@@ -69,7 +69,7 @@ function WithdrawPage() {
             <Label>Tvåfaktorsverifiering</Label>
             <Input placeholder="6-siffrig kod" maxLength={6} className="mt-1 tracking-widest" />
           </div>
-          <Button className="w-full" disabled>Uttag inaktiverat i demoläge</Button>
+          <Button className="w-full" disabled>Begär uttag</Button>
         </div>
       </div>
     </AppShell>

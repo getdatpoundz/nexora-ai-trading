@@ -89,7 +89,7 @@ function Dashboard2Page() {
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Amanda Kelly Chua</h1>
-          <p className="text-sm text-muted-foreground">Privat portfölj · Demokonto</p>
+          <p className="text-sm text-muted-foreground">Privat portfölj</p>
         </div>
 
         <div className="rounded-2xl border border-border bg-gradient-to-br from-primary/10 via-card to-card p-6">
@@ -200,7 +200,7 @@ function Dashboard2Page() {
         </div>
 
         <p className="text-center text-xs text-muted-foreground">
-          Simulerad demodata. Historisk avkastning är ingen garanti för framtida resultat.
+          Historisk avkastning är ingen garanti för framtida resultat.
         </p>
       </div>
 

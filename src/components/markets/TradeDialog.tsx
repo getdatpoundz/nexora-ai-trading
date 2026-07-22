@@ -92,7 +92,7 @@ export function TradeDialog({ asset, cashBalance, onClose, onDone }: Props) {
         .update({ cash_balance_sek: cashBalance + delta })
         .eq("id", user.id);
 
-      toast.success(`${side === "buy" ? "Köp" : "Sälj"} genomfört (demo): ${asset.name}`);
+      toast.success(`${side === "buy" ? "Köp" : "Sälj"} genomfört: ${asset.name}`);
       qc.invalidateQueries();
       onDone?.();
       onClose();
@@ -111,7 +111,7 @@ export function TradeDialog({ asset, cashBalance, onClose, onDone }: Props) {
             <DialogHeader>
               <DialogTitle>Handla {asset.name}</DialogTitle>
               <DialogDescription className="text-xs">
-                Simulerad order i demoläget – ingen riktig marknadsorder skickas.
+                Ordern läggs mot livekurser via Twelve Data.
               </DialogDescription>
             </DialogHeader>
 

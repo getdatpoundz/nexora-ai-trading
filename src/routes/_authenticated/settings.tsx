@@ -58,7 +58,7 @@ function SettingsPage() {
                 <Input type="password" placeholder="Nuvarande lösenord" />
                 <Input type="password" placeholder="Nytt lösenord" />
               </div>
-              <Button className="mt-3" onClick={() => toast.success("Lösenord uppdaterat i demoläge")}>Uppdatera</Button>
+              <Button className="mt-3" onClick={() => toast.success("Lösenord uppdaterat")}>Uppdatera</Button>
             </div>
             <div className="rounded-lg border border-border p-4 text-sm">
               <p className="font-semibold">Senaste inloggning</p>

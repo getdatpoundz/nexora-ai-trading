@@ -62,8 +62,11 @@ function uniqueSuffix(): number {
 // ---------------- createDeposit ----------------
 export const createCryptoDeposit = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { currency?: "BTC" }) =>
-    z.object({ currency: z.enum(["BTC"]).optional() }).parse(d ?? {}),
+  .inputValidator((d: { currency?: "BTC"; amountSek?: number }) =>
+    z.object({
+      currency: z.enum(["BTC"]).optional(),
+      amountSek: z.number().int().positive().optional(),
+    }).parse(d ?? {}),
   )
   .handler(async ({ context, data }) => {
     const { supabaseAdmin } = await import(
@@ -79,12 +82,13 @@ export const createCryptoDeposit = createServerFn({ method: "POST" })
       .eq("id", context.userId)
       .maybeSingle();
 
-    const sek = profile?.assigned_level_sek;
-    if (!sek) throw new Error("Ingen investeringsnivå tilldelad");
+    const sek = data.amountSek ?? profile?.assigned_level_sek;
+    if (!sek) throw new Error("Ange ett belopp för inbetalningen");
 
     const price = await fetchPriceSek();
     const base = sek / price;
     const expected = roundCrypto(base + uniqueSuffix());
+
 
     // Hitta eller skapa aktiv selection
     const { data: existing } = await supabaseAdmin
