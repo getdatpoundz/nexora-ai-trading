@@ -62,10 +62,8 @@ function uniqueSuffix(): number {
 // ---------------- createDeposit ----------------
 export const createCryptoDeposit = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { currency?: "BTC" | "USDT_TRC20" }) =>
-    z
-      .object({ currency: z.enum(["BTC", "USDT_TRC20"]).optional() })
-      .parse(d ?? {}),
+  .inputValidator((d: { currency?: "BTC" }) =>
+    z.object({ currency: z.enum(["BTC"]).optional() }).parse(d ?? {}),
   )
   .handler(async ({ context, data }) => {
     const { supabaseAdmin } = await import(
