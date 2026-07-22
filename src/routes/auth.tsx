@@ -45,7 +45,7 @@ function AuthPage() {
         const { error } = await supabase.auth.signInWithPassword({ email: f.email, password: f.password });
         if (error) throw error;
         toast.success("Välkommen tillbaka");
-        navigate({ to: "/dashboard" });
+        navigate({ to: "/welcome" });
       } else if (mode === "signup") {
         if (!f.terms || !f.risk) { toast.error("Du måste godkänna villkoren och bekräfta riskinformationen"); return; }
         if (f.password.length < 8) { toast.error("Lösenordet måste vara minst 8 tecken"); return; }
@@ -59,7 +59,7 @@ function AuthPage() {
         });
         if (error) throw error;
         toast.success("Konto skapat – kontrollera din e-post");
-        navigate({ to: "/dashboard" });
+        navigate({ to: "/welcome" });
       } else {
         const { error } = await supabase.auth.resetPasswordForEmail(f.email, {
           redirectTo: window.location.origin + "/reset-password",
