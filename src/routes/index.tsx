@@ -117,7 +117,7 @@ function Landing() {
               <span className="font-display text-lg font-bold text-primary-foreground">N</span>
             </div>
             <span className="font-display text-lg font-bold tracking-tight">Nexora AI</span>
-            <span className="ml-2 rounded-full border border-border bg-muted px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Demo</span>
+            
           </div>
           <nav className="hidden items-center gap-8 text-sm font-medium text-muted-foreground md:flex">
             <a href="#om" className="hover:text-foreground">Om</a>
@@ -146,7 +146,7 @@ function Landing() {
             <div>
               <span className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
                 <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-                Demoläge · simulerade belopp i SEK
+                Livedata från marknaden · belopp i SEK
               </span>
               <h1 className="mt-6 font-display text-5xl font-bold leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl">
                 Sveriges nya <span className="text-primary">AI-plattform</span> för kryptoinvesteringar.
@@ -187,7 +187,7 @@ function Landing() {
                   <p className="mt-1 font-display text-3xl font-bold tabular-nums">1 284 500 kr</p>
                   <p className="mt-1 text-sm font-semibold text-primary">+18,4% i år · simulerat</p>
                 </div>
-                <span className="rounded-md border border-border bg-background px-2 py-1 text-[10px] font-semibold uppercase text-muted-foreground">Demo</span>
+                
               </div>
               <div className="mt-4 h-64">
                 <ResponsiveContainer width="100%" height="100%">
@@ -341,7 +341,7 @@ function Landing() {
           </div>
 
           <p className="mx-auto mt-10 max-w-3xl text-center text-xs text-muted-foreground">
-            Alla belopp är i SEK. I demoläget genomförs inga riktiga betalningar. Investeringar i krypto
+            Alla belopp är i SEK. Investeringar i krypto
             innebär hög risk – du kan förlora hela ditt kapital. Utökad verifiering krävs för nivåer från
             100 000 kr och uppåt.
           </p>
@@ -559,13 +559,13 @@ function Landing() {
             <h2 className="mt-3 font-display text-4xl font-bold tracking-tight">Byggt för svenska sparare.</h2>
             <p className="mt-4 text-muted-foreground">
               Nexora AI följer nordiska best practices: stark autentisering, kryptering och tydlig separation
-              mellan användardata och drift. I demoläget hanteras inga riktiga medel.
+              mellan användardata och drift.
             </p>
             <ul className="mt-6 space-y-3 text-sm">
               {[
                 { icon: Lock, t: "Tvåfaktorsautentisering och sessionshantering" },
                 { icon: ShieldCheck, t: "Radbaserad åtkomstkontroll (RLS) på all data" },
-                { icon: Wallet, t: "Inga riktiga plånböcker i demoläget – noll motpartsrisk" },
+                { icon: Wallet, t: "Kall förvaring av kundmedel – minimerad motpartsrisk" },
                 { icon: TrendingUp, t: "Fullständig transaktionshistorik och revisionsloggar" },
               ].map((s) => (
                 <li key={s.t} className="flex items-start gap-3">
@@ -705,7 +705,7 @@ function Landing() {
             Redo att testa <span className="text-primary">Nexora AI</span>?
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-lg text-muted-foreground">
-            Skapa ett konto på under en minut och utforska plattformen i demoläge – helt utan risk.
+            Skapa ett konto på under en minut och kom igång med AI-driven kryptohandel.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Link to="/auth" search={{ mode: "signup" }} className="inline-flex items-center gap-2 rounded-md bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground hover:opacity-90">
@@ -737,9 +737,9 @@ function Landing() {
           <p className="mx-auto mt-6 max-w-3xl text-center text-xs leading-relaxed text-muted-foreground">
             Handel med kryptotillgångar innebär hög risk. Värdet kan både öka och minska och du kan
             förlora hela det investerade kapitalet. Historisk eller simulerad utveckling är ingen
-            garanti för framtida resultat. Nexora AI drivs i demoläge – inga riktiga betalningar sker.
+            garanti för framtida resultat.
           </p>
-          <p className="mt-4 text-center text-xs text-muted-foreground">© {new Date().getFullYear()} Nexora AI · Demoläge</p>
+          <p className="mt-4 text-center text-xs text-muted-foreground">© {new Date().getFullYear()} Nexora AI</p>
         </div>
       </footer>
     </div>

@@ -14,9 +14,9 @@ export const Route = createFileRoute("/_authenticated/support")({
 });
 
 const FAQ = [
-  { q: "Varför visas alla belopp som demodata?", a: "Plattformen är i demoläge. Inga riktiga tillgångar hanteras i den här versionen." },
-  { q: "Kan jag sätta in riktiga pengar?", a: "Nej. Insättningar och uttag är avstängda i demoläget." },
-  { q: "Hur ändrar jag min risknivå?", a: "Gå till AI-strategier, välj strategi och bekräfta i demoläge." },
+  { q: "Är mina pengar säkra?", a: "Alla insättningar hålls i kall förvaring och all trafik är krypterad." },
+  { q: "Kan jag sätta in riktiga pengar?", a: "Ja. Insättningar sker on-chain via Bitcoin och uttag begärs manuellt." },
+  { q: "Hur ändrar jag min risknivå?", a: "Gå till AI-bot och justera riskprofil eller strategi." },
 ];
 
 function SupportPage() {
