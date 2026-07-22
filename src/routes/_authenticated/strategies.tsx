@@ -99,7 +99,7 @@ function StrategiesPage() {
       if (!cancelled) setTrades((data as TradeRow[] | null) ?? []);
     }
     load();
-    const ch = supabase.channel(`bot-trades-${user.id}`)
+    const ch = supabase.channel(`bot-trades-${user.id}-${Math.random().toString(36).slice(2)}`)
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "trades", filter: `user_id=eq.${user.id}` },
         (payload) => setTrades((cur) => [payload.new as TradeRow, ...cur].slice(0, 30)))
       .subscribe();
