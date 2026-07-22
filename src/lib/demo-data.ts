@@ -88,7 +88,7 @@ export const DEMO_INSIGHTS = [
 
 export const DEMO_NOTIFICATIONS = [
   { id: "n1", category: "Säkerhet", title: "Ny inloggning från Stockholm", time: "för 2 tim sedan", read: false },
-  { id: "n2", category: "Strategi", title: "Din balanserade strategi har rebalanserats i demoläge", time: "igår", read: false },
+  { id: "n2", category: "Strategi", title: "Din balanserade strategi har rebalanserats", time: "igår", read: false },
   { id: "n3", category: "Marknad", title: "Bitcoin har rört sig +2,3 % de senaste 24 timmarna", time: "igår", read: true },
   { id: "n4", category: "Dokument", title: "Månadsöversikt november är tillgänglig", time: "3 dagar sedan", read: true },
 ];

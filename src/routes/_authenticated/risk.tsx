@@ -18,7 +18,7 @@ function RiskPage() {
               <p className="font-semibold">Viktigt att läsa innan du börjar</p>
               <p>{RISK_DISCLAIMER}</p>
               <p>
-                I demoläget hanteras inga riktiga tillgångar. Alla belopp, transaktioner
+                Alla belopp, transaktioner
                 och grafer är simulerade och används endast för att visa hur plattformen fungerar.
               </p>
               <p>

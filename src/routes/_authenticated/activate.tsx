@@ -26,6 +26,9 @@ import {
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/activate")({
+  validateSearch: (s: Record<string, unknown>) => ({
+    amount: typeof s.amount === "number" ? s.amount : s.amount ? Number(s.amount) : undefined,
+  }),
   component: ActivatePage,
 });
 
@@ -40,6 +43,7 @@ function fmtSek(n: number | null | undefined) {
 
 function ActivatePage() {
   const navigate = useNavigate();
+  const { amount: overrideAmount } = Route.useSearch();
   const fetchState = useServerFn(getMyOnboardingState);
   const create = useServerFn(createCryptoDeposit);
   const poll = useServerFn(pollCryptoDeposit);
@@ -66,17 +70,17 @@ function ActivatePage() {
   useEffect(() => {
     if (pollData?.status === "funded") {
       toast.success("Betalning bekräftad! Kontot är krediterat.");
-      const t = setTimeout(() => navigate({ to: "/dashboard" }), 1800);
+      const t = setTimeout(() => navigate({ to: "/portfolio" }), 1800);
       return () => clearTimeout(t);
     }
   }, [pollData, navigate]);
 
-  const amount = state?.profile?.assigned_level_sek ?? 0;
+  const amount = overrideAmount ?? state?.profile?.assigned_level_sek ?? 0;
 
   const start = async () => {
     setCreating(true);
     try {
-      const r = await create({ data: { currency: "BTC" } });
+      const r = await create({ data: { currency: "BTC", amountSek: overrideAmount } });
       setDeposit(r);
     } catch (e) {
       toast.error((e as Error).message);
@@ -84,6 +88,7 @@ function ActivatePage() {
       setCreating(false);
     }
   };
+
 
   const qrPayload = useMemo(() => {
     if (!deposit) return "";

@@ -14,9 +14,9 @@ export const Route = createFileRoute("/_authenticated/support")({
 });
 
 const FAQ = [
-  { q: "Varför visas alla belopp som demodata?", a: "Plattformen är i demoläge. Inga riktiga tillgångar hanteras i den här versionen." },
-  { q: "Kan jag sätta in riktiga pengar?", a: "Nej. Insättningar och uttag är avstängda i demoläget." },
-  { q: "Hur ändrar jag min risknivå?", a: "Gå till AI-strategier, välj strategi och bekräfta i demoläge." },
+  { q: "Är mina pengar säkra?", a: "Alla insättningar hålls i kall förvaring och all trafik är krypterad." },
+  { q: "Kan jag sätta in riktiga pengar?", a: "Ja. Insättningar sker on-chain via Bitcoin och uttag begärs manuellt." },
+  { q: "Hur ändrar jag min risknivå?", a: "Gå till AI-bot och justera riskprofil eller strategi." },
 ];
 
 function SupportPage() {
@@ -47,7 +47,7 @@ function SupportPage() {
             <div><Label>Meddelande</Label><Textarea required rows={5} className="mt-1" /></div>
             <div><Label>Bifoga fil</Label><Input type="file" className="mt-1" /></div>
             <Button type="submit" className="w-full">Skicka</Button>
-            {sent && <p className="text-xs text-success">Ärende skickat i demoläge.</p>}
+            {sent && <p className="text-xs text-success">Ärende skickat.</p>}
           </form>
           <div className="space-y-4">
             <div className="rounded-2xl border border-border bg-card p-6">

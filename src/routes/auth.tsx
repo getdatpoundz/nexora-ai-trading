@@ -90,7 +90,7 @@ function AuthPage() {
               Din <span className="text-primary">AI-drivna</span> kryptoplattform.
             </h2>
             <p className="mt-4 max-w-md text-sm text-background/70">
-              Alla belopp visas i demoläge. Inga riktiga tillgångar hanteras i den här versionen.
+              Din inloggning är krypterad och skyddad.
             </p>
           </div>
           <p className="max-w-md text-xs text-background/60">
@@ -106,7 +106,7 @@ function AuthPage() {
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             {mode === "login" && "Välkommen tillbaka till Nexora AI."}
-            {mode === "signup" && "Kom igång med demoläget på under en minut."}
+            {mode === "signup" && "Kom igång på under en minut."}
             {mode === "forgot" && "Ange din e-postadress så skickar vi en länk för återställning."}
           </p>
 
