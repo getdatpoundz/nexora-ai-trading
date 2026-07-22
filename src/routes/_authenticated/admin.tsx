@@ -114,7 +114,7 @@ function AdminInner() {
 function CreateCustomerForm({ onCreated }: { onCreated: () => void }) {
   const createFn = useServerFn(adminCreateCustomer);
   const [loading, setLoading] = useState(false);
-  const [magic, setMagic] = useState<string | null>(null);
+  const [creds, setCreds] = useState<{ email: string; password: string; existed: boolean } | null>(null);
   const [f, setF] = useState({
     email: "",
     first_name: "",
@@ -128,7 +128,7 @@ function CreateCustomerForm({ onCreated }: { onCreated: () => void }) {
     e.preventDefault();
     const level = LEVELS.find((l) => l.name === f.level)!;
     setLoading(true);
-    setMagic(null);
+    setCreds(null);
     try {
       const r = await createFn({
         data: {
@@ -140,8 +140,12 @@ function CreateCustomerForm({ onCreated }: { onCreated: () => void }) {
           assigned_level_name: level.name,
         },
       });
-      setMagic(r.magic_link);
-      toast.success("Kund skapad — kopiera länken nedan och skicka till kunden");
+      setCreds({ email: r.email, password: r.password, existed: r.existed });
+      toast.success(
+        r.existed
+          ? "Kontot fanns redan — lösenordet återställt"
+          : "Kundkonto skapat",
+      );
       onCreated();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Något gick fel");
@@ -150,11 +154,13 @@ function CreateCustomerForm({ onCreated }: { onCreated: () => void }) {
     }
   };
 
+  const authUrl = typeof window !== "undefined" ? `${window.location.origin}/auth` : "/auth";
+
   return (
     <form onSubmit={submit} className="rounded-2xl border border-border bg-card p-6">
       <div className="flex items-center gap-2 text-primary">
         <UserPlus className="h-4 w-4" />
-        <h2 className="font-semibold">Skapa ny kund</h2>
+        <h2 className="font-semibold">Skapa nytt kundkonto</h2>
       </div>
       <div className="mt-4 grid gap-3 md:grid-cols-2">
         <div>
@@ -189,28 +195,43 @@ function CreateCustomerForm({ onCreated }: { onCreated: () => void }) {
       </div>
       <Button type="submit" disabled={loading} className="mt-4 bg-primary text-primary-foreground hover:opacity-90">
         {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-        Skapa kund och generera länk
+        Skapa kundkonto
       </Button>
 
-      {magic && (
-        <div className="mt-4 rounded-xl border border-primary/40 bg-primary/5 p-4">
-          <p className="text-xs font-semibold uppercase tracking-wider text-primary">Inloggningslänk</p>
-          <div className="mt-2 flex gap-2">
-            <Input value={magic} readOnly className="font-mono text-xs" />
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => { navigator.clipboard.writeText(magic); toast.success("Kopierad"); }}
-            >
-              <Copy className="h-4 w-4" />
-            </Button>
-          </div>
-          <p className="mt-2 text-xs text-muted-foreground">
-            Skicka länken via mail/SMS/WhatsApp. Länken loggar in kunden direkt och tar dem till onboarding.
+      {creds && (
+        <div className="mt-4 space-y-3 rounded-xl border border-primary/40 bg-primary/5 p-4">
+          <p className="text-xs font-semibold uppercase tracking-wider text-primary">
+            Inloggningsuppgifter — skicka till kunden
+          </p>
+          <CredRow label="Inloggningssida" value={authUrl} />
+          <CredRow label="E-post" value={creds.email} />
+          <CredRow label="Lösenord" value={creds.password} mono />
+          <p className="text-xs text-muted-foreground">
+            Kunden går till inloggningssidan, loggar in med uppgifterna ovan och kommer direkt till onboarding.
+            Lösenordet visas endast en gång — kopiera det nu.
           </p>
         </div>
       )}
     </form>
+  );
+}
+
+function CredRow({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
+  return (
+    <div>
+      <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">{label}</p>
+      <div className="mt-1 flex gap-2">
+        <Input value={value} readOnly className={mono ? "font-mono text-sm" : "text-sm"} />
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          onClick={() => { navigator.clipboard.writeText(value); toast.success("Kopierad"); }}
+        >
+          <Copy className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
   );
 }
 
