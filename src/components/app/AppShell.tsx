@@ -1,8 +1,8 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
 import {
-  LayoutDashboard, Wallet, Brain, LineChart, ArrowLeftRight,
-  ArrowDownToLine, ArrowUpFromLine, FileText, LifeBuoy, Settings,
+  Wallet, Brain, LineChart, ArrowLeftRight,
+  ArrowDownToLine, ArrowUpFromLine, LifeBuoy, Settings,
   Bell, Menu, X, LogOut, ShieldAlert, User as UserIcon, HelpCircle,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,23 +16,21 @@ import {
 import { cn } from "@/lib/utils";
 
 const NAV = [
-  { to: "/dashboard", label: "Översikt", icon: LayoutDashboard },
   { to: "/portfolio", label: "Min portfölj", icon: Wallet },
   { to: "/strategies", label: "AI-strategier", icon: Brain },
   { to: "/markets", label: "Marknader", icon: LineChart },
   { to: "/transactions", label: "Transaktioner", icon: ArrowLeftRight },
   { to: "/deposit", label: "Sätt in", icon: ArrowDownToLine },
   { to: "/withdraw", label: "Ta ut", icon: ArrowUpFromLine },
-  { to: "/documents", label: "Dokument", icon: FileText },
   { to: "/support", label: "Support", icon: LifeBuoy },
   { to: "/settings", label: "Inställningar", icon: Settings },
 ] as const;
 
 const MOBILE_NAV = [
-  { to: "/dashboard", label: "Översikt", icon: LayoutDashboard },
   { to: "/portfolio", label: "Portfölj", icon: Wallet },
   { to: "/strategies", label: "Strategier", icon: Brain },
   { to: "/markets", label: "Marknader", icon: LineChart },
+  { to: "/transactions", label: "Historik", icon: ArrowLeftRight },
   { to: "/settings", label: "Mer", icon: Settings },
 ] as const;
 
