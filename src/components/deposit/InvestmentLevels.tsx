@@ -248,10 +248,24 @@ export function InvestmentLevels({ strategyId, verificationStatus, incomeRange }
               </div>
               <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{l.description}</p>
 
+              <dl className="mt-4 grid grid-cols-2 gap-2 rounded-lg border border-border/60 bg-muted/30 p-3 text-[11px]">
+                <div>
+                  <dt className="text-muted-foreground">Max trades / månad</dt>
+                  <dd className="mt-0.5 font-semibold tabular-nums text-foreground">{l.maxTradesPerMonth}</dd>
+                </div>
+                <div>
+                  <dt className="text-muted-foreground">Max hävstång</dt>
+                  <dd className="mt-0.5 font-semibold tabular-nums text-foreground">
+                    {l.maxLeveragePct === 0 ? "Ingen" : `${l.maxLeveragePct} %`}
+                  </dd>
+                </div>
+              </dl>
+
               <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
                 <AlertTriangle className="h-3.5 w-3.5 text-warning" />
                 <span>Hög risk – du kan förlora hela kapitalet</span>
               </div>
+
 
               {requiresEnhanced && (
                 <div className="mt-3 inline-flex items-center gap-1.5 self-start rounded-full border border-primary/30 bg-primary/5 px-2.5 py-1 text-[11px] font-medium text-primary">
