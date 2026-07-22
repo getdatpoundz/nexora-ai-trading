@@ -356,6 +356,104 @@ function StrategiesPage() {
               {config.assets.length === 0 && <p className="mt-3 text-xs text-destructive">Välj minst en tillgång</p>}
             </section>
 
+            {/* Risk rules */}
+            <section className="rounded-2xl border border-border bg-card p-6">
+              <div className="mb-4 flex items-center gap-2">
+                <Shield className="h-4 w-4 text-primary" />
+                <h3 className="font-semibold">Riskregler per trade</h3>
+              </div>
+              <div className="grid gap-6 md:grid-cols-2">
+                <RuleSlider
+                  icon={TrendingDown}
+                  label="Stop-loss"
+                  hint="Stäng automatiskt om positionen faller så här mycket"
+                  value={config.stopLossPct}
+                  min={1} max={25} step={0.5}
+                  suffix="%"
+                  tone="destructive"
+                  onChange={(v) => update("stopLossPct", v)}
+                />
+                <RuleSlider
+                  icon={Target}
+                  label="Take-profit"
+                  hint="Ta hem vinsten när positionen når detta"
+                  value={config.takeProfitPct}
+                  min={2} max={50} step={0.5}
+                  suffix="%"
+                  tone="success"
+                  onChange={(v) => update("takeProfitPct", v)}
+                />
+                <RuleSlider
+                  icon={Percent}
+                  label="Max positionsstorlek"
+                  hint="Andel av portföljen per enskild position"
+                  value={config.maxPositionPct}
+                  min={2} max={40} step={1}
+                  suffix="%"
+                  onChange={(v) => update("maxPositionPct", v)}
+                />
+                <RuleSlider
+                  icon={Sparkles}
+                  label="Minsta AI-signalstyrka"
+                  hint="Boten agerar bara på signaler över detta"
+                  value={config.minConfidence}
+                  min={40} max={95} step={1}
+                  suffix="%"
+                  onChange={(v) => update("minConfidence", v)}
+                />
+              </div>
+            </section>
+
+            {/* Trading hours & behavior */}
+            <section className="rounded-2xl border border-border bg-card p-6">
+              <div className="mb-4 flex items-center gap-2">
+                <Clock className="h-4 w-4 text-primary" />
+                <h3 className="font-semibold">Handelstider & beteende</h3>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <Label className="text-sm">När får boten handla?</Label>
+                  <RadioGroup
+                    value={config.tradingHours}
+                    onValueChange={(v) => update("tradingHours", v as BotConfig["tradingHours"])}
+                    className="mt-2 grid gap-2 sm:grid-cols-2"
+                  >
+                    <label className={`flex cursor-pointer items-start gap-2 rounded-lg border p-3 text-sm ${config.tradingHours === "always" ? "border-primary bg-primary/5" : "border-border"}`}>
+                      <RadioGroupItem value="always" className="mt-0.5" />
+                      <div>
+                        <div className="font-medium">24/7 (krypto)</div>
+                        <div className="text-xs text-muted-foreground">Boten handlar när som helst</div>
+                      </div>
+                    </label>
+                    <label className={`flex cursor-pointer items-start gap-2 rounded-lg border p-3 text-sm ${config.tradingHours === "market_hours" ? "border-primary bg-primary/5" : "border-border"}`}>
+                      <RadioGroupItem value="market_hours" className="mt-0.5" />
+                      <div>
+                        <div className="font-medium">Börstider</div>
+                        <div className="text-xs text-muted-foreground">Endast vardagar 09:00–17:30</div>
+                      </div>
+                    </label>
+                  </RadioGroup>
+                </div>
+                <div className="flex items-center justify-between rounded-lg border border-border p-3">
+                  <div>
+                    <div className="text-sm font-medium">Återinvestera vinster</div>
+                    <div className="text-xs text-muted-foreground">Låt boten öka positionerna med genererad vinst</div>
+                  </div>
+                  <Switch checked={config.reinvestProfits} onCheckedChange={(v) => update("reinvestProfits", v)} />
+                </div>
+                <div className="flex items-center justify-between rounded-lg border border-border p-3">
+                  <div className="flex items-center gap-2">
+                    <Bell className="h-4 w-4 text-muted-foreground" />
+                    <div>
+                      <div className="text-sm font-medium">Notiser vid varje trade</div>
+                      <div className="text-xs text-muted-foreground">Få avisering när boten öppnar eller stänger en position</div>
+                    </div>
+                  </div>
+                  <Switch checked={config.notifyOnTrade} onCheckedChange={(v) => update("notifyOnTrade", v)} />
+                </div>
+              </div>
+            </section>
+
             <section className="rounded-2xl border border-warning/40 bg-warning/5 p-6">
               <div className="flex items-start gap-3">
                 <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
