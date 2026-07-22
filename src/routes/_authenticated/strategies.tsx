@@ -249,10 +249,10 @@ function StrategiesPage() {
                   </div>
                   <Badge variant="outline" className="gap-1"><Radio className="h-3 w-3" /> Realtid</Badge>
                 </div>
-                <TradingViewWidget symbol={tvSymbol} height={420} interval="15" />
+                <TradingViewWidget symbol={tvSymbol} height={560} interval="15" />
               </div>
 
-              {/* Trade feed */}
+              {/* Trade feed — sizing matched to chart */}
               <div className="rounded-2xl border border-border bg-card p-4">
                 <div className="mb-3 flex items-center justify-between">
                   <h3 className="font-semibold">Live trade-flöde</h3>
