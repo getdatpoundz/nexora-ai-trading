@@ -236,10 +236,10 @@ function CredRow({ label, value, mono }: { label: string; value: string; mono?: 
 }
 
 function CustomerRow({ customer }: { customer: any }) {
-  const regenFn = useServerFn(adminRegenerateLink);
+  const resetFn = useServerFn(adminResetPassword);
   const markFn = useServerFn(adminMarkFunded);
   const qc = useQueryClient();
-  const [link, setLink] = useState<string | null>(null);
+  const [newPw, setNewPw] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
 
   const status = customer.latest_selection?.onramp_status;
@@ -265,6 +265,8 @@ function CustomerRow({ customer }: { customer: any }) {
       ? "bg-warning/15 text-warning"
       : "bg-muted text-muted-foreground";
 
+  const authUrl = typeof window !== "undefined" ? `${window.location.origin}/auth` : "/auth";
+
   return (
     <div className="flex flex-col gap-2 p-4 md:flex-row md:items-center md:justify-between">
       <div className="min-w-0">
@@ -282,18 +284,20 @@ function CustomerRow({ customer }: { customer: any }) {
         <Button
           variant="outline"
           size="sm"
-          disabled={busy === "link"}
+          disabled={busy === "pw"}
           onClick={async () => {
-            setBusy("link");
+            if (!confirm(`Återställ lösenordet för ${customer.email}?`)) return;
+            setBusy("pw");
             try {
-              const r = await regenFn({ data: { email: customer.email } });
-              setLink(r.magic_link);
+              const r = await resetFn({ data: { email: customer.email } });
+              setNewPw(r.password);
+              toast.success("Nytt lösenord genererat");
             } catch (e) {
               toast.error(e instanceof Error ? e.message : "Fel");
             } finally { setBusy(null); }
           }}
         >
-          {busy === "link" ? <Loader2 className="h-3 w-3 animate-spin" /> : "Ny länk"}
+          {busy === "pw" ? <Loader2 className="h-3 w-3 animate-spin" /> : <><KeyRound className="mr-1 h-3 w-3" /> Nytt lösenord</>}
         </Button>
         {status !== "funded" && !customer.activated_at && (
           <Button
@@ -316,18 +320,25 @@ function CustomerRow({ customer }: { customer: any }) {
           </Button>
         )}
       </div>
-      {link && (
-        <div className="w-full md:mt-2">
-          <div className="flex gap-2">
-            <Input value={link} readOnly className="font-mono text-xs" />
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => { navigator.clipboard.writeText(link); toast.success("Kopierad"); }}
-            >
-              <Copy className="h-4 w-4" />
-            </Button>
+      {newPw && (
+        <div className="w-full space-y-2 md:mt-2">
+          <div>
+            <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Inloggningssida</p>
+            <div className="mt-1 flex gap-2">
+              <Input value={authUrl} readOnly className="text-xs" />
+              <Button type="button" variant="outline" size="sm" onClick={() => { navigator.clipboard.writeText(authUrl); toast.success("Kopierad"); }}>
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+          <div>
+            <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Nytt lösenord</p>
+            <div className="mt-1 flex gap-2">
+              <Input value={newPw} readOnly className="font-mono text-xs" />
+              <Button type="button" variant="outline" size="sm" onClick={() => { navigator.clipboard.writeText(newPw); toast.success("Kopierad"); }}>
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </div>
       )}
