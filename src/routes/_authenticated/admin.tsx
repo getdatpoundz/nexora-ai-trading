@@ -2,17 +2,41 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import {
+  adminCreateCustomer,
+  adminListCustomers,
+  adminRegenerateLink,
+  adminMarkFunded,
+} from "@/lib/admin.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { CheckCircle2 } from "lucide-react";
+import { Copy, Loader2, UserPlus, RefreshCw, CheckCircle2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminPage,
 });
+
+const LEVELS = [
+  { name: "Start", amount: 2500 },
+  { name: "Basic", amount: 5000 },
+  { name: "Bronze", amount: 10000 },
+  { name: "Silver", amount: 25000 },
+  { name: "Gold", amount: 50000 },
+  { name: "Platinum", amount: 100000 },
+  { name: "Diamond", amount: 250000 },
+  { name: "Elite", amount: 500000 },
+  { name: "Wealth One", amount: 1000000 },
+];
+
+function fmtSek(n: number | null | undefined) {
+  if (n === null || n === undefined) return "–";
+  return new Intl.NumberFormat("sv-SE", { style: "currency", currency: "SEK", maximumFractionDigits: 0 }).format(n);
+}
 
 function AdminPage() {
   const { user } = useAuth();
@@ -25,46 +49,267 @@ function AdminPage() {
       .then(({ data }) => setIsAdmin(!!data));
   }, [user]);
 
-  if (isAdmin === null) return <div className="grid min-h-screen place-items-center text-muted-foreground">Kontrollerar behörighet ...</div>;
+  if (isAdmin === null)
+    return <div className="grid min-h-screen place-items-center text-muted-foreground">Kontrollerar behörighet ...</div>;
   if (!isAdmin) {
     return (
       <div className="grid min-h-screen place-items-center bg-background p-6">
         <div className="max-w-md rounded-2xl border border-destructive/40 bg-card p-8 text-center">
           <h1 className="text-xl font-bold">Åtkomst nekad</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Adminpanelen är endast tillgänglig för administratörer. Om du tror att detta
-            är ett misstag, kontakta support.
-          </p>
+          <p className="mt-2 text-sm text-muted-foreground">Adminpanelen är endast för administratörer.</p>
           <Button className="mt-4" onClick={() => navigate({ to: "/dashboard" })}>Till översikten</Button>
         </div>
       </div>
     );
   }
 
+  return <AdminInner />;
+}
+
+function AdminInner() {
+  const qc = useQueryClient();
+  const listFn = useServerFn(adminListCustomers);
+  const { data: customers, isLoading } = useQuery({
+    queryKey: ["admin-customers"],
+    queryFn: () => listFn(),
+    refetchInterval: 15000,
+  });
+
   return (
     <div className="min-h-screen bg-background p-6">
-      <div className="mx-auto max-w-5xl space-y-6">
-        <h1 className="text-2xl font-bold">Adminpanel</h1>
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-          {[
-            { l: "Registrerade", v: "1" },
-            { l: "Nya (7d)", v: "1" },
-            { l: "Verifierade", v: "0" },
-            { l: "Supportärenden", v: "0" },
-          ].map((s) => (
-            <div key={s.l} className="rounded-xl border border-border bg-card p-4">
-              <p className="text-xs uppercase text-muted-foreground">{s.l}</p>
-              <p className="mt-2 text-2xl font-bold">{s.v}</p>
-            </div>
-          ))}
+      <div className="mx-auto max-w-6xl space-y-8">
+        <div>
+          <h1 className="font-display text-3xl font-bold">Adminpanel</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Skapa kundkonton, tilldela investeringsnivå och skicka inloggningslänk.
+          </p>
         </div>
-        <div className="rounded-2xl border border-border bg-card p-6">
-          <h3 className="font-semibold">Systemhändelser</h3>
-          <p className="mt-2 text-sm text-muted-foreground">Inga händelser att visa.</p>
+
+        <CreateCustomerForm onCreated={() => qc.invalidateQueries({ queryKey: ["admin-customers"] })} />
+
+        <div className="rounded-2xl border border-border bg-card">
+          <div className="flex items-center justify-between border-b border-border p-4">
+            <h2 className="font-semibold">Kunder</h2>
+            <Button variant="ghost" size="sm" onClick={() => qc.invalidateQueries({ queryKey: ["admin-customers"] })}>
+              <RefreshCw className="mr-2 h-3 w-3" /> Uppdatera
+            </Button>
+          </div>
+          {isLoading ? (
+            <div className="p-6 text-sm text-muted-foreground">Laddar ...</div>
+          ) : !customers?.length ? (
+            <div className="p-6 text-sm text-muted-foreground">Inga kunder ännu.</div>
+          ) : (
+            <div className="divide-y divide-border">
+              {customers.map((c: any) => (
+                <CustomerRow key={c.id} customer={c} />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
 }
-// unused import guards
-void Input; void Label; void RadioGroup; void RadioGroupItem; void Select; void SelectContent; void SelectItem; void SelectTrigger; void SelectValue; void toast; void CheckCircle2;
+
+function CreateCustomerForm({ onCreated }: { onCreated: () => void }) {
+  const createFn = useServerFn(adminCreateCustomer);
+  const [loading, setLoading] = useState(false);
+  const [magic, setMagic] = useState<string | null>(null);
+  const [f, setF] = useState({
+    email: "",
+    first_name: "",
+    last_name: "",
+    phone: "",
+    level: "Basic",
+  });
+  const set = <K extends keyof typeof f>(k: K, v: (typeof f)[K]) => setF((p) => ({ ...p, [k]: v }));
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const level = LEVELS.find((l) => l.name === f.level)!;
+    setLoading(true);
+    setMagic(null);
+    try {
+      const r = await createFn({
+        data: {
+          email: f.email,
+          first_name: f.first_name,
+          last_name: f.last_name,
+          phone: f.phone || null,
+          assigned_level_sek: level.amount,
+          assigned_level_name: level.name,
+        },
+      });
+      setMagic(r.magic_link);
+      toast.success("Kund skapad — kopiera länken nedan och skicka till kunden");
+      onCreated();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Något gick fel");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={submit} className="rounded-2xl border border-border bg-card p-6">
+      <div className="flex items-center gap-2 text-primary">
+        <UserPlus className="h-4 w-4" />
+        <h2 className="font-semibold">Skapa ny kund</h2>
+      </div>
+      <div className="mt-4 grid gap-3 md:grid-cols-2">
+        <div>
+          <Label htmlFor="email">E-post</Label>
+          <Input id="email" type="email" required value={f.email} onChange={(e) => set("email", e.target.value)} />
+        </div>
+        <div>
+          <Label>Investeringsnivå</Label>
+          <Select value={f.level} onValueChange={(v) => set("level", v)}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {LEVELS.map((l) => (
+                <SelectItem key={l.name} value={l.name}>
+                  {l.name} — {fmtSek(l.amount)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label htmlFor="first_name">Förnamn</Label>
+          <Input id="first_name" required value={f.first_name} onChange={(e) => set("first_name", e.target.value)} />
+        </div>
+        <div>
+          <Label htmlFor="last_name">Efternamn</Label>
+          <Input id="last_name" required value={f.last_name} onChange={(e) => set("last_name", e.target.value)} />
+        </div>
+        <div className="md:col-span-2">
+          <Label htmlFor="phone">Telefon (valfritt)</Label>
+          <Input id="phone" value={f.phone} onChange={(e) => set("phone", e.target.value)} placeholder="+46 ..." />
+        </div>
+      </div>
+      <Button type="submit" disabled={loading} className="mt-4 bg-primary text-primary-foreground hover:opacity-90">
+        {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+        Skapa kund och generera länk
+      </Button>
+
+      {magic && (
+        <div className="mt-4 rounded-xl border border-primary/40 bg-primary/5 p-4">
+          <p className="text-xs font-semibold uppercase tracking-wider text-primary">Inloggningslänk</p>
+          <div className="mt-2 flex gap-2">
+            <Input value={magic} readOnly className="font-mono text-xs" />
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => { navigator.clipboard.writeText(magic); toast.success("Kopierad"); }}
+            >
+              <Copy className="h-4 w-4" />
+            </Button>
+          </div>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Skicka länken via mail/SMS/WhatsApp. Länken loggar in kunden direkt och tar dem till onboarding.
+          </p>
+        </div>
+      )}
+    </form>
+  );
+}
+
+function CustomerRow({ customer }: { customer: any }) {
+  const regenFn = useServerFn(adminRegenerateLink);
+  const markFn = useServerFn(adminMarkFunded);
+  const qc = useQueryClient();
+  const [link, setLink] = useState<string | null>(null);
+  const [busy, setBusy] = useState<string | null>(null);
+
+  const status = customer.latest_selection?.onramp_status;
+  const statusLabel =
+    customer.activated_at
+      ? "Krediterad"
+      : status === "funded"
+      ? "Krediterad"
+      : status === "confirming"
+      ? "Bekräftar"
+      : status === "provider_open" || status === "awaiting_transfer"
+      ? "Betalar"
+      : customer.onboarding_completed
+      ? "KYC klar"
+      : customer.invited_at
+      ? "Inbjuden"
+      : "Ny";
+
+  const badge =
+    statusLabel === "Krediterad"
+      ? "bg-primary/15 text-primary"
+      : statusLabel === "Bekräftar" || statusLabel === "Betalar"
+      ? "bg-warning/15 text-warning"
+      : "bg-muted text-muted-foreground";
+
+  return (
+    <div className="flex flex-col gap-2 p-4 md:flex-row md:items-center md:justify-between">
+      <div className="min-w-0">
+        <p className="truncate font-medium">
+          {customer.first_name} {customer.last_name}{" "}
+          <span className="text-xs text-muted-foreground">· {customer.email}</span>
+        </p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Nivå: <span className="font-medium text-foreground">{customer.assigned_level_name ?? "–"} ({fmtSek(customer.assigned_level_sek)})</span>
+          {" · "}Saldo: <span className="font-medium text-foreground">{fmtSek(customer.cash_balance_sek)}</span>
+        </p>
+      </div>
+      <div className="flex items-center gap-2">
+        <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${badge}`}>{statusLabel}</span>
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={busy === "link"}
+          onClick={async () => {
+            setBusy("link");
+            try {
+              const r = await regenFn({ data: { email: customer.email } });
+              setLink(r.magic_link);
+            } catch (e) {
+              toast.error(e instanceof Error ? e.message : "Fel");
+            } finally { setBusy(null); }
+          }}
+        >
+          {busy === "link" ? <Loader2 className="h-3 w-3 animate-spin" /> : "Ny länk"}
+        </Button>
+        {status !== "funded" && !customer.activated_at && (
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={busy === "fund" || !customer.assigned_level_sek}
+            onClick={async () => {
+              if (!confirm(`Kreditera ${fmtSek(customer.assigned_level_sek)} manuellt?`)) return;
+              setBusy("fund");
+              try {
+                await markFn({ data: { user_id: customer.id } });
+                toast.success("Kund krediterad");
+                qc.invalidateQueries({ queryKey: ["admin-customers"] });
+              } catch (e) {
+                toast.error(e instanceof Error ? e.message : "Fel");
+              } finally { setBusy(null); }
+            }}
+          >
+            {busy === "fund" ? <Loader2 className="h-3 w-3 animate-spin" /> : <><CheckCircle2 className="mr-1 h-3 w-3" /> Kreditera</>}
+          </Button>
+        )}
+      </div>
+      {link && (
+        <div className="w-full md:mt-2">
+          <div className="flex gap-2">
+            <Input value={link} readOnly className="font-mono text-xs" />
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => { navigator.clipboard.writeText(link); toast.success("Kopierad"); }}
+            >
+              <Copy className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
