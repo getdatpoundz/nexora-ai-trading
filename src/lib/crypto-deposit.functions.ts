@@ -9,7 +9,7 @@ import { z } from "zod";
 // och krediterar kontot automatiskt när betalningen är bekräftad.
 // ============================================================
 
-type Currency = "BTC" | "USDT_TRC20";
+type Currency = "BTC";
 
 interface DepositConfig {
   currency: Currency;
@@ -20,19 +20,7 @@ interface DepositConfig {
   explorerTx: (h: string) => string;
 }
 
-function getConfig(currency: Currency): DepositConfig {
-  if (currency === "USDT_TRC20") {
-    return {
-      currency,
-      network: "TRC20",
-      address:
-        process.env.NEXORA_USDT_TRC20_ADDRESS ||
-        "TDemoUSDTaddressReplaceWithRealTronAddr",
-      label: "USDT (Tron / TRC20)",
-      minConfirmations: 1,
-      explorerTx: (h) => `https://tronscan.org/#/transaction/${h}`,
-    };
-  }
+function getConfig(_currency: Currency): DepositConfig {
   return {
     currency: "BTC",
     network: "Bitcoin",
@@ -45,39 +33,30 @@ function getConfig(currency: Currency): DepositConfig {
   };
 }
 
-async function fetchPriceSek(currency: Currency): Promise<number> {
-  const id = currency === "BTC" ? "bitcoin" : "tether";
+async function fetchPriceSek(): Promise<number> {
   try {
     const r = await fetch(
-      `https://api.coingecko.com/api/v3/simple/price?ids=${id}&vs_currencies=sek`,
+      `https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=sek`,
       { headers: { accept: "application/json" } },
     );
     const j = (await r.json()) as Record<string, { sek: number }>;
-    const p = j?.[id]?.sek;
+    const p = j?.bitcoin?.sek;
     if (p && p > 0) return p;
   } catch {
     /* fallthrough */
   }
-  // Fallback så flödet inte dör: grova approx
-  return currency === "BTC" ? 700000 : 10.5;
+  // Fallback så flödet inte dör
+  return 700000;
 }
 
-function roundCrypto(amount: number, currency: Currency): number {
-  if (currency === "BTC") {
-    // 8 decimaler
-    return Math.round(amount * 1e8) / 1e8;
-  }
-  // USDT 6 decimaler
-  return Math.round(amount * 1e6) / 1e6;
+function roundCrypto(amount: number): number {
+  // 8 decimaler
+  return Math.round(amount * 1e8) / 1e8;
 }
 
-function uniqueSuffix(currency: Currency): number {
-  if (currency === "BTC") {
-    // 100–9 999 satoshi
-    return (100 + Math.floor(Math.random() * 9900)) / 1e8;
-  }
-  // 0.01–0.99 USDT
-  return (1 + Math.floor(Math.random() * 99)) / 100;
+function uniqueSuffix(): number {
+  // 100–9 999 satoshi
+  return (100 + Math.floor(Math.random() * 9900)) / 1e8;
 }
 
 // ---------------- createDeposit ----------------
