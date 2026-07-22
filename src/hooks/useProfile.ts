@@ -38,7 +38,7 @@ export function useProfile(userId: string | undefined) {
     load();
     // Live refresh when bot updates cash balance
     const ch = supabase
-      .channel(`profile-${userId}`)
+      .channel(`profile-${userId}-${Math.random().toString(36).slice(2)}`)
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "profiles", filter: `id=eq.${userId}` }, () => load())
       .subscribe();
     return () => {
