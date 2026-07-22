@@ -162,25 +162,6 @@ export const adminListCustomers = createServerFn({ method: "GET" })
     }));
   });
 
-const regenLinkSchema = z.object({ email: z.string().email() });
-
-export const adminRegenerateLink = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: z.infer<typeof regenLinkSchema>) => regenLinkSchema.parse(d))
-  .handler(async ({ data, context }) => {
-    await assertAdmin(context.supabase, context.userId);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const origin = process.env.PUBLIC_SITE_URL || process.env.SITE_URL || "";
-    const { data: linkData, error } = await supabaseAdmin.auth.admin.generateLink({
-      type: "magiclink",
-      email: data.email,
-      options: {
-        redirectTo: origin ? `${origin}/auth/callback` : undefined,
-      },
-    });
-    if (error) throw new Error(error.message);
-    return { magic_link: linkData?.properties?.action_link ?? null };
-  });
 
 const markFundedSchema = z.object({ user_id: z.string().uuid() });
 
