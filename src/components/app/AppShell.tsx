@@ -1,8 +1,8 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
 import {
-  LayoutDashboard, Wallet, Brain, LineChart, ArrowLeftRight,
-  ArrowDownToLine, ArrowUpFromLine, FileText, LifeBuoy, Settings,
+  Wallet, Brain, LineChart, ArrowLeftRight,
+  ArrowDownToLine, ArrowUpFromLine, LifeBuoy, Settings,
   Bell, Menu, X, LogOut, ShieldAlert, User as UserIcon, HelpCircle,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,23 +16,21 @@ import {
 import { cn } from "@/lib/utils";
 
 const NAV = [
-  { to: "/dashboard", label: "Översikt", icon: LayoutDashboard },
   { to: "/portfolio", label: "Min portfölj", icon: Wallet },
   { to: "/strategies", label: "AI-strategier", icon: Brain },
   { to: "/markets", label: "Marknader", icon: LineChart },
   { to: "/transactions", label: "Transaktioner", icon: ArrowLeftRight },
   { to: "/deposit", label: "Sätt in", icon: ArrowDownToLine },
   { to: "/withdraw", label: "Ta ut", icon: ArrowUpFromLine },
-  { to: "/documents", label: "Dokument", icon: FileText },
   { to: "/support", label: "Support", icon: LifeBuoy },
   { to: "/settings", label: "Inställningar", icon: Settings },
 ] as const;
 
 const MOBILE_NAV = [
-  { to: "/dashboard", label: "Översikt", icon: LayoutDashboard },
   { to: "/portfolio", label: "Portfölj", icon: Wallet },
   { to: "/strategies", label: "Strategier", icon: Brain },
   { to: "/markets", label: "Marknader", icon: LineChart },
+  { to: "/transactions", label: "Historik", icon: ArrowLeftRight },
   { to: "/settings", label: "Mer", icon: Settings },
 ] as const;
 
@@ -45,7 +43,7 @@ function Logo({ small = false }: { small?: boolean }) {
       {!small && (
         <div className="flex flex-col leading-none">
           <span className="text-base font-bold tracking-tight text-sidebar-foreground">Nexora AI</span>
-          <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Demoläge</span>
+          <span className="text-[10px] uppercase tracking-widest text-muted-foreground">AI-driven handel</span>
         </div>
       )}
     </div>
@@ -81,15 +79,6 @@ function SidebarInner({ pathname, onNavigate }: { pathname: string; onNavigate?:
         })}
       </nav>
       <div className="border-t border-sidebar-border p-3 space-y-2">
-        <div className="rounded-lg border border-primary/30 bg-primary/10 px-3 py-2">
-          <div className="flex items-center gap-2 text-xs font-semibold text-primary">
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
-            Demoläge aktivt
-          </div>
-          <p className="mt-1 text-[11px] text-muted-foreground leading-relaxed">
-            Alla belopp och resultat är simulerade.
-          </p>
-        </div>
         <Link
           to="/risk"
           onClick={onNavigate}
@@ -154,10 +143,6 @@ export function AppShell({ title, children }: { title: string; children: ReactNo
                 <Menu className="h-4 w-4" />
               </button>
               <h1 className="truncate text-lg font-semibold tracking-tight sm:text-xl">{title}</h1>
-              <span className="hidden sm:inline-flex items-center gap-1 rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary">
-                <span className="h-1 w-1 rounded-full bg-primary" />
-                Demo
-              </span>
             </div>
             <div className="flex items-center gap-2">
               <Link to="/notifications" aria-label="Notifikationer" className="relative grid h-9 w-9 place-items-center rounded-lg border border-border text-muted-foreground hover:text-foreground">

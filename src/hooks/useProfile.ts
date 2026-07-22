@@ -13,6 +13,8 @@ export type Profile = {
   active_strategy: string | null;
   cash_balance_sek: number | null;
   tour_completed: boolean | null;
+  assigned_level_name: string | null;
+  assigned_level_sek: number | null;
 };
 
 export function useProfile(userId: string | undefined) {

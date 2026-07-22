@@ -1,12 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/app/AppShell";
-import { DemoBanner } from "@/components/app/DemoBanner";
 import { StatCard } from "@/components/app/StatCard";
 import { DEMO_HOLDINGS, DEMO_PORTFOLIO, generatePortfolioHistory } from "@/lib/demo-data";
 import { sek, pct, num } from "@/lib/format";
 import { PieChart, Pie, Cell, ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { Button } from "@/components/ui/button";
 import { useMemo } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
+import { Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/portfolio")({
   component: PortfolioPage,
@@ -14,10 +16,27 @@ export const Route = createFileRoute("/_authenticated/portfolio")({
 
 function PortfolioPage() {
   const history = useMemo(() => generatePortfolioHistory(90), []);
+  const { user } = useAuth();
+  const { profile } = useProfile(user?.id);
+  const firstName = profile?.first_name ?? "";
+  const accountType = profile?.assigned_level_name ?? "Standard";
+
   return (
     <AppShell title="Min portfölj">
       <div className="space-y-6">
-        <DemoBanner compact />
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
+              Välkommen tillbaka{firstName ? `, ${firstName}` : ""}
+            </h2>
+            <div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
+              <Sparkles className="h-3.5 w-3.5 text-primary" />
+              <span>Kontotyp:</span>
+              <span className="font-semibold text-foreground">{accountType}</span>
+            </div>
+          </div>
+        </div>
+
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           <StatCard label="Totalt värde" value={sek(DEMO_PORTFOLIO.totalValue)} />
           <StatCard label="Investerat" value={sek(DEMO_PORTFOLIO.investedCapital)} />
@@ -34,7 +53,7 @@ function PortfolioPage() {
                   <Pie data={DEMO_HOLDINGS} dataKey="value" nameKey="name" innerRadius={55} outerRadius={90} paddingAngle={2}>
                     {DEMO_HOLDINGS.map((h) => <Cell key={h.symbol} fill={h.color} stroke="none" />)}
                   </Pie>
-                  <Tooltip contentStyle={{ background: "oklch(0.18 0.028 250)", border: "1px solid oklch(0.28 0.03 250)", borderRadius: 8, fontSize: 12 }} formatter={(v: number) => sek(v)} />
+                  <Tooltip contentStyle={{ background: "var(--color-card)", border: "1px solid var(--color-border)", borderRadius: 8, fontSize: 12, color: "var(--color-foreground)" }} formatter={(v: number) => sek(v)} />
                 </PieChart>
               </ResponsiveContainer>
             </div>
@@ -46,15 +65,15 @@ function PortfolioPage() {
                 <AreaChart data={history}>
                   <defs>
                     <linearGradient id="pv2" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="oklch(0.78 0.14 195)" stopOpacity={0.4} />
-                      <stop offset="100%" stopColor="oklch(0.78 0.14 195)" stopOpacity={0} />
+                      <stop offset="0%" stopColor="var(--color-primary)" stopOpacity={0.35} />
+                      <stop offset="100%" stopColor="var(--color-primary)" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid stroke="oklch(0.28 0.03 250)" strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="date" tick={{ fill: "oklch(0.68 0.02 245)", fontSize: 11 }} minTickGap={40} />
-                  <YAxis tick={{ fill: "oklch(0.68 0.02 245)", fontSize: 11 }} width={40} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
-                  <Tooltip contentStyle={{ background: "oklch(0.18 0.028 250)", border: "1px solid oklch(0.28 0.03 250)", borderRadius: 8, fontSize: 12 }} formatter={(v: number) => sek(v)} />
-                  <Area type="monotone" dataKey="value" stroke="oklch(0.78 0.14 195)" strokeWidth={2} fill="url(#pv2)" />
+                  <CartesianGrid stroke="var(--color-border)" strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="date" tick={{ fill: "var(--color-muted-foreground)", fontSize: 11 }} minTickGap={40} />
+                  <YAxis tick={{ fill: "var(--color-muted-foreground)", fontSize: 11 }} width={40} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
+                  <Tooltip contentStyle={{ background: "var(--color-card)", border: "1px solid var(--color-border)", borderRadius: 8, fontSize: 12, color: "var(--color-foreground)" }} formatter={(v: number) => sek(v)} />
+                  <Area type="monotone" dataKey="value" stroke="var(--color-primary)" strokeWidth={2} fill="url(#pv2)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -64,7 +83,6 @@ function PortfolioPage() {
         <div className="rounded-2xl border border-border bg-card">
           <div className="border-b border-border p-4 sm:p-6">
             <h3 className="text-base font-semibold">Innehav</h3>
-            <p className="text-xs text-muted-foreground">Simulerade priser – inte livekurser.</p>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
