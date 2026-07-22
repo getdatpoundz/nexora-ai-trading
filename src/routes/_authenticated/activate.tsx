@@ -118,7 +118,9 @@ function ActivatePage() {
         automatiskt (vanligtvis 2–10 minuter).
       </p>
 
-      {!deposit ? (
+      {!guideDone ? (
+        <ExodusGuide amount={amount} onDone={() => setGuideDone(true)} />
+      ) : !deposit ? (
         <div className="mt-8 space-y-4">
           <div className="grid gap-3 sm:grid-cols-3">
             <Info
