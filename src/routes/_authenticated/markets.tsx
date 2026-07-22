@@ -93,7 +93,28 @@ function MarketsPage() {
           <p className="text-xs text-muted-foreground">
             Livepriser via Twelve Data · uppdateras var 3:e minut
           </p>
+
+        {/* TradingView chart for selected asset */}
+        <div className="rounded-2xl border border-border bg-card p-4">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h3 className="text-base font-semibold">{chartAsset.name} · {chartAsset.symbol}</h3>
+              <p className="text-xs text-muted-foreground">Proffsgraf med indikatorer · realtidsdata</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" size="sm" onClick={() => setTradeAsset(chartAsset)} className="gap-1.5">
+                <TrendingUp className="h-3.5 w-3.5" /> Handla manuellt
+              </Button>
+              {chartAsset.type === "crypto" && (
+                <Button size="sm" onClick={() => letBotTrade(chartAsset)} disabled={botRunning} className="gap-1.5">
+                  <Bot className="h-3.5 w-3.5" /> {botRunning ? "Boten kör" : "Låt boten trada denna"}
+                </Button>
+              )}
+            </div>
+          </div>
+          <TradingViewWidget symbol={toTradingViewSymbol(chartAsset.symbol, chartAsset.type)} height={480} interval="60" />
         </div>
+
 
         <div className="rounded-2xl border border-border bg-card">
           <div className="flex flex-wrap items-center gap-3 border-b border-border p-4">
