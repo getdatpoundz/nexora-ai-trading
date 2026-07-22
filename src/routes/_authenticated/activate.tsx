@@ -17,6 +17,11 @@ import {
   ExternalLink,
   QrCode,
   Timer,
+  Download,
+  CreditCard,
+  Send,
+  ArrowRight,
+  Wallet,
 } from "lucide-react";
 import { toast } from "sonner";
 
