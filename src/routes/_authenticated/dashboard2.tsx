@@ -87,6 +87,11 @@ function Dashboard2Page() {
   return (
     <AppShell title="Översikt Pro">
       <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Amanda Kelly Chua</h1>
+          <p className="text-sm text-muted-foreground">Privat portfölj · Demokonto</p>
+        </div>
+
         <div className="rounded-2xl border border-border bg-gradient-to-br from-primary/10 via-card to-card p-6">
           <div className="flex items-start justify-between gap-4">
             <div>
