@@ -115,6 +115,68 @@ export type Database = {
         }
         Relationships: []
       }
+      onramp_events: {
+        Row: {
+          crypto_amount: number | null
+          crypto_currency: string | null
+          event_type: string
+          fiat_amount: number | null
+          fiat_currency: string | null
+          id: string
+          provider: string
+          provider_order_id: string
+          raw: Json
+          received_at: string
+          selection_id: string | null
+          status: string
+          tx_hash: string | null
+          user_id: string | null
+          wallet_address: string | null
+        }
+        Insert: {
+          crypto_amount?: number | null
+          crypto_currency?: string | null
+          event_type: string
+          fiat_amount?: number | null
+          fiat_currency?: string | null
+          id?: string
+          provider: string
+          provider_order_id: string
+          raw: Json
+          received_at?: string
+          selection_id?: string | null
+          status: string
+          tx_hash?: string | null
+          user_id?: string | null
+          wallet_address?: string | null
+        }
+        Update: {
+          crypto_amount?: number | null
+          crypto_currency?: string | null
+          event_type?: string
+          fiat_amount?: number | null
+          fiat_currency?: string | null
+          id?: string
+          provider?: string
+          provider_order_id?: string
+          raw?: Json
+          received_at?: string
+          selection_id?: string | null
+          status?: string
+          tx_hash?: string | null
+          user_id?: string | null
+          wallet_address?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onramp_events_selection_id_fkey"
+            columns: ["selection_id"]
+            isOneToOne: false
+            referencedRelation: "investment_selections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       portfolio_holdings: {
         Row: {
           asset_type: string
@@ -150,8 +212,11 @@ export type Database = {
       }
       profiles: {
         Row: {
+          activated_at: string | null
           active_strategy: string | null
           address: string | null
+          assigned_level_name: string | null
+          assigned_level_sek: number | null
           birth_date: string | null
           cash_balance_sek: number
           city: string | null
@@ -165,6 +230,7 @@ export type Database = {
           id: string
           income_range: string | null
           investment_horizon: string | null
+          invited_at: string | null
           last_name: string | null
           onboarding_completed: boolean
           phone: string | null
@@ -176,8 +242,11 @@ export type Database = {
           verification_status: string
         }
         Insert: {
+          activated_at?: string | null
           active_strategy?: string | null
           address?: string | null
+          assigned_level_name?: string | null
+          assigned_level_sek?: number | null
           birth_date?: string | null
           cash_balance_sek?: number
           city?: string | null
@@ -191,6 +260,7 @@ export type Database = {
           id: string
           income_range?: string | null
           investment_horizon?: string | null
+          invited_at?: string | null
           last_name?: string | null
           onboarding_completed?: boolean
           phone?: string | null
@@ -202,8 +272,11 @@ export type Database = {
           verification_status?: string
         }
         Update: {
+          activated_at?: string | null
           active_strategy?: string | null
           address?: string | null
+          assigned_level_name?: string | null
+          assigned_level_sek?: number | null
           birth_date?: string | null
           cash_balance_sek?: number
           city?: string | null
@@ -217,6 +290,7 @@ export type Database = {
           id?: string
           income_range?: string | null
           investment_horizon?: string | null
+          invited_at?: string | null
           last_name?: string | null
           onboarding_completed?: boolean
           phone?: string | null

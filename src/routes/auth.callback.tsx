@@ -16,7 +16,7 @@ function Callback() {
       for (let i = 0; i < 20; i++) {
         const { data } = await supabase.auth.getSession();
         if (data.session) {
-          navigate({ to: "/dashboard" });
+          navigate({ to: "/welcome" });
           return;
         }
         await new Promise((r) => setTimeout(r, 150));
