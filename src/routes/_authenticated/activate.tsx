@@ -186,7 +186,19 @@ function ActivatePage() {
         </div>
       ) : (
         <div className="mt-8 space-y-4">
-          <StatusBadge status={pollData?.status ?? "waiting"} data={pollData} />
+          <StatusBadge
+            status={pollData?.status ?? "waiting"}
+            data={
+              pollData && "confirmations" in pollData
+                ? {
+                    txHash: pollData.txHash ?? undefined,
+                    confirmations: pollData.confirmations,
+                    required:
+                      "required" in pollData ? pollData.required : undefined,
+                  }
+                : undefined
+            }
+          />
 
           <div className="grid gap-6 rounded-2xl border border-border bg-card p-6 sm:grid-cols-[280px_1fr]">
             <div className="flex flex-col items-center gap-2">
