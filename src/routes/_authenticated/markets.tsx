@@ -4,7 +4,7 @@ import { DemoBanner } from "@/components/app/DemoBanner";
 import { sek, pct } from "@/lib/format";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search } from "lucide-react";
+import { Search, Bot, TrendingUp } from "lucide-react";
 import { useMemo, useState } from "react";
 import { MARKET_UNIVERSE, type MarketAsset } from "@/lib/market-data.shared";
 import { useQuotes } from "@/hooks/useMarketData";
@@ -12,6 +12,12 @@ import { TradeDialog } from "@/components/markets/TradeDialog";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { InfoTip } from "@/components/InfoTip";
+import { TradingViewWidget, toTradingViewSymbol } from "@/components/markets/TradingViewWidget";
+import { useServerFn } from "@tanstack/react-start";
+import { startBot } from "@/lib/bot.functions";
+import { useBotStatus } from "@/hooks/useBotStatus";
+import { toast } from "sonner";
+import { useNavigate } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_authenticated/markets")({
   component: MarketsPage,
