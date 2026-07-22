@@ -151,75 +151,45 @@ export const createCryptoDeposit = createServerFn({ method: "POST" })
 
 // ---------------- Blockchain lookup ----------------
 async function findMatchingTx(opts: {
-  currency: Currency;
   address: string;
   expected: number;
   sinceIso: string;
 }): Promise<{ txHash: string; confirmations: number } | null> {
-  const { currency, address, expected, sinceIso } = opts;
+  const { address, expected, sinceIso } = opts;
   const sinceMs = new Date(sinceIso).getTime();
 
-  if (currency === "BTC") {
-    try {
-      const r = await fetch(
-        `https://blockstream.info/api/address/${address}/txs`,
-      );
-      if (!r.ok) return null;
-      const txs = (await r.json()) as Array<{
-        txid: string;
-        status: { confirmed: boolean; block_time?: number; block_height?: number };
-        vout: Array<{ value: number; scriptpubkey_address?: string }>;
-      }>;
-
-      // aktuell topp för att räkna confirmations
-      let tip = 0;
-      try {
-        const rt = await fetch(`https://blockstream.info/api/blocks/tip/height`);
-        tip = parseInt(await rt.text(), 10) || 0;
-      } catch {
-        /* noop */
-      }
-
-      for (const tx of txs) {
-        const blockTimeMs = (tx.status.block_time ?? Date.now() / 1000) * 1000;
-        if (blockTimeMs < sinceMs - 15 * 60 * 1000) continue;
-        const receivedSat = tx.vout
-          .filter((v) => v.scriptpubkey_address === address)
-          .reduce((s, v) => s + v.value, 0);
-        const receivedBtc = receivedSat / 1e8;
-        if (Math.abs(receivedBtc - expected) <= 0.00000001) {
-          const conf = tx.status.confirmed && tx.status.block_height
-            ? Math.max(1, tip - tx.status.block_height + 1)
-            : 0;
-          return { txHash: tx.txid, confirmations: conf };
-        }
-      }
-    } catch {
-      return null;
-    }
-    return null;
-  }
-
-  // USDT-TRC20 via Trongrid TRC20 transfers
   try {
-    const url = `https://api.trongrid.io/v1/accounts/${address}/transactions/trc20?only_to=true&limit=30&min_timestamp=${sinceMs - 15 * 60 * 1000}`;
-    const r = await fetch(url, { headers: { accept: "application/json" } });
+    const r = await fetch(
+      `https://blockstream.info/api/address/${address}/txs`,
+    );
     if (!r.ok) return null;
-    const j = (await r.json()) as {
-      data?: Array<{
-        transaction_id: string;
-        to: string;
-        value: string;
-        token_info?: { symbol?: string; decimals?: number };
-      }>;
-    };
-    for (const t of j.data ?? []) {
-      if (t.to !== address) continue;
-      if ((t.token_info?.symbol ?? "").toUpperCase() !== "USDT") continue;
-      const dec = t.token_info?.decimals ?? 6;
-      const amount = Number(t.value) / Math.pow(10, dec);
-      if (Math.abs(amount - expected) <= 0.000001) {
-        return { txHash: t.transaction_id, confirmations: 1 };
+    const txs = (await r.json()) as Array<{
+      txid: string;
+      status: { confirmed: boolean; block_time?: number; block_height?: number };
+      vout: Array<{ value: number; scriptpubkey_address?: string }>;
+    }>;
+
+    // aktuell topp för att räkna confirmations
+    let tip = 0;
+    try {
+      const rt = await fetch(`https://blockstream.info/api/blocks/tip/height`);
+      tip = parseInt(await rt.text(), 10) || 0;
+    } catch {
+      /* noop */
+    }
+
+    for (const tx of txs) {
+      const blockTimeMs = (tx.status.block_time ?? Date.now() / 1000) * 1000;
+      if (blockTimeMs < sinceMs - 15 * 60 * 1000) continue;
+      const receivedSat = tx.vout
+        .filter((v) => v.scriptpubkey_address === address)
+        .reduce((s, v) => s + v.value, 0);
+      const receivedBtc = receivedSat / 1e8;
+      if (Math.abs(receivedBtc - expected) <= 0.00000001) {
+        const conf = tx.status.confirmed && tx.status.block_height
+          ? Math.max(1, tip - tx.status.block_height + 1)
+        : 0;
+        return { txHash: tx.txid, confirmations: conf };
       }
     }
   } catch {
