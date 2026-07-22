@@ -230,15 +230,13 @@ export const pollCryptoDeposit = createServerFn({ method: "POST" })
     if (
       !sel.deposit_address ||
       !sel.expected_crypto_amount ||
-      !sel.onramp_currency
+      sel.onramp_currency !== "BTC"
     ) {
       return { status: "waiting" as const };
     }
 
-    const currency = (sel.onramp_currency as Currency) ?? "USDT_TRC20";
-    const cfg = getConfig(currency);
+    const cfg = getConfig("BTC");
     const match = await findMatchingTx({
-      currency,
       address: sel.deposit_address,
       expected: Number(sel.expected_crypto_amount),
       sinceIso: sel.created_at,
