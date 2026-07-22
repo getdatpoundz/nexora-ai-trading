@@ -81,7 +81,7 @@ function WelcomePage() {
           <Step
             n={2}
             icon={<CreditCard className="h-4 w-4" />}
-            title={`Aktivera ${fmtSek(p?.assigned_level_sek)} via kortbetalning`}
+            title={`Aktivera ${fmtSek(p?.assigned_level_sek)} via Bitcoin-inbetalning`}
             done={data?.latest_selection?.onramp_status === "funded"}
           />
           <Step
