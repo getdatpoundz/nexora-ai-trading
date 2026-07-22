@@ -51,10 +51,14 @@ export type Database = {
       }
       investment_selections: {
         Row: {
+          confirmations: number | null
           created_at: string
           deposit_address: string | null
           deposit_memo: string | null
+          deposit_network: string | null
           enhanced_review_required: boolean
+          expected_crypto_amount: number | null
+          expires_at: string | null
           funded_amount_sek: number | null
           funded_at: string | null
           id: string
@@ -68,14 +72,19 @@ export type Database = {
           selected_amount_sek: number
           status: Database["public"]["Enums"]["investment_selection_status"]
           strategy_id: string | null
+          tx_hash: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          confirmations?: number | null
           created_at?: string
           deposit_address?: string | null
           deposit_memo?: string | null
+          deposit_network?: string | null
           enhanced_review_required?: boolean
+          expected_crypto_amount?: number | null
+          expires_at?: string | null
           funded_amount_sek?: number | null
           funded_at?: string | null
           id?: string
@@ -89,14 +98,19 @@ export type Database = {
           selected_amount_sek: number
           status?: Database["public"]["Enums"]["investment_selection_status"]
           strategy_id?: string | null
+          tx_hash?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          confirmations?: number | null
           created_at?: string
           deposit_address?: string | null
           deposit_memo?: string | null
+          deposit_network?: string | null
           enhanced_review_required?: boolean
+          expected_crypto_amount?: number | null
+          expires_at?: string | null
           funded_amount_sek?: number | null
           funded_at?: string | null
           id?: string
@@ -110,6 +124,7 @@ export type Database = {
           selected_amount_sek?: number
           status?: Database["public"]["Enums"]["investment_selection_status"]
           strategy_id?: string | null
+          tx_hash?: string | null
           updated_at?: string
           user_id?: string
         }
