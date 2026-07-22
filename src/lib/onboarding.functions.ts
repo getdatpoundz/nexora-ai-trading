@@ -25,18 +25,27 @@ export const getMyOnboardingState = createServerFn({ method: "GET" })
     return { profile, latest_selection: sel };
   });
 
-const kycSchema = z.object({
-  birth_date: z.string().min(4).max(20),
-  address: z.string().min(2).max(200),
-  postal_code: z.string().min(3).max(20),
-  city: z.string().min(1).max(80),
-  risk_acknowledged: z.literal(true),
-  terms_accepted: z.literal(true),
-});
-
 export const completeKyc = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: z.infer<typeof kycSchema>) => kycSchema.parse(d))
+  .inputValidator((d: {
+    birth_date: string;
+    address: string;
+    postal_code: string;
+    city: string;
+    risk_acknowledged: true;
+    terms_accepted: true;
+  }) =>
+    z
+      .object({
+        birth_date: z.string().min(4).max(20),
+        address: z.string().min(2).max(200),
+        postal_code: z.string().min(3).max(20),
+        city: z.string().min(1).max(80),
+        risk_acknowledged: z.literal(true),
+        terms_accepted: z.literal(true),
+      })
+      .parse(d),
+  )
   .handler(async ({ data, context }) => {
     // profile RLS blocks changing verification_status from client;
     // use supabaseAdmin for the status flip after we've verified auth.
