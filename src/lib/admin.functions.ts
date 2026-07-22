@@ -19,6 +19,23 @@ const createCustomerSchema = z.object({
   assigned_level_name: z.string().min(1).max(80),
 });
 
+function generatePassword(len = 14) {
+  const upper = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+  const lower = "abcdefghijkmnpqrstuvwxyz";
+  const digits = "23456789";
+  const symbols = "!@#$%&*";
+  const all = upper + lower + digits + symbols;
+  const bytes = new Uint8Array(len);
+  crypto.getRandomValues(bytes);
+  let out =
+    upper[bytes[0] % upper.length] +
+    lower[bytes[1] % lower.length] +
+    digits[bytes[2] % digits.length] +
+    symbols[bytes[3] % symbols.length];
+  for (let i = 4; i < len; i++) out += all[bytes[i] % all.length];
+  return out;
+}
+
 export const adminCreateCustomer = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: z.infer<typeof createCustomerSchema>) =>
