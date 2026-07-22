@@ -24,8 +24,6 @@ export const Route = createFileRoute("/_authenticated/activate")({
   component: ActivatePage,
 });
 
-type Currency = "BTC" | "USDT_TRC20";
-
 function fmtSek(n: number | null | undefined) {
   if (!n) return "–";
   return new Intl.NumberFormat("sv-SE", {
@@ -41,7 +39,6 @@ function ActivatePage() {
   const create = useServerFn(createCryptoDeposit);
   const poll = useServerFn(pollCryptoDeposit);
 
-  const [currency, setCurrency] = useState<Currency>("USDT_TRC20");
   const [deposit, setDeposit] = useState<Awaited<
     ReturnType<typeof create>
   > | null>(null);
