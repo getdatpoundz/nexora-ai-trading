@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useEffect, useState } from "react";
-import { Bot, Play, Pause, Save, Sparkles, Shield, TrendingUp, Zap, Clock, Coins, AlertTriangle, RotateCcw, StopCircle, Radio } from "lucide-react";
+import { Bot, Play, Pause, Save, Sparkles, Shield, TrendingUp, Zap, Clock, Coins, AlertTriangle, RotateCcw, StopCircle, Radio, TrendingDown, Target, Percent, Bell } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
@@ -21,9 +21,11 @@ import { startBot, pauseBot, resumeBot, stopBot } from "@/lib/bot.functions";
 import { getLevelByAmount, INVESTMENT_LEVELS } from "@/lib/investment-levels";
 import { TradingViewWidget, toTradingViewSymbol } from "@/components/markets/TradingViewWidget";
 import { supabase } from "@/integrations/supabase/client";
-import { sek } from "@/lib/format";
+import { sek, pct } from "@/lib/format";
 import { formatDistanceToNow } from "date-fns";
 import { sv } from "date-fns/locale";
+import { MARKET_UNIVERSE } from "@/lib/market-data.shared";
+import { useQuotes } from "@/hooks/useMarketData";
 
 export const Route = createFileRoute("/_authenticated/strategies")({
   component: StrategiesPage,
@@ -34,6 +36,13 @@ type BotConfig = {
   strategy: "dca" | "momentum" | "mean_reversion" | "grid" | "ai_hybrid";
   aggressiveness: number;
   assets: string[];
+  stopLossPct: number;
+  takeProfitPct: number;
+  maxPositionPct: number;
+  minConfidence: number;
+  tradingHours: "always" | "market_hours";
+  reinvestProfits: boolean;
+  notifyOnTrade: boolean;
 };
 
 const DEFAULT_CONFIG: BotConfig = {
@@ -41,6 +50,13 @@ const DEFAULT_CONFIG: BotConfig = {
   strategy: "ai_hybrid",
   aggressiveness: 5,
   assets: ["BTC", "ETH", "SOL"],
+  stopLossPct: 5,
+  takeProfitPct: 12,
+  maxPositionPct: 15,
+  minConfidence: 65,
+  tradingHours: "always",
+  reinvestProfits: true,
+  notifyOnTrade: true,
 };
 
 const AVAILABLE_ASSETS = ["BTC", "ETH", "SOL", "ADA", "DOT", "AVAX", "MATIC", "LINK", "XRP", "DOGE"];
@@ -139,7 +155,7 @@ function StrategiesPage() {
     await stopFn(); toast("Boten stoppad");
   }
 
-  if (!loaded) return <AppShell title="AI-bot"><div /></AppShell>;
+  if (!loaded) return <AppShell title="Trade (AI)"><div /></AppShell>;
 
   const running = session?.status === "running";
   const paused = session?.status === "paused";
@@ -153,7 +169,7 @@ function StrategiesPage() {
   const multProgress = session ? Math.min(100, Math.round(((session.current_multiplier - 1) / (session.target_multiplier - 1)) * 100)) : 0;
 
   return (
-    <AppShell title="AI-bot">
+    <AppShell title="Trade (AI)">
       <div className="space-y-6">
         {/* Status header */}
         <div className="rounded-2xl border border-border bg-card p-6">
@@ -233,16 +249,16 @@ function StrategiesPage() {
                   </div>
                   <Badge variant="outline" className="gap-1"><Radio className="h-3 w-3" /> Realtid</Badge>
                 </div>
-                <TradingViewWidget symbol={tvSymbol} height={420} interval="15" />
+                <TradingViewWidget symbol={tvSymbol} height={560} interval="15" />
               </div>
 
-              {/* Trade feed */}
+              {/* Trade feed — sizing matched to chart */}
               <div className="rounded-2xl border border-border bg-card p-4">
                 <div className="mb-3 flex items-center justify-between">
                   <h3 className="font-semibold">Live trade-flöde</h3>
                   <Badge variant="outline">{trades.length}</Badge>
                 </div>
-                <div className="max-h-[420px] space-y-2 overflow-y-auto pr-1">
+                <div className="max-h-[560px] space-y-2 overflow-y-auto pr-1">
                   {trades.length === 0 && (
                     <p className="rounded-lg border border-dashed border-border p-6 text-center text-xs text-muted-foreground">
                       Inga trades ännu. Starta boten så börjar den arbeta.
@@ -282,6 +298,15 @@ function StrategiesPage() {
                 <LimitCard label="Målmultiplikator" value={`${userLevel.targetMultiplier.toFixed(1)}x`} />
               </div>
             </div>
+
+            {/* Live markets — bot's watchlist */}
+            <LiveMarketsPanel
+              assets={session?.allowed_assets ?? config.assets}
+              onSelect={(sym) => {
+                const asset = MARKET_UNIVERSE.find((m) => m.symbol === sym);
+                if (asset) toast(`${asset.name} · Öppna Marknader för att handla manuellt`);
+              }}
+            />
           </TabsContent>
 
           <TabsContent value="settings" className="mt-6 space-y-6">
@@ -329,6 +354,104 @@ function StrategiesPage() {
                 ))}
               </div>
               {config.assets.length === 0 && <p className="mt-3 text-xs text-destructive">Välj minst en tillgång</p>}
+            </section>
+
+            {/* Risk rules */}
+            <section className="rounded-2xl border border-border bg-card p-6">
+              <div className="mb-4 flex items-center gap-2">
+                <Shield className="h-4 w-4 text-primary" />
+                <h3 className="font-semibold">Riskregler per trade</h3>
+              </div>
+              <div className="grid gap-6 md:grid-cols-2">
+                <RuleSlider
+                  icon={TrendingDown}
+                  label="Stop-loss"
+                  hint="Stäng automatiskt om positionen faller så här mycket"
+                  value={config.stopLossPct}
+                  min={1} max={25} step={0.5}
+                  suffix="%"
+                  tone="destructive"
+                  onChange={(v) => update("stopLossPct", v)}
+                />
+                <RuleSlider
+                  icon={Target}
+                  label="Take-profit"
+                  hint="Ta hem vinsten när positionen når detta"
+                  value={config.takeProfitPct}
+                  min={2} max={50} step={0.5}
+                  suffix="%"
+                  tone="success"
+                  onChange={(v) => update("takeProfitPct", v)}
+                />
+                <RuleSlider
+                  icon={Percent}
+                  label="Max positionsstorlek"
+                  hint="Andel av portföljen per enskild position"
+                  value={config.maxPositionPct}
+                  min={2} max={40} step={1}
+                  suffix="%"
+                  onChange={(v) => update("maxPositionPct", v)}
+                />
+                <RuleSlider
+                  icon={Sparkles}
+                  label="Minsta AI-signalstyrka"
+                  hint="Boten agerar bara på signaler över detta"
+                  value={config.minConfidence}
+                  min={40} max={95} step={1}
+                  suffix="%"
+                  onChange={(v) => update("minConfidence", v)}
+                />
+              </div>
+            </section>
+
+            {/* Trading hours & behavior */}
+            <section className="rounded-2xl border border-border bg-card p-6">
+              <div className="mb-4 flex items-center gap-2">
+                <Clock className="h-4 w-4 text-primary" />
+                <h3 className="font-semibold">Handelstider & beteende</h3>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <Label className="text-sm">När får boten handla?</Label>
+                  <RadioGroup
+                    value={config.tradingHours}
+                    onValueChange={(v) => update("tradingHours", v as BotConfig["tradingHours"])}
+                    className="mt-2 grid gap-2 sm:grid-cols-2"
+                  >
+                    <label className={`flex cursor-pointer items-start gap-2 rounded-lg border p-3 text-sm ${config.tradingHours === "always" ? "border-primary bg-primary/5" : "border-border"}`}>
+                      <RadioGroupItem value="always" className="mt-0.5" />
+                      <div>
+                        <div className="font-medium">24/7 (krypto)</div>
+                        <div className="text-xs text-muted-foreground">Boten handlar när som helst</div>
+                      </div>
+                    </label>
+                    <label className={`flex cursor-pointer items-start gap-2 rounded-lg border p-3 text-sm ${config.tradingHours === "market_hours" ? "border-primary bg-primary/5" : "border-border"}`}>
+                      <RadioGroupItem value="market_hours" className="mt-0.5" />
+                      <div>
+                        <div className="font-medium">Börstider</div>
+                        <div className="text-xs text-muted-foreground">Endast vardagar 09:00–17:30</div>
+                      </div>
+                    </label>
+                  </RadioGroup>
+                </div>
+                <div className="flex items-center justify-between rounded-lg border border-border p-3">
+                  <div>
+                    <div className="text-sm font-medium">Återinvestera vinster</div>
+                    <div className="text-xs text-muted-foreground">Låt boten öka positionerna med genererad vinst</div>
+                  </div>
+                  <Switch checked={config.reinvestProfits} onCheckedChange={(v) => update("reinvestProfits", v)} />
+                </div>
+                <div className="flex items-center justify-between rounded-lg border border-border p-3">
+                  <div className="flex items-center gap-2">
+                    <Bell className="h-4 w-4 text-muted-foreground" />
+                    <div>
+                      <div className="text-sm font-medium">Notiser vid varje trade</div>
+                      <div className="text-xs text-muted-foreground">Få avisering när boten öppnar eller stänger en position</div>
+                    </div>
+                  </div>
+                  <Switch checked={config.notifyOnTrade} onCheckedChange={(v) => update("notifyOnTrade", v)} />
+                </div>
+              </div>
             </section>
 
             <section className="rounded-2xl border border-warning/40 bg-warning/5 p-6">
@@ -382,6 +505,75 @@ function LimitCard({ label, value }: { label: string; value: string }) {
     <div className="rounded-xl border border-border p-4">
       <div className="text-xs text-muted-foreground">{label}</div>
       <div className="mt-1 text-xl font-bold tabular-nums">{value}</div>
+    </div>
+  );
+}
+
+function RuleSlider({
+  icon: Icon, label, hint, value, min, max, step, suffix, tone, onChange,
+}: {
+  icon: typeof Bot; label: string; hint: string;
+  value: number; min: number; max: number; step: number;
+  suffix?: string; tone?: "success" | "destructive";
+  onChange: (v: number) => void;
+}) {
+  const color = tone === "success" ? "text-success" : tone === "destructive" ? "text-destructive" : "text-primary";
+  return (
+    <div className="rounded-xl border border-border p-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Icon className={`h-4 w-4 ${color}`} />
+          <Label className="text-sm font-medium">{label}</Label>
+        </div>
+        <span className={`text-sm font-semibold tabular-nums ${color}`}>{value}{suffix ?? ""}</span>
+      </div>
+      <Slider className="mt-3" value={[value]} min={min} max={max} step={step} onValueChange={([v]) => onChange(v)} />
+      <p className="mt-2 text-xs text-muted-foreground">{hint}</p>
+    </div>
+  );
+}
+
+function LiveMarketsPanel({ assets, onSelect }: { assets: string[]; onSelect: (sym: string) => void }) {
+  const symbols = assets.length ? assets : ["BTC", "ETH", "SOL"];
+  const { data: quotes, isLoading } = useQuotes(symbols);
+  return (
+    <div className="rounded-2xl border border-border bg-card p-6">
+      <div className="mb-4 flex items-center justify-between">
+        <div>
+          <h3 className="flex items-center gap-2 font-semibold">
+            <Radio className="h-4 w-4 animate-pulse text-success" /> Live-marknader boten övervakar
+          </h3>
+          <p className="text-xs text-muted-foreground">Uppdateras automatiskt · realtidspriser</p>
+        </div>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        {isLoading && symbols.map((s) => (
+          <div key={s} className="h-20 animate-pulse rounded-xl border border-border bg-muted/40" />
+        ))}
+        {!isLoading && symbols.map((s) => {
+          const q = quotes?.find((x) => x.symbol === s);
+          const asset = MARKET_UNIVERSE.find((m) => m.symbol === s);
+          const up = (q?.changePct24h ?? 0) >= 0;
+          return (
+            <button
+              key={s}
+              onClick={() => onSelect(s)}
+              className="flex flex-col items-start gap-1 rounded-xl border border-border p-4 text-left transition hover:border-primary hover:bg-primary/5"
+            >
+              <div className="flex w-full items-center justify-between">
+                <span className="text-sm font-semibold">{s}</span>
+                <span className={`text-xs font-medium tabular-nums ${up ? "text-success" : "text-destructive"}`}>
+                  {q ? pct(q.changePct24h) : "–"}
+                </span>
+              </div>
+              <div className="text-lg font-bold tabular-nums">
+                {q ? sek(q.priceSek, { decimals: q.priceSek < 100 ? 2 : 0 }) : "–"}
+              </div>
+              <div className="text-[11px] text-muted-foreground">{asset?.name ?? s}</div>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
