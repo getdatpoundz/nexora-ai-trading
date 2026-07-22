@@ -194,7 +194,7 @@ function ActivatePage() {
             </div>
 
             <div className="space-y-4">
-              <Field label={`Belopp att skicka (${deposit.currency === "BTC" ? "BTC" : "USDT"})`}>
+              <Field label="Belopp att skicka (BTC)">
                 <div className="flex items-center gap-2">
                   <code className="flex-1 rounded-lg bg-muted px-3 py-2 font-mono text-sm">
                     {deposit.expectedAmount}
@@ -216,7 +216,7 @@ function ActivatePage() {
                   {new Intl.NumberFormat("sv-SE").format(
                     Math.round(deposit.pricePerCoinSek),
                   )}{" "}
-                  kr/{deposit.currency === "BTC" ? "BTC" : "USDT"})
+                  kr/BTC)
                 </p>
               </Field>
 
@@ -242,9 +242,9 @@ function ActivatePage() {
               <div className="rounded-lg bg-amber-50 p-3 text-xs text-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
                 <strong>Viktigt:</strong> Skicka exakt{" "}
                 <span className="font-mono">{deposit.expectedAmount}</span>{" "}
-                {deposit.currency === "BTC" ? "BTC" : "USDT"} på nätverket{" "}
-                <strong>{deposit.network}</strong>. Fel nätverk eller fel belopp
-                kan innebära att medlen inte kan matchas automatiskt.
+                BTC på nätverket <strong>{deposit.network}</strong>. Fel
+                nätverk eller fel belopp kan innebära att medlen inte kan
+                matchas automatiskt.
               </div>
             </div>
           </div>
