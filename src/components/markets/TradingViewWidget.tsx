@@ -53,7 +53,7 @@ function TradingViewWidgetInner({ symbol, height = 500, interval = "60", hideToo
     <div
       ref={containerRef}
       className="tradingview-widget-container overflow-hidden rounded-xl border border-border bg-card"
-      style={{ height, width: "100%" }}
+      style={{ height, minHeight: height, width: "100%" }}
     />
   );
 }
