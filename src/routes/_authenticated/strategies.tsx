@@ -508,3 +508,72 @@ function LimitCard({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
+
+function RuleSlider({
+  icon: Icon, label, hint, value, min, max, step, suffix, tone, onChange,
+}: {
+  icon: typeof Bot; label: string; hint: string;
+  value: number; min: number; max: number; step: number;
+  suffix?: string; tone?: "success" | "destructive";
+  onChange: (v: number) => void;
+}) {
+  const color = tone === "success" ? "text-success" : tone === "destructive" ? "text-destructive" : "text-primary";
+  return (
+    <div className="rounded-xl border border-border p-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Icon className={`h-4 w-4 ${color}`} />
+          <Label className="text-sm font-medium">{label}</Label>
+        </div>
+        <span className={`text-sm font-semibold tabular-nums ${color}`}>{value}{suffix ?? ""}</span>
+      </div>
+      <Slider className="mt-3" value={[value]} min={min} max={max} step={step} onValueChange={([v]) => onChange(v)} />
+      <p className="mt-2 text-xs text-muted-foreground">{hint}</p>
+    </div>
+  );
+}
+
+function LiveMarketsPanel({ assets, onSelect }: { assets: string[]; onSelect: (sym: string) => void }) {
+  const symbols = assets.length ? assets : ["BTC", "ETH", "SOL"];
+  const { data: quotes, isLoading } = useQuotes(symbols);
+  return (
+    <div className="rounded-2xl border border-border bg-card p-6">
+      <div className="mb-4 flex items-center justify-between">
+        <div>
+          <h3 className="flex items-center gap-2 font-semibold">
+            <Radio className="h-4 w-4 animate-pulse text-success" /> Live-marknader boten övervakar
+          </h3>
+          <p className="text-xs text-muted-foreground">Uppdateras automatiskt · realtidspriser</p>
+        </div>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        {isLoading && symbols.map((s) => (
+          <div key={s} className="h-20 animate-pulse rounded-xl border border-border bg-muted/40" />
+        ))}
+        {!isLoading && symbols.map((s) => {
+          const q = quotes?.find((x) => x.symbol === s);
+          const asset = MARKET_UNIVERSE.find((m) => m.symbol === s);
+          const up = (q?.changePct24h ?? 0) >= 0;
+          return (
+            <button
+              key={s}
+              onClick={() => onSelect(s)}
+              className="flex flex-col items-start gap-1 rounded-xl border border-border p-4 text-left transition hover:border-primary hover:bg-primary/5"
+            >
+              <div className="flex w-full items-center justify-between">
+                <span className="text-sm font-semibold">{s}</span>
+                <span className={`text-xs font-medium tabular-nums ${up ? "text-success" : "text-destructive"}`}>
+                  {q ? pct(q.changePct24h) : "–"}
+                </span>
+              </div>
+              <div className="text-lg font-bold tabular-nums">
+                {q ? sek(q.priceSek, { decimals: q.priceSek < 100 ? 2 : 0 }) : "–"}
+              </div>
+              <div className="text-[11px] text-muted-foreground">{asset?.name ?? s}</div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
