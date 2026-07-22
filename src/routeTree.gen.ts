@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as Dashboard2RouteImport } from './routes/dashboard2'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
@@ -24,10 +25,14 @@ import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authen
 import { Route as AuthenticatedMarketsRouteImport } from './routes/_authenticated/markets'
 import { Route as AuthenticatedDocumentsRouteImport } from './routes/_authenticated/documents'
 import { Route as AuthenticatedDepositRouteImport } from './routes/_authenticated/deposit'
-import { Route as AuthenticatedDashboard2RouteImport } from './routes/_authenticated/dashboard2'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 
+const Dashboard2Route = Dashboard2RouteImport.update({
+  id: '/dashboard2',
+  path: '/dashboard2',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -104,11 +109,6 @@ const AuthenticatedDepositRoute = AuthenticatedDepositRouteImport.update({
   path: '/deposit',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedDashboard2Route = AuthenticatedDashboard2RouteImport.update({
-  id: '/dashboard2',
-  path: '/dashboard2',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -123,9 +123,9 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
+  '/dashboard2': typeof Dashboard2Route
   '/admin': typeof AuthenticatedAdminRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
-  '/dashboard2': typeof AuthenticatedDashboard2Route
   '/deposit': typeof AuthenticatedDepositRoute
   '/documents': typeof AuthenticatedDocumentsRoute
   '/markets': typeof AuthenticatedMarketsRoute
@@ -142,9 +142,9 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
+  '/dashboard2': typeof Dashboard2Route
   '/admin': typeof AuthenticatedAdminRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
-  '/dashboard2': typeof AuthenticatedDashboard2Route
   '/deposit': typeof AuthenticatedDepositRoute
   '/documents': typeof AuthenticatedDocumentsRoute
   '/markets': typeof AuthenticatedMarketsRoute
@@ -163,9 +163,9 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
+  '/dashboard2': typeof Dashboard2Route
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
-  '/_authenticated/dashboard2': typeof AuthenticatedDashboard2Route
   '/_authenticated/deposit': typeof AuthenticatedDepositRoute
   '/_authenticated/documents': typeof AuthenticatedDocumentsRoute
   '/_authenticated/markets': typeof AuthenticatedMarketsRoute
@@ -184,9 +184,9 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/dashboard2'
     | '/admin'
     | '/dashboard'
-    | '/dashboard2'
     | '/deposit'
     | '/documents'
     | '/markets'
@@ -203,9 +203,9 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/dashboard2'
     | '/admin'
     | '/dashboard'
-    | '/dashboard2'
     | '/deposit'
     | '/documents'
     | '/markets'
@@ -223,9 +223,9 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/dashboard2'
     | '/_authenticated/admin'
     | '/_authenticated/dashboard'
-    | '/_authenticated/dashboard2'
     | '/_authenticated/deposit'
     | '/_authenticated/documents'
     | '/_authenticated/markets'
@@ -244,10 +244,18 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRouteWithChildren
+  Dashboard2Route: typeof Dashboard2Route
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/dashboard2': {
+      id: '/dashboard2'
+      path: '/dashboard2'
+      fullPath: '/dashboard2'
+      preLoaderRoute: typeof Dashboard2RouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
@@ -353,13 +361,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDepositRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/dashboard2': {
-      id: '/_authenticated/dashboard2'
-      path: '/dashboard2'
-      fullPath: '/dashboard2'
-      preLoaderRoute: typeof AuthenticatedDashboard2RouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
@@ -380,7 +381,6 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
-  AuthenticatedDashboard2Route: typeof AuthenticatedDashboard2Route
   AuthenticatedDepositRoute: typeof AuthenticatedDepositRoute
   AuthenticatedDocumentsRoute: typeof AuthenticatedDocumentsRoute
   AuthenticatedMarketsRoute: typeof AuthenticatedMarketsRoute
@@ -397,7 +397,6 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
-  AuthenticatedDashboard2Route: AuthenticatedDashboard2Route,
   AuthenticatedDepositRoute: AuthenticatedDepositRoute,
   AuthenticatedDocumentsRoute: AuthenticatedDocumentsRoute,
   AuthenticatedMarketsRoute: AuthenticatedMarketsRoute,
@@ -428,6 +427,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRouteWithChildren,
+  Dashboard2Route: Dashboard2Route,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

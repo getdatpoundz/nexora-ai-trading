@@ -12,7 +12,7 @@ import {
 } from "recharts";
 import { TrendingUp, Wallet, Sparkles, ArrowUpRight } from "lucide-react";
 
-export const Route = createFileRoute("/_authenticated/dashboard2")({
+export const Route = createFileRoute("/dashboard2")({
   head: () => ({
     meta: [
       { title: "Översikt Pro — Nexora AI" },
