@@ -28,7 +28,7 @@ const NAV = [
 
 const MOBILE_NAV = [
   { to: "/portfolio", label: "Portfölj", icon: Wallet },
-  { to: "/strategies", label: "Strategier", icon: Brain },
+  { to: "/strategies", label: "AI-bot", icon: Brain },
   { to: "/markets", label: "Marknader", icon: LineChart },
   { to: "/transactions", label: "Historik", icon: ArrowLeftRight },
   { to: "/settings", label: "Mer", icon: Settings },
