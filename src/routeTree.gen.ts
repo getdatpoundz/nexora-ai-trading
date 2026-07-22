@@ -31,6 +31,7 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedActivateRouteImport } from './routes/_authenticated/activate'
 import { Route as ApiPublicOnrampWebhookRouteImport } from './routes/api/public/onramp.webhook'
+import { Route as ApiPublicHooksBotTickRouteImport } from './routes/api/public/hooks/bot-tick'
 
 const Dashboard2Route = Dashboard2RouteImport.update({
   id: '/dashboard2',
@@ -143,6 +144,11 @@ const ApiPublicOnrampWebhookRoute = ApiPublicOnrampWebhookRouteImport.update({
   path: '/api/public/onramp/webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHooksBotTickRoute = ApiPublicHooksBotTickRouteImport.update({
+  id: '/api/public/hooks/bot-tick',
+  path: '/api/public/hooks/bot-tick',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -165,6 +171,7 @@ export interface FileRoutesByFullPath {
   '/welcome': typeof AuthenticatedWelcomeRoute
   '/withdraw': typeof AuthenticatedWithdrawRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/api/public/hooks/bot-tick': typeof ApiPublicHooksBotTickRoute
   '/api/public/onramp/webhook': typeof ApiPublicOnrampWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -188,6 +195,7 @@ export interface FileRoutesByTo {
   '/welcome': typeof AuthenticatedWelcomeRoute
   '/withdraw': typeof AuthenticatedWithdrawRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/api/public/hooks/bot-tick': typeof ApiPublicHooksBotTickRoute
   '/api/public/onramp/webhook': typeof ApiPublicOnrampWebhookRoute
 }
 export interface FileRoutesById {
@@ -213,6 +221,7 @@ export interface FileRoutesById {
   '/_authenticated/welcome': typeof AuthenticatedWelcomeRoute
   '/_authenticated/withdraw': typeof AuthenticatedWithdrawRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/api/public/hooks/bot-tick': typeof ApiPublicHooksBotTickRoute
   '/api/public/onramp/webhook': typeof ApiPublicOnrampWebhookRoute
 }
 export interface FileRouteTypes {
@@ -238,6 +247,7 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/withdraw'
     | '/auth/callback'
+    | '/api/public/hooks/bot-tick'
     | '/api/public/onramp/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -261,6 +271,7 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/withdraw'
     | '/auth/callback'
+    | '/api/public/hooks/bot-tick'
     | '/api/public/onramp/webhook'
   id:
     | '__root__'
@@ -285,6 +296,7 @@ export interface FileRouteTypes {
     | '/_authenticated/welcome'
     | '/_authenticated/withdraw'
     | '/auth/callback'
+    | '/api/public/hooks/bot-tick'
     | '/api/public/onramp/webhook'
   fileRoutesById: FileRoutesById
 }
@@ -293,6 +305,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRouteWithChildren
   Dashboard2Route: typeof Dashboard2Route
+  ApiPublicHooksBotTickRoute: typeof ApiPublicHooksBotTickRoute
   ApiPublicOnrampWebhookRoute: typeof ApiPublicOnrampWebhookRoute
 }
 
@@ -452,6 +465,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicOnrampWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/bot-tick': {
+      id: '/api/public/hooks/bot-tick'
+      path: '/api/public/hooks/bot-tick'
+      fullPath: '/api/public/hooks/bot-tick'
+      preLoaderRoute: typeof ApiPublicHooksBotTickRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -511,6 +531,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRouteWithChildren,
   Dashboard2Route: Dashboard2Route,
+  ApiPublicHooksBotTickRoute: ApiPublicHooksBotTickRoute,
   ApiPublicOnrampWebhookRoute: ApiPublicOnrampWebhookRoute,
 }
 export const routeTree = rootRouteImport
