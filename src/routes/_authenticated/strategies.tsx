@@ -155,7 +155,7 @@ function StrategiesPage() {
     await stopFn(); toast("Boten stoppad");
   }
 
-  if (!loaded) return <AppShell title="AI-bot"><div /></AppShell>;
+  if (!loaded) return <AppShell title="Trade (AI)"><div /></AppShell>;
 
   const running = session?.status === "running";
   const paused = session?.status === "paused";
@@ -169,7 +169,7 @@ function StrategiesPage() {
   const multProgress = session ? Math.min(100, Math.round(((session.current_multiplier - 1) / (session.target_multiplier - 1)) * 100)) : 0;
 
   return (
-    <AppShell title="AI-bot">
+    <AppShell title="Trade (AI)">
       <div className="space-y-6">
         {/* Status header */}
         <div className="rounded-2xl border border-border bg-card p-6">
