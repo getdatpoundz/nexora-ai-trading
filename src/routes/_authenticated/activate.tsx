@@ -67,11 +67,10 @@ function ActivatePage() {
 
   const amount = state?.profile?.assigned_level_sek ?? 0;
 
-  const start = async (cur: Currency) => {
+  const start = async () => {
     setCreating(true);
-    setCurrency(cur);
     try {
-      const r = await create({ data: { currency: cur } });
+      const r = await create({ data: { currency: "BTC" } });
       setDeposit(r);
     } catch (e) {
       toast.error((e as Error).message);
@@ -82,10 +81,7 @@ function ActivatePage() {
 
   const qrPayload = useMemo(() => {
     if (!deposit) return "";
-    if (deposit.currency === "BTC") {
-      return `bitcoin:${deposit.address}?amount=${deposit.expectedAmount}`;
-    }
-    return deposit.address;
+    return `bitcoin:${deposit.address}?amount=${deposit.expectedAmount}`;
   }, [deposit]);
 
   const qrUrl = qrPayload
