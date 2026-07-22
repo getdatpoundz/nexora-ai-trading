@@ -258,7 +258,7 @@ function StrategiesPage() {
                   <h3 className="font-semibold">Live trade-flöde</h3>
                   <Badge variant="outline">{trades.length}</Badge>
                 </div>
-                <div className="max-h-[420px] space-y-2 overflow-y-auto pr-1">
+                <div className="max-h-[560px] space-y-2 overflow-y-auto pr-1">
                   {trades.length === 0 && (
                     <p className="rounded-lg border border-dashed border-border p-6 text-center text-xs text-muted-foreground">
                       Inga trades ännu. Starta boten så börjar den arbeta.
