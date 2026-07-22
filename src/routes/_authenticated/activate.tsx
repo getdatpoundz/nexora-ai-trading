@@ -133,42 +133,26 @@ function ActivatePage() {
           </div>
 
           <div className="rounded-2xl border border-border bg-card p-6">
-            <p className="text-sm font-medium">Välj valuta att betala med</p>
+            <p className="text-sm font-medium">Betala med Bitcoin</p>
             <p className="mt-1 text-xs text-muted-foreground">
-              USDT (TRC20) rekommenderas – snabbast och lägst avgift.
+              Skicka BTC till vår adress. Vi bekräftar automatiskt på
+              blockkedjan och krediterar din portfölj.
             </p>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              <button
-                onClick={() => start("USDT_TRC20")}
-                disabled={creating || !amount}
-                className="group rounded-xl border border-border bg-background p-4 text-left transition hover:border-primary hover:shadow-sm disabled:opacity-50"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold">USDT</span>
-                  <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase text-primary">
-                    Rekommenderas
-                  </span>
-                </div>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Tron (TRC20) · låg avgift · ~1 min
-                </p>
-              </button>
-              <button
-                onClick={() => start("BTC")}
-                disabled={creating || !amount}
-                className="group rounded-xl border border-border bg-background p-4 text-left transition hover:border-primary hover:shadow-sm disabled:opacity-50"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold">Bitcoin</span>
-                  <span className="text-[10px] uppercase text-muted-foreground">
-                    BTC
-                  </span>
-                </div>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Bitcoin-nätverket · ~10 min bekräftelse
-                </p>
-              </button>
-            </div>
+            <button
+              onClick={() => start()}
+              disabled={creating || !amount}
+              className="mt-4 w-full rounded-xl border border-border bg-background p-4 text-left transition hover:border-primary hover:shadow-sm disabled:opacity-50"
+            >
+              <div className="flex items-center justify-between">
+                <span className="font-semibold">Bitcoin</span>
+                <span className="text-[10px] uppercase text-muted-foreground">
+                  BTC
+                </span>
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Bitcoin-nätverket · ~10 min bekräftelse
+              </p>
+            </button>
             {creating && (
               <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
