@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useEffect, useState } from "react";
-import { Bot, Play, Pause, Save, Sparkles, Shield, TrendingUp, Zap, Clock, Coins, AlertTriangle, RotateCcw, StopCircle, Radio } from "lucide-react";
+import { Bot, Play, Pause, Save, Sparkles, Shield, TrendingUp, Zap, Clock, Coins, AlertTriangle, RotateCcw, StopCircle, Radio, TrendingDown, Target, Percent, Bell } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
@@ -21,9 +21,11 @@ import { startBot, pauseBot, resumeBot, stopBot } from "@/lib/bot.functions";
 import { getLevelByAmount, INVESTMENT_LEVELS } from "@/lib/investment-levels";
 import { TradingViewWidget, toTradingViewSymbol } from "@/components/markets/TradingViewWidget";
 import { supabase } from "@/integrations/supabase/client";
-import { sek } from "@/lib/format";
+import { sek, pct } from "@/lib/format";
 import { formatDistanceToNow } from "date-fns";
 import { sv } from "date-fns/locale";
+import { MARKET_UNIVERSE } from "@/lib/market-data.shared";
+import { useQuotes } from "@/hooks/useMarketData";
 
 export const Route = createFileRoute("/_authenticated/strategies")({
   component: StrategiesPage,
