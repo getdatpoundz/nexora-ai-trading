@@ -43,7 +43,7 @@ function Logo({ small = false }: { small?: boolean }) {
       {!small && (
         <div className="flex flex-col leading-none">
           <span className="text-base font-bold tracking-tight text-sidebar-foreground">Nexora AI</span>
-          <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Demoläge</span>
+          <span className="text-[10px] uppercase tracking-widest text-muted-foreground">AI-driven handel</span>
         </div>
       )}
     </div>
