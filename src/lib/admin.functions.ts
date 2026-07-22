@@ -19,6 +19,23 @@ const createCustomerSchema = z.object({
   assigned_level_name: z.string().min(1).max(80),
 });
 
+function generatePassword(len = 14) {
+  const upper = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+  const lower = "abcdefghijkmnpqrstuvwxyz";
+  const digits = "23456789";
+  const symbols = "!@#$%&*";
+  const all = upper + lower + digits + symbols;
+  const bytes = new Uint8Array(len);
+  crypto.getRandomValues(bytes);
+  let out =
+    upper[bytes[0] % upper.length] +
+    lower[bytes[1] % lower.length] +
+    digits[bytes[2] % digits.length] +
+    symbols[bytes[3] % symbols.length];
+  for (let i = 4; i < len; i++) out += all[bytes[i] % all.length];
+  return out;
+}
+
 export const adminCreateCustomer = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: z.infer<typeof createCustomerSchema>) =>
@@ -28,10 +45,13 @@ export const adminCreateCustomer = createServerFn({ method: "POST" })
     await assertAdmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    // 1. Create user (auto-confirmed so magic link works instantly)
+    const password = generatePassword(14);
+
+    // 1. Create user with generated password (auto-confirmed so they can log in immediately)
     const { data: created, error: createErr } =
       await supabaseAdmin.auth.admin.createUser({
         email: data.email,
+        password,
         email_confirm: true,
         user_metadata: {
           first_name: data.first_name,
@@ -41,14 +61,22 @@ export const adminCreateCustomer = createServerFn({ method: "POST" })
       });
 
     let userId = created?.user?.id;
+    let existed = false;
 
-    // If user already exists, look them up
-    if (createErr && /already/i.test(createErr.message)) {
+    // If user already exists, look them up and reset their password
+    if (createErr && /already|registered|exists/i.test(createErr.message)) {
+      existed = true;
       const { data: list } = await supabaseAdmin.auth.admin.listUsers();
       const existing = list?.users.find(
         (u) => u.email?.toLowerCase() === data.email.toLowerCase(),
       );
       userId = existing?.id;
+      if (userId) {
+        await supabaseAdmin.auth.admin.updateUserById(userId, {
+          password,
+          email_confirm: true,
+        });
+      }
     } else if (createErr) {
       throw new Error(createErr.message);
     }
@@ -69,25 +97,34 @@ export const adminCreateCustomer = createServerFn({ method: "POST" })
       .eq("id", userId);
     if (profErr) throw new Error(profErr.message);
 
-    // 3. Generate magic link
-    const origin =
-      process.env.PUBLIC_SITE_URL ||
-      process.env.SITE_URL ||
-      "";
-    const { data: linkData, error: linkErr } =
-      await supabaseAdmin.auth.admin.generateLink({
-        type: "magiclink",
-        email: data.email,
-        options: {
-          redirectTo: origin ? `${origin}/auth/callback` : undefined,
-        },
-      });
-    if (linkErr) throw new Error(linkErr.message);
-
     return {
       user_id: userId,
-      magic_link: linkData?.properties?.action_link ?? null,
+      email: data.email,
+      password,
+      existed,
     };
+  });
+
+const resetPwSchema = z.object({ email: z.string().email() });
+
+export const adminResetPassword = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: z.infer<typeof resetPwSchema>) => resetPwSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: list } = await supabaseAdmin.auth.admin.listUsers();
+    const user = list?.users.find(
+      (u) => u.email?.toLowerCase() === data.email.toLowerCase(),
+    );
+    if (!user) throw new Error("Användaren hittades inte");
+    const password = generatePassword(14);
+    const { error } = await supabaseAdmin.auth.admin.updateUserById(user.id, {
+      password,
+      email_confirm: true,
+    });
+    if (error) throw new Error(error.message);
+    return { email: data.email, password };
   });
 
 export const adminListCustomers = createServerFn({ method: "GET" })
@@ -125,25 +162,6 @@ export const adminListCustomers = createServerFn({ method: "GET" })
     }));
   });
 
-const regenLinkSchema = z.object({ email: z.string().email() });
-
-export const adminRegenerateLink = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: z.infer<typeof regenLinkSchema>) => regenLinkSchema.parse(d))
-  .handler(async ({ data, context }) => {
-    await assertAdmin(context.supabase, context.userId);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const origin = process.env.PUBLIC_SITE_URL || process.env.SITE_URL || "";
-    const { data: linkData, error } = await supabaseAdmin.auth.admin.generateLink({
-      type: "magiclink",
-      email: data.email,
-      options: {
-        redirectTo: origin ? `${origin}/auth/callback` : undefined,
-      },
-    });
-    if (error) throw new Error(error.message);
-    return { magic_link: linkData?.properties?.action_link ?? null };
-  });
 
 const markFundedSchema = z.object({ user_id: z.string().uuid() });
 
