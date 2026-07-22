@@ -79,15 +79,6 @@ function SidebarInner({ pathname, onNavigate }: { pathname: string; onNavigate?:
         })}
       </nav>
       <div className="border-t border-sidebar-border p-3 space-y-2">
-        <div className="rounded-lg border border-primary/30 bg-primary/10 px-3 py-2">
-          <div className="flex items-center gap-2 text-xs font-semibold text-primary">
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
-            Demoläge aktivt
-          </div>
-          <p className="mt-1 text-[11px] text-muted-foreground leading-relaxed">
-            Alla belopp och resultat är simulerade.
-          </p>
-        </div>
         <Link
           to="/risk"
           onClick={onNavigate}
