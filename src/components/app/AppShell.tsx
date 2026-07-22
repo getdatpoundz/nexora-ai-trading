@@ -189,7 +189,6 @@ export function AppShell({ title, children }: { title: string; children: ReactNo
               </DropdownMenu>
             </div>
           </div>
-          </div>
           <BotStatusBanner />
         </header>
 
