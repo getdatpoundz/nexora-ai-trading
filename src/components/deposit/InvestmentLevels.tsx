@@ -24,20 +24,23 @@ type Level = {
   name: string;
   amount: number;
   description: string;
+  maxTradesPerMonth: number;
+  maxLeveragePct: number;
   popular?: boolean;
 };
 
 const LEVELS: Level[] = [
-  { key: "START", name: "Start", amount: 2500, description: "Den lägsta investeringsnivån för dig som vill börja med ett mindre belopp." },
-  { key: "BAS", name: "Bas", amount: 5000, description: "En grundnivå för dig som vill ta ett första steg in på kryptomarknaden." },
-  { key: "PLUS", name: "Plus", amount: 10000, description: "För dig som vill skapa en större marknadsexponering och följa utvecklingen långsiktigt." },
-  { key: "ADVANCED", name: "Advanced", amount: 25000, description: "En högre investeringsnivå som kräver god förståelse för kryptomarknadens risker.", popular: true },
-  { key: "PREMIUM", name: "Premium", amount: 50000, description: "För erfarna användare som accepterar betydande värdeförändringar och kapitalrisk." },
-  { key: "PRIVATE", name: "Private", amount: 100000, description: "En större kapitalplacering med utökad kontroll av investerarens profil och pengarnas ursprung." },
-  { key: "PRIVATE_PLUS", name: "Private Plus", amount: 250000, description: "För större kapitalplaceringar som kräver kompletterad kundkännedom före aktivering." },
-  { key: "WEALTH", name: "Wealth", amount: 500000, description: "En avancerad nivå där personlig kontakt och utökad verifiering krävs innan insättning." },
-  { key: "WEALTH_ONE", name: "Wealth One", amount: 1000000, description: "Den högsta nivån. Kräver individuell granskning, dokumentation och godkännande innan insättning." },
+  { key: "START",        name: "Start",         amount: 2500,    description: "Den lägsta investeringsnivån för dig som vill börja med ett mindre belopp.", maxTradesPerMonth: 20,  maxLeveragePct: 0 },
+  { key: "BAS",          name: "Bas",           amount: 5000,    description: "En grundnivå för dig som vill ta ett första steg in på kryptomarknaden.", maxTradesPerMonth: 40,  maxLeveragePct: 0 },
+  { key: "PLUS",         name: "Plus",          amount: 10000,   description: "För dig som vill skapa en större marknadsexponering och följa utvecklingen långsiktigt.", maxTradesPerMonth: 60,  maxLeveragePct: 25 },
+  { key: "ADVANCED",     name: "Advanced",      amount: 25000,   description: "En högre investeringsnivå som kräver god förståelse för kryptomarknadens risker.", maxTradesPerMonth: 100, maxLeveragePct: 50, popular: true },
+  { key: "PREMIUM",      name: "Premium",       amount: 50000,   description: "För erfarna användare som accepterar betydande värdeförändringar och kapitalrisk.", maxTradesPerMonth: 150, maxLeveragePct: 100 },
+  { key: "PRIVATE",      name: "Private",       amount: 100000,  description: "En större kapitalplacering med utökad kontroll av investerarens profil och pengarnas ursprung.", maxTradesPerMonth: 200, maxLeveragePct: 150 },
+  { key: "PRIVATE_PLUS", name: "Private Plus",  amount: 250000,  description: "För större kapitalplaceringar som kräver kompletterad kundkännedom före aktivering.", maxTradesPerMonth: 300, maxLeveragePct: 200 },
+  { key: "WEALTH",       name: "Wealth",        amount: 500000,  description: "En avancerad nivå där personlig kontakt och utökad verifiering krävs innan insättning.", maxTradesPerMonth: 500, maxLeveragePct: 300 },
+  { key: "WEALTH_ONE",   name: "Wealth One",    amount: 1000000, description: "Den högsta nivån. Kräver individuell granskning, dokumentation och godkännande innan insättning.", maxTradesPerMonth: 1000, maxLeveragePct: 500 },
 ];
+
 
 const MIN_AMOUNT = 2500;
 const ENHANCED_THRESHOLD = 100000;
@@ -245,10 +248,24 @@ export function InvestmentLevels({ strategyId, verificationStatus, incomeRange }
               </div>
               <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{l.description}</p>
 
+              <dl className="mt-4 grid grid-cols-2 gap-2 rounded-lg border border-border/60 bg-muted/30 p-3 text-[11px]">
+                <div>
+                  <dt className="text-muted-foreground">Max trades / månad</dt>
+                  <dd className="mt-0.5 font-semibold tabular-nums text-foreground">{l.maxTradesPerMonth}</dd>
+                </div>
+                <div>
+                  <dt className="text-muted-foreground">Max hävstång</dt>
+                  <dd className="mt-0.5 font-semibold tabular-nums text-foreground">
+                    {l.maxLeveragePct === 0 ? "Ingen" : `${l.maxLeveragePct} %`}
+                  </dd>
+                </div>
+              </dl>
+
               <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
                 <AlertTriangle className="h-3.5 w-3.5 text-warning" />
                 <span>Hög risk – du kan förlora hela kapitalet</span>
               </div>
+
 
               {requiresEnhanced && (
                 <div className="mt-3 inline-flex items-center gap-1.5 self-start rounded-full border border-primary/30 bg-primary/5 px-2.5 py-1 text-[11px] font-medium text-primary">
