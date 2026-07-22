@@ -72,7 +72,7 @@ export const createCryptoDeposit = createServerFn({ method: "POST" })
       "@/integrations/supabase/client.server"
     );
 
-    const currency: Currency = data.currency ?? "USDT_TRC20";
+    const currency: Currency = data.currency ?? "BTC";
     const cfg = getConfig(currency);
 
     const { data: profile } = await supabaseAdmin
@@ -84,9 +84,9 @@ export const createCryptoDeposit = createServerFn({ method: "POST" })
     const sek = profile?.assigned_level_sek;
     if (!sek) throw new Error("Ingen investeringsnivå tilldelad");
 
-    const price = await fetchPriceSek(currency);
+    const price = await fetchPriceSek();
     const base = sek / price;
-    const expected = roundCrypto(base + uniqueSuffix(currency), currency);
+    const expected = roundCrypto(base + uniqueSuffix());
 
     // Hitta eller skapa aktiv selection
     const { data: existing } = await supabaseAdmin
