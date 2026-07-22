@@ -93,9 +93,11 @@ function MarketsPage() {
           <p className="text-xs text-muted-foreground">
             Livepriser via Twelve Data · uppdateras var 3:e minut
           </p>
+        </div>
 
         {/* TradingView chart for selected asset */}
         <div className="rounded-2xl border border-border bg-card p-4">
+
           <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
             <div>
               <h3 className="text-base font-semibold">{chartAsset.name} · {chartAsset.symbol}</h3>
