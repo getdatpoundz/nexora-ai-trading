@@ -179,48 +179,6 @@ function Landing() {
               </dl>
             </div>
 
-            {/* Chart card */}
-            <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-xs uppercase tracking-wider text-muted-foreground">Balanserad</p>
-                  <p className="mt-1 font-display text-3xl font-bold tabular-nums">1 284 500 kr</p>
-                  <p className="mt-1 text-sm font-semibold text-primary">+18,4% i år · simulerat</p>
-                </div>
-                
-              </div>
-              <div className="mt-4 h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={chartData} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
-                    <defs>
-                      <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="oklch(0.68 0.13 210)" stopOpacity={0.35} />
-                        <stop offset="100%" stopColor="oklch(0.68 0.13 210)" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <XAxis dataKey="date" hide />
-                    <YAxis hide domain={["auto", "auto"]} />
-                    <Tooltip
-                      contentStyle={{ background: "white", border: "1px solid oklch(0.9 0.005 90)", borderRadius: 8, fontSize: 12 }}
-                      formatter={(v: number) => [`${v.toLocaleString("sv-SE")} kr`, "Värde"]}
-                    />
-                    <Area type="monotone" dataKey="value" stroke="oklch(0.68 0.13 210)" strokeWidth={2} fill="url(#g1)" />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="mt-4 grid grid-cols-3 gap-2 text-xs">
-                {[
-                  { l: "1M", v: "+4,2%" },
-                  { l: "6M", v: "+12,8%" },
-                  { l: "1Å", v: "+18,4%" },
-                ].map((s) => (
-                  <div key={s.l} className="rounded-md border border-border bg-background px-3 py-2">
-                    <div className="text-muted-foreground">{s.l}</div>
-                    <div className="mt-0.5 font-semibold text-primary tabular-nums">{s.v}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
         </div>
       </section>
