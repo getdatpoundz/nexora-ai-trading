@@ -139,24 +139,24 @@ function AuthPage() {
 
   return (
     <div className="theme-nordnet grid min-h-screen lg:grid-cols-2">
-      <div className="relative hidden overflow-hidden bg-foreground text-background lg:block">
-        <div className="absolute inset-0 bg-[radial-gradient(80%_60%_at_20%_20%,oklch(0.62_0.16_155/0.35),transparent)]" />
-        <div className="relative flex h-full flex-col justify-between p-12">
+      <div className="relative hidden overflow-hidden lg:block">
+        <AuthBackground />
+        <div className="relative z-10 flex h-full flex-col justify-between p-12">
           <Link to="/" className="flex items-center gap-2.5">
-            <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary">
+            <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary shadow-glow">
               <span className="font-display text-lg font-bold text-primary-foreground">N</span>
             </div>
-            <span className="font-display text-lg font-bold">Nexora AI</span>
+            <span className="font-display text-lg font-bold text-foreground">Nexora AI</span>
           </Link>
           <div>
-            <h2 className="max-w-md font-display text-4xl font-bold leading-tight tracking-tight">
-              Din <span className="text-primary">AI-drivna</span> kryptoplattform.
+            <h2 className="max-w-md font-display text-4xl font-bold leading-tight tracking-tight text-foreground">
+              Din <span className="text-gradient-brand">AI-drivna</span> kryptoplattform.
             </h2>
-            <p className="mt-4 max-w-md text-sm text-background/70">
+            <p className="mt-4 max-w-md text-sm text-muted-foreground">
               Din inloggning är krypterad och skyddad.
             </p>
           </div>
-          <p className="max-w-md text-xs text-background/60">
+          <p className="max-w-md text-xs text-muted-foreground">
             Handel med kryptotillgångar innebär hög risk. Du kan förlora hela det investerade kapitalet.
           </p>
         </div>
