@@ -33,9 +33,9 @@ export const startBot = createServerFn({ method: "POST" })
     // avkastningen alltid mäts mot den avsedda insatsen (annars kan små cash-rester
     // ge orealistiskt höga multipel-värden).
     const { data: holdings } = await supabase.from("portfolio_holdings")
-      .select("quantity, avg_price_sek").eq("user_id", userId);
+      .select("quantity, avg_cost_sek").eq("user_id", userId);
     const holdingsValue = (holdings ?? []).reduce(
-      (acc, h) => acc + Number(h.quantity ?? 0) * Number(h.avg_price_sek ?? 0),
+      (acc, h) => acc + Number(h.quantity ?? 0) * Number(h.avg_cost_sek ?? 0),
       0,
     );
     const cash = Number(profile?.cash_balance_sek ?? 0);
