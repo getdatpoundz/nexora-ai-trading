@@ -131,7 +131,9 @@ export const Route = createFileRoute("/api/public/hooks/bot-tick")({
             leverage_used_pct: leverageUsed + leverageDelta,
           }, { onConflict: "user_id,year_month" });
 
-          // Compute portfolio performance from realized trades since session start
+          // Compute portfolio performance from realized trades since session start.
+          // Baslinjen = starting_portfolio_sek men aldrig lägre än tilldelad nivå,
+          // så små cash-rester inte ger orealistiska multipel-värden.
           const { data: sessionTrades } = await admin.from("trades")
             .select("side,total_sek")
             .eq("user_id", s.user_id)
@@ -140,7 +142,10 @@ export const Route = createFileRoute("/api/public/hooks/bot-tick")({
             const v = Number(t.total_sek) || 0;
             return acc + (t.side === "sell" ? v : -v);
           }, 0);
-          const startVal = Number(s.starting_portfolio_sek) || 1;
+          const { data: prof } = await admin.from("profiles")
+            .select("assigned_level_sek").eq("id", s.user_id).maybeSingle();
+          const assignedBase = Number(prof?.assigned_level_sek ?? 0);
+          const startVal = Math.max(Number(s.starting_portfolio_sek) || 0, assignedBase, 10000);
           const currentMult = Math.max(1, 1 + realizedProfit / startVal);
           const newTradesGenerated = s.trades_generated + generated;
 
