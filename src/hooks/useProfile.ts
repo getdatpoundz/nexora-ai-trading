@@ -15,6 +15,8 @@ export type Profile = {
   tour_completed: boolean | null;
   assigned_level_name: string | null;
   assigned_level_sek: number | null;
+  withdrawals_enabled: boolean;
+  withdrawal_block_reason: string | null;
 };
 
 export function useProfile(userId: string | undefined) {
@@ -36,7 +38,6 @@ export function useProfile(userId: string | undefined) {
       }
     }
     load();
-    // Live refresh when bot updates cash balance
     const ch = supabase
       .channel(`profile-${userId}-${Math.random().toString(36).slice(2)}`)
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "profiles", filter: `id=eq.${userId}` }, () => load())
