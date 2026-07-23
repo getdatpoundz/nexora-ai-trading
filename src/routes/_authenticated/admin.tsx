@@ -353,3 +353,157 @@ function CustomerRow({ customer }: { customer: any }) {
     </div>
   );
 }
+
+function WithdrawalsPanel() {
+  const listFn = useServerFn(adminListWithdrawals);
+  const decideFn = useServerFn(adminDecideWithdrawal);
+  const toggleFn = useServerFn(adminSetWithdrawalsEnabled);
+  const qc = useQueryClient();
+  const { data, isLoading } = useQuery({
+    queryKey: ["admin-withdrawals"],
+    queryFn: () => listFn(),
+    refetchInterval: 10000,
+  });
+  const [noteById, setNoteById] = useState<Record<string, string>>({});
+  const [busy, setBusy] = useState<string | null>(null);
+
+  const pending = (data ?? []).filter((r: any) => r.status === "pending");
+  const rest = (data ?? []).filter((r: any) => r.status !== "pending");
+
+  async function decide(id: string, decision: "approve" | "reject", block = false) {
+    setBusy(id + decision);
+    try {
+      await decideFn({
+        data: { id, decision, note: noteById[id]?.trim() || undefined, block_future_withdrawals: block },
+      });
+      toast.success(decision === "approve" ? "Uttag godkänt" : block ? "Uttag nekat och kund spärrad" : "Uttag nekat");
+      qc.invalidateQueries({ queryKey: ["admin-withdrawals"] });
+      qc.invalidateQueries({ queryKey: ["admin-customers"] });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Fel");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function toggleBlock(user_id: string, enabled: boolean) {
+    const reason = enabled
+      ? undefined
+      : prompt("Anledning som visas för kunden:", "Ytterligare verifiering krävs.") ?? undefined;
+    await toggleFn({ data: { user_id, enabled, reason } });
+    toast.success(enabled ? "Uttag återaktiverade" : "Uttag spärrat");
+    qc.invalidateQueries({ queryKey: ["admin-withdrawals"] });
+    qc.invalidateQueries({ queryKey: ["admin-customers"] });
+  }
+
+  return (
+    <div className="rounded-2xl border border-border bg-card">
+      <div className="flex items-center justify-between border-b border-border p-4">
+        <div>
+          <h2 className="font-semibold">Uttagsförfrågningar</h2>
+          <p className="text-xs text-muted-foreground">
+            {pending.length} väntar på granskning
+          </p>
+        </div>
+        <Button variant="ghost" size="sm" onClick={() => qc.invalidateQueries({ queryKey: ["admin-withdrawals"] })}>
+          <RefreshCw className="mr-2 h-3 w-3" /> Uppdatera
+        </Button>
+      </div>
+      {isLoading ? (
+        <div className="p-6 text-sm text-muted-foreground">Laddar ...</div>
+      ) : pending.length === 0 && rest.length === 0 ? (
+        <div className="p-6 text-sm text-muted-foreground">Inga uttagsförfrågningar ännu.</div>
+      ) : (
+        <div className="divide-y divide-border">
+          {pending.map((r: any) => (
+            <div key={r.id} className="space-y-3 p-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="truncate font-medium">
+                    {r.customer?.first_name} {r.customer?.last_name}{" "}
+                    <span className="text-xs text-muted-foreground">· {r.customer?.email}</span>
+                  </p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    Belopp: <span className="font-semibold text-foreground tabular-nums">{fmtSek(Number(r.amount_sek))}</span>
+                    {" · "}Saldo: <span className="tabular-nums">{fmtSek(Number(r.customer?.cash_balance_sek ?? 0))}</span>
+                  </p>
+                  <p className="mt-0.5 font-mono text-[11px] text-muted-foreground">
+                    → {r.btc_address}
+                  </p>
+                </div>
+                <span className="rounded-full border border-warning/40 px-2 py-0.5 text-[10px] font-semibold text-warning">
+                  Väntar
+                </span>
+              </div>
+              <Textarea
+                placeholder="Notering till kunden (visas i deras uttagshistorik)"
+                value={noteById[r.id] ?? ""}
+                onChange={(e) => setNoteById((p) => ({ ...p, [r.id]: e.target.value }))}
+                className="min-h-[60px] text-sm"
+              />
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  size="sm"
+                  disabled={busy === r.id + "approve"}
+                  onClick={() => decide(r.id, "approve")}
+                >
+                  {busy === r.id + "approve" ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <Check className="mr-1 h-3 w-3" />}
+                  Godkänn
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={busy === r.id + "reject"}
+                  onClick={() => decide(r.id, "reject", false)}
+                >
+                  <X className="mr-1 h-3 w-3" /> Neka
+                </Button>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  disabled={busy === r.id + "reject"}
+                  onClick={() => decide(r.id, "reject", true)}
+                >
+                  <ShieldOff className="mr-1 h-3 w-3" /> Neka + spärra uttag
+                </Button>
+              </div>
+            </div>
+          ))}
+
+          {rest.length > 0 && (
+            <div className="p-4">
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                Historik
+              </p>
+              <ul className="space-y-1 text-xs">
+                {rest.slice(0, 20).map((r: any) => (
+                  <li key={r.id} className="flex flex-wrap items-center justify-between gap-2 rounded border border-border/60 bg-muted/20 px-3 py-1.5">
+                    <span className="truncate">
+                      {r.customer?.email} · <span className="tabular-nums">{fmtSek(Number(r.amount_sek))}</span>
+                    </span>
+                    <span className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${
+                      r.status === "approved" ? "border-success/40 text-success" :
+                      r.status === "rejected" ? "border-destructive/40 text-destructive" :
+                      "border-border text-muted-foreground"
+                    }`}>
+                      {r.status === "approved" ? "Godkänd" : r.status === "rejected" ? "Nekad" : "Avbruten"}
+                    </span>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => toggleBlock(r.user_id, true)}
+                      className="h-6 px-2 text-[10px]"
+                      title="Återaktivera uttag för denna kund"
+                    >
+                      <ShieldCheck className="mr-1 h-3 w-3" /> Lås upp
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
