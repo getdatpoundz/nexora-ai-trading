@@ -28,12 +28,20 @@ export const startBot = createServerFn({ method: "POST" })
     await supabase.from("bot_sessions").update({ status: "stopped", stopped_at: new Date().toISOString() })
       .eq("user_id", userId).in("status", ["running", "paused", "limit_reached"]);
 
-    // Baslinje = användarens faktiska aktiva kapital (samma tal som "Totalt värde" i portföljen).
-    // Fallback till tilldelad nivå om kontot inte är finansierat än.
-    const startingValue =
-      Number(profile?.cash_balance_sek ?? 0) > 0
-        ? Number(profile?.cash_balance_sek)
-        : Number(profile?.assigned_level_sek ?? level.amount);
+    // Baslinje = totalt portföljvärde vid start (cash + befintliga innehav värderade till snittpris).
+    // Om värdet är lägre än tilldelad investeringsnivå används nivåbeloppet så att
+    // avkastningen alltid mäts mot den avsedda insatsen (annars kan små cash-rester
+    // ge orealistiskt höga multipel-värden).
+    const { data: holdings } = await supabase.from("portfolio_holdings")
+      .select("quantity, avg_price_sek").eq("user_id", userId);
+    const holdingsValue = (holdings ?? []).reduce(
+      (acc, h) => acc + Number(h.quantity ?? 0) * Number(h.avg_price_sek ?? 0),
+      0,
+    );
+    const cash = Number(profile?.cash_balance_sek ?? 0);
+    const totalValue = cash + holdingsValue;
+    const assignedBaseline = Number(profile?.assigned_level_sek ?? level.amount);
+    const startingValue = Math.max(totalValue, assignedBaseline);
     const targetTrades = Math.min(level.maxTradesPerMonth, Math.max(30, Math.floor(level.maxTradesPerMonth * 0.6)));
 
 
