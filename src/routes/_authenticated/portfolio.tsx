@@ -106,7 +106,47 @@ function PortfolioPage() {
     return points;
   }, [trades, totalDeposited, balance]);
 
-  const recentTrades = useMemo(() => [...trades].slice(-8).reverse(), [trades]);
+  const recentPositions = useMemo(() => {
+    const sorted = [...trades].sort((a, b) => (a.executed_at < b.executed_at ? -1 : 1));
+    const open: Record<string, Trade[]> = {};
+    const closed: {
+      id: string;
+      symbol: string;
+      qty: number;
+      entry: number;
+      exit: number;
+      cost: number;
+      proceeds: number;
+      pnl: number;
+      multiplier: number;
+      opened_at: string;
+      closed_at: string;
+    }[] = [];
+    for (const t of sorted) {
+      if (t.side === "buy") {
+        (open[t.symbol] ||= []).push(t);
+      } else {
+        const b = open[t.symbol]?.shift();
+        if (!b) continue;
+        const cost = Number(b.total_sek);
+        const proceeds = Number(t.total_sek);
+        closed.push({
+          id: t.id,
+          symbol: t.symbol,
+          qty: Number(b.quantity),
+          entry: Number(b.price_sek),
+          exit: Number(t.price_sek),
+          cost,
+          proceeds,
+          pnl: proceeds - cost,
+          multiplier: cost > 0 ? proceeds / cost : 1,
+          opened_at: b.executed_at,
+          closed_at: t.executed_at,
+        });
+      }
+    }
+    return closed.slice(-8).reverse();
+  }, [trades]);
 
   return (
     <AppShell title="Min portfölj">
@@ -188,45 +228,56 @@ function PortfolioPage() {
 
         <div className="rounded-2xl border border-border bg-card">
           <div className="flex items-center justify-between border-b border-border p-4 sm:p-6">
-            <h3 className="text-base font-semibold">Senaste trades</h3>
+            <div>
+              <h3 className="text-base font-semibold">Senaste trades</h3>
+              <p className="mt-0.5 text-xs text-muted-foreground">Avslutade positioner från AI-boten</p>
+            </div>
             <Button asChild variant="ghost" size="sm">
               <Link to="/transactions">Se alla</Link>
             </Button>
           </div>
-          {recentTrades.length === 0 ? (
+          {recentPositions.length === 0 ? (
             <p className="p-8 text-center text-sm text-muted-foreground">
-              Inga trades ännu. Starta boten för att börja handla automatiskt.
+              Inga avslutade positioner ännu. Starta boten för att börja handla automatiskt.
             </p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-muted/40 text-xs uppercase text-muted-foreground">
                   <tr>
-                    <th className="px-4 py-3 text-left font-medium">Datum</th>
+                    <th className="px-4 py-3 text-left font-medium">Stängd</th>
                     <th className="px-4 py-3 text-left font-medium">Tillgång</th>
-                    <th className="px-4 py-3 text-left font-medium">Sida</th>
                     <th className="px-4 py-3 text-right font-medium">Antal</th>
-                    <th className="px-4 py-3 text-right font-medium">Pris</th>
-                    <th className="px-4 py-3 text-right font-medium">Totalt</th>
+                    <th className="px-4 py-3 text-right font-medium">Köpt</th>
+                    <th className="px-4 py-3 text-right font-medium">Sålt</th>
+                    <th className="px-4 py-3 text-right font-medium">Avkastning</th>
+                    <th className="px-4 py-3 text-right font-medium">Vinst</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {recentTrades.map((t) => (
-                    <tr key={t.id} className="border-t border-border">
-                      <td className="px-4 py-3 text-muted-foreground">{dateSv(t.executed_at)}</td>
-                      <td className="px-4 py-3 font-medium">{t.symbol}</td>
-                      <td className="px-4 py-3">
-                        <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium ${
-                          t.side === "buy" ? "border-success/40 text-success" : "border-primary/40 text-primary"
-                        }`}>
-                          {t.side === "buy" ? <><TrendingUp className="h-3 w-3"/> Köp</> : <><TrendingDown className="h-3 w-3"/> Sälj</>}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-right tabular-nums">{Number(t.quantity).toFixed(6)}</td>
-                      <td className="px-4 py-3 text-right tabular-nums">{sek(Number(t.price_sek))}</td>
-                      <td className="px-4 py-3 text-right tabular-nums font-medium">{sek(Number(t.total_sek))}</td>
-                    </tr>
-                  ))}
+                  {recentPositions.map((p) => {
+                    const win = p.pnl >= 0;
+                    return (
+                      <tr key={p.id} className="border-t border-border">
+                        <td className="px-4 py-3 text-muted-foreground">{dateSv(p.closed_at)}</td>
+                        <td className="px-4 py-3 font-medium">{p.symbol}</td>
+                        <td className="px-4 py-3 text-right tabular-nums text-muted-foreground">{p.qty.toFixed(6)}</td>
+                        <td className="px-4 py-3 text-right tabular-nums">{sek(p.cost)}</td>
+                        <td className="px-4 py-3 text-right tabular-nums">{sek(p.proceeds)}</td>
+                        <td className="px-4 py-3 text-right">
+                          <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold tabular-nums ${
+                            win ? "border-success/40 text-success" : "border-destructive/40 text-destructive"
+                          }`}>
+                            {win ? <TrendingUp className="h-3 w-3"/> : <TrendingDown className="h-3 w-3"/>}
+                            {p.multiplier.toFixed(2)}x
+                          </span>
+                        </td>
+                        <td className={`px-4 py-3 text-right tabular-nums font-semibold ${win ? "text-success" : "text-destructive"}`}>
+                          {win ? "+" : ""}{sek(p.pnl)}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
