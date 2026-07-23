@@ -351,6 +351,8 @@ export type Database = {
           tour_completed: boolean
           updated_at: string
           verification_status: string
+          withdrawal_block_reason: string | null
+          withdrawals_enabled: boolean
         }
         Insert: {
           activated_at?: string | null
@@ -381,6 +383,8 @@ export type Database = {
           tour_completed?: boolean
           updated_at?: string
           verification_status?: string
+          withdrawal_block_reason?: string | null
+          withdrawals_enabled?: boolean
         }
         Update: {
           activated_at?: string | null
@@ -411,6 +415,8 @@ export type Database = {
           tour_completed?: boolean
           updated_at?: string
           verification_status?: string
+          withdrawal_block_reason?: string | null
+          withdrawals_enabled?: boolean
         }
         Relationships: []
       }
@@ -473,6 +479,45 @@ export type Database = {
           created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      withdrawal_requests: {
+        Row: {
+          admin_note: string | null
+          amount_sek: number
+          btc_address: string
+          created_at: string
+          id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_note?: string | null
+          amount_sek: number
+          btc_address: string
+          created_at?: string
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_note?: string | null
+          amount_sek?: number
+          btc_address?: string
+          created_at?: string
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
