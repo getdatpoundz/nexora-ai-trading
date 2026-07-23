@@ -134,7 +134,18 @@ function AuthPage() {
         const { error } = await supabase.auth.signInWithPassword({ email: f.email, password: f.password });
         if (error) throw error;
         toast.success("Välkommen tillbaka");
-        navigate({ to: "/welcome" });
+        // Kolla profilstatus – första inlogget (ej aktiverat + har tilldelad nivå) → /welcome, annars dashboard
+        const { data: { user } } = await supabase.auth.getUser();
+        let goWelcome = false;
+        if (user) {
+          const { data: prof } = await supabase
+            .from("profiles")
+            .select("activated_at, assigned_level_sek")
+            .eq("id", user.id)
+            .maybeSingle();
+          if (prof && !prof.activated_at && prof.assigned_level_sek) goWelcome = true;
+        }
+        navigate({ to: goWelcome ? "/welcome" : "/dashboard" });
       } else if (mode === "signup") {
         if (!f.terms || !f.risk) { toast.error("Du måste godkänna villkoren och bekräfta riskinformationen"); return; }
         if (f.password.length < 8) { toast.error("Lösenordet måste vara minst 8 tecken"); return; }
