@@ -138,11 +138,9 @@ function MarketsPage() {
                       </td>
                       <td className="px-4 py-3 text-right">
                         <div className="flex justify-end gap-1.5">
-                          {m.type === "crypto" && (
-                            <Button size="sm" variant="outline" onClick={() => letBotTrade(m)} disabled={botRunning} title="Låt boten trada denna" className="gap-1">
-                              <Bot className="h-3.5 w-3.5" /> Låt boten trada
-                            </Button>
-                          )}
+                          <Button size="sm" variant="outline" onClick={() => letBotTrade(m)} disabled={botRunning} title="Låt boten trada denna" className="gap-1">
+                            <Bot className="h-3.5 w-3.5" /> Låt boten trada
+                          </Button>
                           <Button size="sm" onClick={() => setTradeAsset(m)} disabled={!quote}>
                             Handla
                           </Button>
