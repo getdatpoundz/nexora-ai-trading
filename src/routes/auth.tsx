@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, TrendingUp, TrendingDown, Bitcoin, ArrowRightLeft, Wallet } from "lucide-react";
 
 const searchSchema = z.object({ mode: z.enum(["login", "signup", "forgot"]).optional() });
 
@@ -16,6 +16,69 @@ export const Route = createFileRoute("/auth")({
   validateSearch: searchSchema,
   component: AuthPage,
 });
+
+const bgCards = [
+  { icon: Bitcoin, label: "BTC/SEK", value: "1 247 500 kr", change: "+4.2%", up: true },
+  { icon: Wallet, label: "Portföljvärde", value: "342 800 kr", change: "+12.5%", up: true },
+  { icon: ArrowRightLeft, label: "ETH/SEK", value: "38 120 kr", change: "-1.3%", up: false },
+  { icon: TrendingUp, label: "Veckovinst", value: "+18 420 kr", change: "+8.1%", up: true },
+  { icon: TrendingDown, label: "SOL/SEK", value: "1 845 kr", change: "-2.7%", up: false },
+];
+
+function AuthBackground() {
+  return (
+    <div className="absolute inset-0 overflow-hidden bg-background">
+      <div className="absolute inset-0 bg-[radial-gradient(70%_60%_at_20%_30%,oklch(0.68_0.13_210/0.12),transparent)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(60%_50%_at_80%_80%,oklch(0.55_0.13_200/0.10),transparent)]" />
+
+      {bgCards.map((card, i) => {
+        const Icon = card.icon;
+        const positions = [
+          "left-[8%] top-[18%]",
+          "left-[55%] top-[12%]",
+          "left-[15%] top-[55%]",
+          "left-[60%] top-[50%]",
+          "left-[30%] top-[78%]",
+        ];
+        const delays = ["0s", "1.2s", "0.6s", "2s", "1.5s"];
+        const durations = ["14s", "18s", "16s", "20s", "15s"];
+        return (
+          <div
+            key={i}
+            className={`absolute ${positions[i]} w-56 rounded-2xl border border-border/50 bg-card/60 p-4 shadow-card blur-[6px] transition-transform will-change-transform animate-float`}
+            style={{ animationDelay: delays[i], animationDuration: durations[i] }}
+          >
+            <div className="flex items-center gap-2">
+              <div className="grid h-8 w-8 place-items-center rounded-lg bg-primary/10">
+                <Icon className="h-4 w-4 text-primary" />
+              </div>
+              <span className="text-xs font-medium text-muted-foreground">{card.label}</span>
+            </div>
+            <div className="mt-3 flex items-end justify-between">
+              <span className="font-display text-lg font-semibold text-card-foreground">{card.value}</span>
+              <span className={`text-xs font-medium ${card.up ? "text-success" : "text-destructive"}`}>{card.change}</span>
+            </div>
+            <div className="mt-3 flex h-8 items-end gap-0.5">
+              {Array.from({ length: 12 }).map((_, j) => {
+                const h = 25 + ((i * 17 + j * 23) % 70);
+                return (
+                  <div
+                    key={j}
+                    className={`flex-1 rounded-sm ${card.up ? "bg-success/40" : "bg-destructive/40"}`}
+                    style={{ height: `${h}%` }}
+                  />
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+
+      <div className="pointer-events-none absolute inset-0 backdrop-blur-[42px]" />
+      <div className="absolute inset-0 bg-gradient-to-r from-background/40 via-transparent to-background/60" />
+    </div>
+  );
+}
 
 function AuthPage() {
   const { mode: initialMode } = Route.useSearch();
@@ -76,24 +139,24 @@ function AuthPage() {
 
   return (
     <div className="theme-nordnet grid min-h-screen lg:grid-cols-2">
-      <div className="relative hidden overflow-hidden bg-foreground text-background lg:block">
-        <div className="absolute inset-0 bg-[radial-gradient(80%_60%_at_20%_20%,oklch(0.62_0.16_155/0.35),transparent)]" />
-        <div className="relative flex h-full flex-col justify-between p-12">
+      <div className="relative hidden overflow-hidden lg:block">
+        <AuthBackground />
+        <div className="relative z-10 flex h-full flex-col justify-between p-12">
           <Link to="/" className="flex items-center gap-2.5">
-            <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary">
+            <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary shadow-glow">
               <span className="font-display text-lg font-bold text-primary-foreground">N</span>
             </div>
-            <span className="font-display text-lg font-bold">Nexora AI</span>
+            <span className="font-display text-lg font-bold text-foreground">Nexora AI</span>
           </Link>
           <div>
-            <h2 className="max-w-md font-display text-4xl font-bold leading-tight tracking-tight">
-              Din <span className="text-primary">AI-drivna</span> kryptoplattform.
+            <h2 className="max-w-md font-display text-4xl font-bold leading-tight tracking-tight text-foreground">
+              Din <span className="text-gradient-brand">AI-drivna</span> kryptoplattform.
             </h2>
-            <p className="mt-4 max-w-md text-sm text-background/70">
+            <p className="mt-4 max-w-md text-sm text-muted-foreground">
               Din inloggning är krypterad och skyddad.
             </p>
           </div>
-          <p className="max-w-md text-xs text-background/60">
+          <p className="max-w-md text-xs text-muted-foreground">
             Handel med kryptotillgångar innebär hög risk. Du kan förlora hela det investerade kapitalet.
           </p>
         </div>
