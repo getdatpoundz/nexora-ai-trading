@@ -53,7 +53,15 @@ const DEFAULT_CONFIG: BotConfig = {
   notifyOnTrade: true,
 };
 
-const AVAILABLE_ASSETS = ["BTC", "ETH", "SOL", "ADA", "DOT", "AVAX", "MATIC", "LINK", "XRP", "DOGE"];
+import { MARKET_UNIVERSE } from "@/lib/market-data.shared";
+const AVAILABLE_ASSETS = MARKET_UNIVERSE.map((a) => a.symbol);
+const ASSET_GROUPS = [
+  { key: "crypto", label: "Krypto" },
+  { key: "stock", label: "Aktier" },
+  { key: "index", label: "Index/ETF" },
+  { key: "commodity", label: "Råvaror" },
+  { key: "forex", label: "Valuta" },
+] as const;
 
 const PRESETS: Record<Exclude<BotConfig["preset"], "anpassad">, Partial<BotConfig> & { label: string; desc: string; icon: typeof Bot }> = {
   forsiktig:   { label: "Försiktig",  desc: "Låg risk, färre trades, tight stop-loss.",  icon: Shield,     aggressiveness: 3, stopLossPct: 3, takeProfitPct: 8,  maxPositionPct: 10, minConfidence: 75 },
