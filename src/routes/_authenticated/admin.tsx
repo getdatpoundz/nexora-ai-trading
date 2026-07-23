@@ -15,7 +15,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Copy, Loader2, UserPlus, RefreshCw, CheckCircle2, KeyRound } from "lucide-react";
+import { Copy, Loader2, UserPlus, RefreshCw, CheckCircle2, KeyRound, ShieldOff, ShieldCheck, Check, X } from "lucide-react";
+import {
+  adminListWithdrawals,
+  adminDecideWithdrawal,
+  adminSetWithdrawalsEnabled,
+} from "@/lib/withdrawal.functions";
+import { Textarea } from "@/components/ui/textarea";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminPage,
@@ -86,6 +92,8 @@ function AdminInner() {
         </div>
 
         <CreateCustomerForm onCreated={() => qc.invalidateQueries({ queryKey: ["admin-customers"] })} />
+
+        <WithdrawalsPanel />
 
         <div className="rounded-2xl border border-border bg-card">
           <div className="flex items-center justify-between border-b border-border p-4">
