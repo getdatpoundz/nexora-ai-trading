@@ -1,25 +1,112 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/app/AppShell";
 import { StatCard } from "@/components/app/StatCard";
-import { DEMO_HOLDINGS, DEMO_PORTFOLIO, generatePortfolioHistory } from "@/lib/demo-data";
-import { sek, pct, num } from "@/lib/format";
-import { PieChart, Pie, Cell, ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
+import { sek, pct, dateSv } from "@/lib/format";
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { Button } from "@/components/ui/button";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
-import { Sparkles } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { Sparkles, ArrowDownToLine, ArrowUpFromLine, Brain, TrendingUp, TrendingDown } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/portfolio")({
   component: PortfolioPage,
 });
 
+type Trade = {
+  id: string;
+  symbol: string;
+  side: "buy" | "sell";
+  quantity: number;
+  price_sek: number;
+  total_sek: number;
+  executed_at: string;
+};
+
 function PortfolioPage() {
-  const history = useMemo(() => generatePortfolioHistory(90), []);
   const { user } = useAuth();
   const { profile } = useProfile(user?.id);
   const firstName = profile?.first_name ?? "";
   const accountType = profile?.assigned_level_name ?? "Standard";
+  const balance = Number(profile?.cash_balance_sek ?? 0);
+
+  const [trades, setTrades] = useState<Trade[]>([]);
+  const [totalDeposited, setTotalDeposited] = useState(0);
+
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    (async () => {
+      const [t, d] = await Promise.all([
+        supabase
+          .from("trades")
+          .select("id, symbol, side, quantity, price_sek, total_sek, executed_at")
+          .eq("user_id", user.id)
+          .order("executed_at", { ascending: true })
+          .limit(500),
+        supabase
+          .from("investment_selections")
+          .select("funded_amount_sek")
+          .eq("user_id", user.id)
+          .eq("onramp_status", "funded"),
+      ]);
+      if (cancelled) return;
+      setTrades(((t.data ?? []) as unknown as Trade[]));
+      setTotalDeposited((d.data ?? []).reduce((s, r) => s + Number(r.funded_amount_sek ?? 0), 0));
+    })();
+
+    const ch = supabase
+      .channel(`portfolio-trades-${user.id}-${Math.random().toString(36).slice(2)}`)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "trades", filter: `user_id=eq.${user.id}` },
+        (payload) => setTrades((prev) => [...prev, payload.new as unknown as Trade]),
+      )
+      .subscribe();
+    return () => {
+      cancelled = true;
+      supabase.removeChannel(ch);
+    };
+  }, [user]);
+
+  const pnl = balance - totalDeposited;
+  const pnlPct = totalDeposited > 0 ? (pnl / totalDeposited) * 100 : 0;
+
+  // Build equity curve from deposits + closing trades' net effect on cash.
+  const history = useMemo(() => {
+    if (totalDeposited === 0 && trades.length === 0) return [];
+    // Approximate: start at totalDeposited, add cumulative realized from sell trades minus buy trades net.
+    // Since bot closes trades symmetrically we approximate value = starting + cumulative pnl per trade group.
+    const points: { date: string; value: number }[] = [];
+    let running = totalDeposited;
+    const sortedSells = trades.filter((t) => t.side === "sell");
+    const start = trades[0]?.executed_at ?? new Date().toISOString();
+    points.push({ date: start.slice(0, 10), value: running });
+    // pair buys and sells sequentially per symbol as bot does
+    const buysBySymbol: Record<string, Trade[]> = {};
+    const sorted = [...trades].sort((a, b) => (a.executed_at < b.executed_at ? -1 : 1));
+    for (const t of sorted) {
+      if (t.side === "buy") {
+        (buysBySymbol[t.symbol] ||= []).push(t);
+      } else {
+        const buy = buysBySymbol[t.symbol]?.shift();
+        if (buy) {
+          const p = Number(t.total_sek) - Number(buy.total_sek);
+          running += p;
+          points.push({ date: t.executed_at.slice(0, 10), value: Math.round(running) });
+        }
+      }
+    }
+    if (sortedSells.length === 0 && totalDeposited > 0) {
+      points.push({ date: new Date().toISOString().slice(0, 10), value: balance });
+    } else {
+      points.push({ date: new Date().toISOString().slice(0, 10), value: balance });
+    }
+    return points;
+  }, [trades, totalDeposited, balance]);
+
+  const recentTrades = useMemo(() => [...trades].slice(-8).reverse(), [trades]);
 
   return (
     <AppShell title="Min portfölj">
@@ -35,32 +122,46 @@ function PortfolioPage() {
               <span className="font-semibold text-foreground">{accountType}</span>
             </div>
           </div>
+          <div className="flex gap-2">
+            <Button asChild variant="outline" size="sm">
+              <Link to="/deposit"><ArrowDownToLine className="mr-1.5 h-3.5 w-3.5" /> Sätt in</Link>
+            </Button>
+            <Button asChild variant="outline" size="sm">
+              <Link to="/withdraw"><ArrowUpFromLine className="mr-1.5 h-3.5 w-3.5" /> Ta ut</Link>
+            </Button>
+            <Button asChild size="sm">
+              <Link to="/strategies"><Brain className="mr-1.5 h-3.5 w-3.5" /> Trade (AI)</Link>
+            </Button>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <StatCard label="Totalt värde" value={sek(DEMO_PORTFOLIO.totalValue)} />
-          <StatCard label="Investerat" value={sek(DEMO_PORTFOLIO.investedCapital)} />
-          <StatCard label="Orealiserat" value={sek(DEMO_PORTFOLIO.totalChange)} sub={<span className="text-success">{pct(DEMO_PORTFOLIO.totalChangePct)}</span>} tone="success" />
-          <StatCard label="Realiserat" value={sek(0)} sub="Inget realiserat resultat än" />
+          <StatCard label="Totalt värde" value={sek(balance)} />
+          <StatCard label="Totalt insatt" value={sek(totalDeposited)} />
+          <StatCard
+            label="Utveckling"
+            value={sek(pnl)}
+            sub={
+              <span className={pnl >= 0 ? "text-success" : "text-destructive"}>
+                {pct(pnlPct)}
+              </span>
+            }
+            tone={pnl >= 0 ? "success" : "warning"}
+          />
+          <StatCard label="Antal trades" value={String(trades.length)} sub="Totalt genomförda" />
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-[1fr_1.2fr]">
-          <div className="rounded-2xl border border-border bg-card p-6">
-            <h3 className="text-base font-semibold">Fördelning</h3>
-            <div className="mt-4 h-56">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={DEMO_HOLDINGS} dataKey="value" nameKey="name" innerRadius={55} outerRadius={90} paddingAngle={2}>
-                    {DEMO_HOLDINGS.map((h) => <Cell key={h.symbol} fill={h.color} stroke="none" />)}
-                  </Pie>
-                  <Tooltip contentStyle={{ background: "var(--color-card)", border: "1px solid var(--color-border)", borderRadius: 8, fontSize: 12, color: "var(--color-foreground)" }} formatter={(v: number) => sek(v)} />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-          <div className="rounded-2xl border border-border bg-card p-6">
+        <div className="rounded-2xl border border-border bg-card p-6">
+          <div className="flex items-center justify-between">
             <h3 className="text-base font-semibold">Utveckling</h3>
-            <div className="mt-4 h-56">
+            <span className="text-xs text-muted-foreground">Baserat på faktiska trades</span>
+          </div>
+          <div className="mt-4 h-64">
+            {history.length < 2 ? (
+              <div className="grid h-full place-items-center text-sm text-muted-foreground">
+                Ingen historik ännu. Aktivera AI-boten för att börja handla.
+              </div>
+            ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={history}>
                   <defs>
@@ -71,55 +172,60 @@ function PortfolioPage() {
                   </defs>
                   <CartesianGrid stroke="var(--color-border)" strokeDasharray="3 3" vertical={false} />
                   <XAxis dataKey="date" tick={{ fill: "var(--color-muted-foreground)", fontSize: 11 }} minTickGap={40} />
-                  <YAxis tick={{ fill: "var(--color-muted-foreground)", fontSize: 11 }} width={40} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
+                  <YAxis tick={{ fill: "var(--color-muted-foreground)", fontSize: 11 }} width={50} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
                   <Tooltip contentStyle={{ background: "var(--color-card)", border: "1px solid var(--color-border)", borderRadius: 8, fontSize: 12, color: "var(--color-foreground)" }} formatter={(v: number) => sek(v)} />
                   <Area type="monotone" dataKey="value" stroke="var(--color-primary)" strokeWidth={2} fill="url(#pv2)" />
                 </AreaChart>
               </ResponsiveContainer>
-            </div>
+            )}
           </div>
         </div>
 
         <div className="rounded-2xl border border-border bg-card">
-          <div className="border-b border-border p-4 sm:p-6">
-            <h3 className="text-base font-semibold">Innehav</h3>
+          <div className="flex items-center justify-between border-b border-border p-4 sm:p-6">
+            <h3 className="text-base font-semibold">Senaste trades</h3>
+            <Button asChild variant="ghost" size="sm">
+              <Link to="/transactions">Se alla</Link>
+            </Button>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-muted/40 text-xs uppercase text-muted-foreground">
-                <tr>
-                  <th className="px-4 py-3 text-left font-medium">Tillgång</th>
-                  <th className="px-4 py-3 text-right font-medium">Antal</th>
-                  <th className="px-4 py-3 text-right font-medium">Värde</th>
-                  <th className="px-4 py-3 text-right font-medium">Andel</th>
-                  <th className="px-4 py-3 text-right font-medium">Snitt</th>
-                  <th className="px-4 py-3 text-right font-medium">Förändring</th>
-                  <th className="px-4 py-3 text-right font-medium"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {DEMO_HOLDINGS.map((h) => {
-                  const share = (h.value / DEMO_PORTFOLIO.totalValue) * 100;
-                  return (
-                    <tr key={h.symbol} className="border-t border-border">
+          {recentTrades.length === 0 ? (
+            <p className="p-8 text-center text-sm text-muted-foreground">
+              Inga trades ännu. Starta boten för att börja handla automatiskt.
+            </p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-muted/40 text-xs uppercase text-muted-foreground">
+                  <tr>
+                    <th className="px-4 py-3 text-left font-medium">Datum</th>
+                    <th className="px-4 py-3 text-left font-medium">Tillgång</th>
+                    <th className="px-4 py-3 text-left font-medium">Sida</th>
+                    <th className="px-4 py-3 text-right font-medium">Antal</th>
+                    <th className="px-4 py-3 text-right font-medium">Pris</th>
+                    <th className="px-4 py-3 text-right font-medium">Totalt</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recentTrades.map((t) => (
+                    <tr key={t.id} className="border-t border-border">
+                      <td className="px-4 py-3 text-muted-foreground">{dateSv(t.executed_at)}</td>
+                      <td className="px-4 py-3 font-medium">{t.symbol}</td>
                       <td className="px-4 py-3">
-                        <div className="flex items-center gap-3">
-                          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-xs font-bold" style={{ background: `${h.color}20`, color: h.color }}>{h.symbol}</span>
-                          <div><div className="font-medium">{h.name}</div><div className="text-xs text-muted-foreground">{h.symbol}</div></div>
-                        </div>
+                        <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium ${
+                          t.side === "buy" ? "border-success/40 text-success" : "border-primary/40 text-primary"
+                        }`}>
+                          {t.side === "buy" ? <><TrendingUp className="h-3 w-3"/> Köp</> : <><TrendingDown className="h-3 w-3"/> Sälj</>}
+                        </span>
                       </td>
-                      <td className="px-4 py-3 text-right tabular-nums">{num(h.amount, h.symbol === "SEK" ? 0 : 4)}</td>
-                      <td className="px-4 py-3 text-right tabular-nums">{sek(h.value)}</td>
-                      <td className="px-4 py-3 text-right tabular-nums">{share.toFixed(1)} %</td>
-                      <td className="px-4 py-3 text-right tabular-nums">{sek(h.avgPrice)}</td>
-                      <td className={`px-4 py-3 text-right tabular-nums ${h.changePct >= 0 ? "text-success" : "text-destructive"}`}>{pct(h.changePct)}</td>
-                      <td className="px-4 py-3 text-right"><Button size="sm" variant="ghost">Visa detaljer</Button></td>
+                      <td className="px-4 py-3 text-right tabular-nums">{Number(t.quantity).toFixed(6)}</td>
+                      <td className="px-4 py-3 text-right tabular-nums">{sek(Number(t.price_sek))}</td>
+                      <td className="px-4 py-3 text-right tabular-nums font-medium">{sek(Number(t.total_sek))}</td>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
     </AppShell>

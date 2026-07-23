@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { BotStatusBanner } from "@/components/app/BotStatusBanner";
+import { VerificationBanner } from "@/components/app/VerificationBanner";
 
 const NAV = [
   { to: "/portfolio", label: "Min portfölj", icon: Wallet },
@@ -189,6 +190,7 @@ export function AppShell({ title, children }: { title: string; children: ReactNo
               </DropdownMenu>
             </div>
           </div>
+          <VerificationBanner />
           <BotStatusBanner />
         </header>
 
