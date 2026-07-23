@@ -60,7 +60,7 @@ function AuthBackground() {
             </div>
             <div className="mt-3 flex h-8 items-end gap-0.5">
               {Array.from({ length: 12 }).map((_, j) => {
-                const h = 20 + Math.random() * 80;
+                const h = 25 + ((i * 17 + j * 23) % 70);
                 return (
                   <div
                     key={j}
