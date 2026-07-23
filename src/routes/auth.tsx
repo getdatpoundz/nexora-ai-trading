@@ -74,21 +74,20 @@ function AuthBackground() {
       <div className="absolute inset-0 bg-[radial-gradient(60%_50%_at_80%_80%,oklch(0.55_0.13_200/0.08),transparent)]" />
 
       <div
-        className="absolute inset-0 flex flex-col justify-center gap-16"
-        style={{ transform: "rotate(-18deg) scale(1.35)" }}
+        className="absolute -inset-[20%] flex flex-col justify-center gap-20"
+        style={{ transform: "rotate(-16deg) scale(1.25)" }}
       >
         {tickerRows.map((row, i) => (
           <TickerStrip
             key={i}
             items={row}
             reverse={i % 2 === 1}
-            className="py-3 border-y border-border/30 bg-card/40 backdrop-blur-sm"
+            className="py-2.5 border-y border-border/20 bg-card/30"
           />
         ))}
       </div>
 
-      <div className="pointer-events-none absolute inset-0 backdrop-blur-[8px]" />
-      <div className="absolute inset-0 bg-gradient-to-br from-background/60 via-background/30 to-background/70" />
+      <div className="absolute inset-0 bg-gradient-to-br from-background/55 via-background/25 to-background/65" />
     </div>
   );
 }
