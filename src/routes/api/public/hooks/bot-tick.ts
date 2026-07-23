@@ -105,13 +105,13 @@ export const Route = createFileRoute("/api/public/hooks/bot-tick")({
 
             // Buy
             await admin.from("trades").insert({
-              user_id: s.user_id, symbol, asset_type: "crypto", side: "buy",
+              user_id: s.user_id, symbol, asset_type: assetTypeFor(symbol), side: "buy",
               quantity, price_sek: buyPrice, fee_sek: positionSek * 0.001,
               total_sek: positionSek, executed_at: buyAt.toISOString(),
             });
             // Sell
             await admin.from("trades").insert({
-              user_id: s.user_id, symbol, asset_type: "crypto", side: "sell",
+              user_id: s.user_id, symbol, asset_type: assetTypeFor(symbol), side: "sell",
               quantity, price_sek: sellPrice, fee_sek: quantity * sellPrice * 0.001,
               total_sek: quantity * sellPrice, executed_at: now.toISOString(),
             });
