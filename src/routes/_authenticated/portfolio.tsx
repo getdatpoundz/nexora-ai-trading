@@ -146,7 +146,7 @@ function PortfolioPage() {
                 {pct(pnlPct)}
               </span>
             }
-            tone={pnl >= 0 ? "success" : "danger"}
+            tone={pnl >= 0 ? "success" : "warning"}
           />
           <StatCard label="Antal trades" value={String(trades.length)} sub="Totalt genomförda" />
         </div>
