@@ -28,6 +28,7 @@ import { Route as AuthenticatedMarketsRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedDocumentsRouteImport } from './routes/_authenticated/documents'
 import { Route as AuthenticatedDepositRouteImport } from './routes/_authenticated/deposit'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedBotRulesRouteImport } from './routes/_authenticated/bot-rules'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedActivateRouteImport } from './routes/_authenticated/activate'
 import { Route as ApiPublicOnrampWebhookRouteImport } from './routes/api/public/onramp.webhook'
@@ -129,6 +130,11 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedBotRulesRoute = AuthenticatedBotRulesRouteImport.update({
+  id: '/bot-rules',
+  path: '/bot-rules',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -156,6 +162,7 @@ export interface FileRoutesByFullPath {
   '/dashboard2': typeof Dashboard2Route
   '/activate': typeof AuthenticatedActivateRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/bot-rules': typeof AuthenticatedBotRulesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/deposit': typeof AuthenticatedDepositRoute
   '/documents': typeof AuthenticatedDocumentsRoute
@@ -180,6 +187,7 @@ export interface FileRoutesByTo {
   '/dashboard2': typeof Dashboard2Route
   '/activate': typeof AuthenticatedActivateRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/bot-rules': typeof AuthenticatedBotRulesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/deposit': typeof AuthenticatedDepositRoute
   '/documents': typeof AuthenticatedDocumentsRoute
@@ -206,6 +214,7 @@ export interface FileRoutesById {
   '/dashboard2': typeof Dashboard2Route
   '/_authenticated/activate': typeof AuthenticatedActivateRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/bot-rules': typeof AuthenticatedBotRulesRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/deposit': typeof AuthenticatedDepositRoute
   '/_authenticated/documents': typeof AuthenticatedDocumentsRoute
@@ -232,6 +241,7 @@ export interface FileRouteTypes {
     | '/dashboard2'
     | '/activate'
     | '/admin'
+    | '/bot-rules'
     | '/dashboard'
     | '/deposit'
     | '/documents'
@@ -256,6 +266,7 @@ export interface FileRouteTypes {
     | '/dashboard2'
     | '/activate'
     | '/admin'
+    | '/bot-rules'
     | '/dashboard'
     | '/deposit'
     | '/documents'
@@ -281,6 +292,7 @@ export interface FileRouteTypes {
     | '/dashboard2'
     | '/_authenticated/activate'
     | '/_authenticated/admin'
+    | '/_authenticated/bot-rules'
     | '/_authenticated/dashboard'
     | '/_authenticated/deposit'
     | '/_authenticated/documents'
@@ -444,6 +456,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/bot-rules': {
+      id: '/_authenticated/bot-rules'
+      path: '/bot-rules'
+      fullPath: '/bot-rules'
+      preLoaderRoute: typeof AuthenticatedBotRulesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin': {
       id: '/_authenticated/admin'
       path: '/admin'
@@ -478,6 +497,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedActivateRoute: typeof AuthenticatedActivateRoute
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedBotRulesRoute: typeof AuthenticatedBotRulesRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedDepositRoute: typeof AuthenticatedDepositRoute
   AuthenticatedDocumentsRoute: typeof AuthenticatedDocumentsRoute
@@ -497,6 +517,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedActivateRoute: AuthenticatedActivateRoute,
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedBotRulesRoute: AuthenticatedBotRulesRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedDepositRoute: AuthenticatedDepositRoute,
   AuthenticatedDocumentsRoute: AuthenticatedDocumentsRoute,
