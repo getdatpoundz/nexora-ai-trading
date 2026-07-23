@@ -149,12 +149,12 @@ function Landing() {
                 Livedata från marknaden · belopp i SEK
               </span>
               <h1 className="mt-6 font-display text-5xl font-bold leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl">
-                Sveriges nya <span className="text-primary">AI-plattform</span> för kryptoinvesteringar.
+                AI-driven handel för alla <span className="text-primary">— kom igång på några minuter</span>
               </h1>
               <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
-                Nexora AI kombinerar automatiserade strategier, transparent risk och professionella verktyg.
-                Välj din investeringsnivå och låt AI:n sköta portföljen åt dig.
+                Nexora AI är en intelligent handelsbot som analyserar globala marknader dygnet runt — krypto, aktier, valuta och råvaror. Du väljer din risknivå och regler, sedan sköter boten handeln åt dig helt automatiskt.
               </p>
+
               <div className="mt-8 flex flex-wrap items-center gap-3">
                 <Link to="/auth" search={{ mode: "signup" }} className="inline-flex items-center gap-2 rounded-md bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground hover:opacity-90">
                   Öppna konto gratis <ArrowRight className="h-4 w-4" />
@@ -194,8 +194,8 @@ function Landing() {
                   <AreaChart data={chartData} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
                     <defs>
                       <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="oklch(0.62 0.16 155)" stopOpacity={0.35} />
-                        <stop offset="100%" stopColor="oklch(0.62 0.16 155)" stopOpacity={0} />
+                        <stop offset="0%" stopColor="oklch(0.68 0.13 210)" stopOpacity={0.35} />
+                        <stop offset="100%" stopColor="oklch(0.68 0.13 210)" stopOpacity={0} />
                       </linearGradient>
                     </defs>
                     <XAxis dataKey="date" hide />
@@ -204,7 +204,7 @@ function Landing() {
                       contentStyle={{ background: "white", border: "1px solid oklch(0.9 0.005 90)", borderRadius: 8, fontSize: 12 }}
                       formatter={(v: number) => [`${v.toLocaleString("sv-SE")} kr`, "Värde"]}
                     />
-                    <Area type="monotone" dataKey="value" stroke="oklch(0.62 0.16 155)" strokeWidth={2} fill="url(#g1)" />
+                    <Area type="monotone" dataKey="value" stroke="oklch(0.68 0.13 210)" strokeWidth={2} fill="url(#g1)" />
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
@@ -679,7 +679,7 @@ function Landing() {
                   <div className="mt-0.5 text-xs font-semibold text-primary">+18,4% i år</div>
                   <div className="relative mt-4 h-28 overflow-hidden rounded-lg bg-gradient-to-t from-primary/30 to-transparent">
                     <svg viewBox="0 0 200 100" className="h-full w-full" preserveAspectRatio="none">
-                      <path d="M0 80 L20 70 L40 74 L60 55 L80 60 L100 40 L120 45 L140 30 L160 35 L180 20 L200 15" fill="none" stroke="oklch(0.62 0.16 155)" strokeWidth="2" />
+                      <path d="M0 80 L20 70 L40 74 L60 55 L80 60 L100 40 L120 45 L140 30 L160 35 L180 20 L200 15" fill="none" stroke="oklch(0.68 0.13 210)" strokeWidth="2" />
                     </svg>
                   </div>
                   <div className="mt-4 grid grid-cols-3 gap-1.5">
