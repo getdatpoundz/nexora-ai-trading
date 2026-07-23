@@ -17,65 +17,78 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
-const bgCards = [
-  { icon: Bitcoin, label: "BTC/SEK", value: "1 247 500 kr", change: "+4.2%", up: true },
-  { icon: Wallet, label: "Portföljvärde", value: "342 800 kr", change: "+12.5%", up: true },
-  { icon: ArrowRightLeft, label: "ETH/SEK", value: "38 120 kr", change: "-1.3%", up: false },
-  { icon: TrendingUp, label: "Veckovinst", value: "+18 420 kr", change: "+8.1%", up: true },
-  { icon: TrendingDown, label: "SOL/SEK", value: "1 845 kr", change: "-2.7%", up: false },
+const tickerRows = [
+  [
+    { symbol: "ETH", price: "37 980", change: "-0.95%", up: false },
+    { symbol: "SOL", price: "1 878", change: "-0.82%", up: false },
+    { symbol: "XRP", price: "30,60", change: "-0.70%", up: false },
+    { symbol: "DOGE", price: "2,3210", change: "-0.33%", up: false },
+    { symbol: "AAPL", price: "2 384", change: "-0.34%", up: false },
+    { symbol: "TSLA", price: "3 482", change: "-0.12%", up: false },
+    { symbol: "BTC", price: "1 247 500", change: "+4.20%", up: true },
+    { symbol: "BNB", price: "6 120", change: "+1.15%", up: true },
+  ],
+  [
+    { symbol: "NVDA", price: "12 840", change: "+2.10%", up: true },
+    { symbol: "MSFT", price: "4 560", change: "+0.45%", up: true },
+    { symbol: "GOOGL", price: "18 220", change: "-0.18%", up: false },
+    { symbol: "AMZN", price: "3 910", change: "+0.72%", up: true },
+    { symbol: "META", price: "6 780", change: "-0.55%", up: false },
+    { symbol: "AMD", price: "1 450", change: "+1.30%", up: true },
+    { symbol: "COIN", price: "2 180", change: "-1.05%", up: false },
+    { symbol: "MSTR", price: "8 940", change: "+3.25%", up: true },
+  ],
+  [
+    { symbol: "EUR/SEK", price: "11,52", change: "+0.08%", up: true },
+    { symbol: "USD/SEK", price: "10,68", change: "-0.12%", up: false },
+    { symbol: "GBP/SEK", price: "13,84", change: "+0.05%", up: true },
+    { symbol: "GOLD", price: "2 450", change: "+0.62%", up: true },
+    { symbol: "SILVER", price: "28,40", change: "-0.30%", up: false },
+    { symbol: "OIL", price: "82,50", change: "+1.10%", up: true },
+    { symbol: "SP500", price: "5 890", change: "+0.25%", up: true },
+    { symbol: "OMXS30", price: "2 640", change: "-0.15%", up: false },
+  ],
 ];
+
+function TickerStrip({ items, reverse = false, className = "" }: { items: typeof tickerRows[0]; reverse?: boolean; className?: string }) {
+  const doubled = [...items, ...items];
+  return (
+    <div className={`flex overflow-hidden whitespace-nowrap ${className}`}>
+      <div className={`flex animate-ticker ${reverse ? "animate-ticker-reverse" : ""} gap-8`}>
+        {doubled.map((item, i) => (
+          <div key={i} className="flex items-center gap-2 text-sm">
+            <span className="font-semibold text-foreground/70">{item.symbol}</span>
+            <span className="text-foreground/90">{item.price}</span>
+            <span className={item.up ? "text-success" : "text-destructive"}>{item.change}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function AuthBackground() {
   return (
     <div className="absolute inset-0 overflow-hidden bg-background">
-      <div className="absolute inset-0 bg-[radial-gradient(70%_60%_at_20%_30%,oklch(0.68_0.13_210/0.12),transparent)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(60%_50%_at_80%_80%,oklch(0.55_0.13_200/0.10),transparent)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(70%_60%_at_20%_30%,oklch(0.68_0.13_210/0.10),transparent)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(60%_50%_at_80%_80%,oklch(0.55_0.13_200/0.08),transparent)]" />
 
-      {bgCards.map((card, i) => {
-        const Icon = card.icon;
-        const positions = [
-          "left-[8%] top-[18%]",
-          "left-[55%] top-[12%]",
-          "left-[15%] top-[55%]",
-          "left-[60%] top-[50%]",
-          "left-[30%] top-[78%]",
-        ];
-        const delays = ["0s", "1.2s", "0.6s", "2s", "1.5s"];
-        const durations = ["14s", "18s", "16s", "20s", "15s"];
-        return (
-          <div
+      <div
+        className="absolute inset-0 flex flex-col justify-center gap-16"
+        style={{ transform: "rotate(-18deg) scale(1.35)" }}
+      >
+        {tickerRows.map((row, i) => (
+          <TickerStrip
             key={i}
-            className={`absolute ${positions[i]} w-56 rounded-2xl border border-border/50 bg-card/60 p-4 shadow-card blur-[6px] transition-transform will-change-transform animate-float`}
-            style={{ animationDelay: delays[i], animationDuration: durations[i] }}
-          >
-            <div className="flex items-center gap-2">
-              <div className="grid h-8 w-8 place-items-center rounded-lg bg-primary/10">
-                <Icon className="h-4 w-4 text-primary" />
-              </div>
-              <span className="text-xs font-medium text-muted-foreground">{card.label}</span>
-            </div>
-            <div className="mt-3 flex items-end justify-between">
-              <span className="font-display text-lg font-semibold text-card-foreground">{card.value}</span>
-              <span className={`text-xs font-medium ${card.up ? "text-success" : "text-destructive"}`}>{card.change}</span>
-            </div>
-            <div className="mt-3 flex h-8 items-end gap-0.5">
-              {Array.from({ length: 12 }).map((_, j) => {
-                const h = 25 + ((i * 17 + j * 23) % 70);
-                return (
-                  <div
-                    key={j}
-                    className={`flex-1 rounded-sm ${card.up ? "bg-success/40" : "bg-destructive/40"}`}
-                    style={{ height: `${h}%` }}
-                  />
-                );
-              })}
-            </div>
-          </div>
-        );
-      })}
+            items={row}
+            reverse={i % 2 === 1}
+            className="py-3 border-y border-border/30 bg-card/40 backdrop-blur-sm"
+          />
+        ))}
+      </div>
 
-      <div className="pointer-events-none absolute inset-0 backdrop-blur-[42px]" />
-      <div className="absolute inset-0 bg-gradient-to-r from-background/40 via-transparent to-background/60" />
+      <div className="pointer-events-none absolute inset-0 backdrop-blur-[8px]" />
+      <div className="absolute inset-0 bg-gradient-to-br from-background/60 via-background/30 to-background/70" />
     </div>
   );
 }
