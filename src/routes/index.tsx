@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, ShieldCheck, TrendingUp, Sparkles, Check, LineChart, Lock, Wallet, PiggyBank, BarChart3, Bot, Apple, Play } from "lucide-react";
+import { ArrowRight, ShieldCheck, TrendingUp, Sparkles, Check, LineChart, Lock, Wallet, PiggyBank, BarChart3, Bot, Apple, Play, Repeat, Gauge } from "lucide-react";
 import { useEffect, useState } from "react";
 import avanzaLogo from "@/assets/avanza.png";
 import nordnetLogo from "@/assets/nordnet.png";
 import { MarketTicker } from "@/components/landing/MarketTicker";
+import { getLevelByAmount } from "@/lib/investment-levels";
 
 export const Route = createFileRoute("/")({
   component: Landing,
@@ -266,18 +267,29 @@ function Landing() {
                   </div>
                 </div>
 
-                <ul className="mt-6 space-y-2 border-t border-border pt-5 text-sm text-muted-foreground">
-                  <li className="flex items-center gap-2">
-                    <Check className="h-4 w-4 shrink-0 text-primary" /> Full tillgång till AI-strategier
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="h-4 w-4 shrink-0 text-primary" /> Automatisk rebalansering
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="h-4 w-4 shrink-0 text-primary" />
-                    {tier.extendedKyc ? "Dedikerad kontaktperson" : "Standardrapportering"}
-                  </li>
-                </ul>
+                {(() => {
+                  const meta = getLevelByAmount(tier.amount);
+                  const leverageLabel = meta.maxLeveragePct === 0 ? "Ingen hävstång" : `Upp till ${meta.maxLeveragePct}% hävstång`;
+                  return (
+                    <ul className="mt-6 space-y-2 border-t border-border pt-5 text-sm text-muted-foreground">
+                      <li className="flex items-center gap-2">
+                        <Repeat className="h-4 w-4 shrink-0 text-primary" />
+                        Upp till <span className="font-semibold text-foreground tabular-nums">{meta.maxTradesPerMonth}</span> trades / månad
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <Gauge className="h-4 w-4 shrink-0 text-primary" />
+                        <span className="font-medium text-foreground">{leverageLabel}</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <Check className="h-4 w-4 shrink-0 text-primary" /> Full tillgång till AI-strategier
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <Check className="h-4 w-4 shrink-0 text-primary" />
+                        {tier.extendedKyc ? "Dedikerad kontaktperson" : "Automatisk rebalansering"}
+                      </li>
+                    </ul>
+                  );
+                })()}
 
                 <Link
                   to="/auth"
