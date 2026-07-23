@@ -183,7 +183,7 @@ function Landing() {
             <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-xs uppercase tracking-wider text-muted-foreground">Portfölj · Balanserad</p>
+                  <p className="text-xs uppercase tracking-wider text-muted-foreground">Balanserad</p>
                   <p className="mt-1 font-display text-3xl font-bold tabular-nums">1 284 500 kr</p>
                   <p className="mt-1 text-sm font-semibold text-primary">+18,4% i år · simulerat</p>
                 </div>
