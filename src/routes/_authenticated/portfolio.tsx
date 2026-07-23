@@ -63,8 +63,10 @@ function PortfolioPage() {
     return () => { cancelled = true; supabase.removeChannel(ch); };
   }, [user]);
 
-  const pnl = balance - totalDeposited;
-  const pnlPct = totalDeposited > 0 ? (pnl / totalDeposited) * 100 : 0;
+  const assignedBase = Number(profile?.assigned_level_sek ?? 0);
+  const pnlBase = Math.max(totalDeposited, assignedBase);
+  const pnl = balance - pnlBase;
+  const pnlPct = pnlBase > 0 ? (pnl / pnlBase) * 100 : 0;
 
   const history = useMemo(() => {
     if (totalDeposited === 0 && trades.length === 0) return [];
