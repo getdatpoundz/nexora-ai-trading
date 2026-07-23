@@ -16,6 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { sek } from "@/lib/format";
 import { formatDistanceToNow } from "date-fns";
 import { sv } from "date-fns/locale";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export const Route = createFileRoute("/_authenticated/strategies")({
   component: StrategiesPage,
@@ -42,6 +43,8 @@ type Position = {
 };
 
 function StrategiesPage() {
+  const isMobile = useIsMobile();
+  const chartH = isMobile ? 380 : 620;
   const { user } = useAuth();
   const { profile } = useProfile(user?.id);
   const { session } = useBotStatus(user?.id);
@@ -176,7 +179,7 @@ function StrategiesPage() {
               </div>
               <Badge variant="outline" className="gap-1"><Radio className="h-3 w-3" /> Realtid</Badge>
             </div>
-            <TradingViewWidget symbol={tvSymbol} height={620} interval="15" />
+            <TradingViewWidget symbol={tvSymbol} height={chartH} interval="15" />
           </div>
 
           <div className="rounded-2xl border border-border bg-card p-4">

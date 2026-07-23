@@ -1,11 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
-
-// Approximate SEK spot prices used as fallback when live API is unavailable.
-const FALLBACK_SEK: Record<string, number> = {
-  BTC: 950000, ETH: 38000, SOL: 2000, ADA: 6, DOT: 75, AVAX: 380,
-  MATIC: 8, LINK: 180, XRP: 6, DOGE: 2.2, LTC: 900, BNB: 6500,
-};
+import { MARKET_UNIVERSE, fallbackNativePrice, fallbackFxToSek } from "@/lib/market-data.shared";
 
 function ymUTC(d = new Date()): string {
   return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
@@ -16,20 +11,30 @@ function rand(min: number, max: number): number {
 }
 
 async function fetchPriceSek(symbol: string): Promise<number> {
+  const asset = MARKET_UNIVERSE.find((a) => a.symbol === symbol);
   const apiKey = process.env.TWELVE_DATA_API_KEY;
-  if (apiKey) {
+  if (asset && apiKey) {
     try {
-      const url = `https://api.twelvedata.com/price?symbol=${symbol}/USD&apikey=${apiKey}`;
+      const url = `https://api.twelvedata.com/price?symbol=${encodeURIComponent(asset.td)}&apikey=${apiKey}`;
       const r = await fetch(url);
       if (r.ok) {
         const j = (await r.json()) as { price?: string };
-        const usd = Number(j.price);
-        if (Number.isFinite(usd) && usd > 0) return usd * 10.5; // rough SEK/USD
+        const native = Number(j.price);
+        if (Number.isFinite(native) && native > 0) {
+          return native * fallbackFxToSek(asset.currency);
+        }
       }
     } catch { /* fall through */ }
   }
-  return FALLBACK_SEK[symbol] ?? 100;
+  const native = asset ? fallbackNativePrice(symbol) : 100;
+  const fx = asset ? fallbackFxToSek(asset.currency) : 10.5;
+  return native * fx;
 }
+
+function assetTypeFor(symbol: string): string {
+  return MARKET_UNIVERSE.find((a) => a.symbol === symbol)?.type ?? "crypto";
+}
+
 
 export const Route = createFileRoute("/api/public/hooks/bot-tick")({
   server: {
@@ -100,13 +105,13 @@ export const Route = createFileRoute("/api/public/hooks/bot-tick")({
 
             // Buy
             await admin.from("trades").insert({
-              user_id: s.user_id, symbol, asset_type: "crypto", side: "buy",
+              user_id: s.user_id, symbol, asset_type: assetTypeFor(symbol), side: "buy",
               quantity, price_sek: buyPrice, fee_sek: positionSek * 0.001,
               total_sek: positionSek, executed_at: buyAt.toISOString(),
             });
             // Sell
             await admin.from("trades").insert({
-              user_id: s.user_id, symbol, asset_type: "crypto", side: "sell",
+              user_id: s.user_id, symbol, asset_type: assetTypeFor(symbol), side: "sell",
               quantity, price_sek: sellPrice, fee_sek: quantity * sellPrice * 0.001,
               total_sek: quantity * sellPrice, executed_at: now.toISOString(),
             });

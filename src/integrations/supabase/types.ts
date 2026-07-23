@@ -420,6 +420,36 @@ export type Database = {
         }
         Relationships: []
       }
+      support_messages: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          read_by_admin_at: string | null
+          read_by_user_at: string | null
+          sender_role: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          read_by_admin_at?: string | null
+          read_by_user_at?: string | null
+          sender_role: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          read_by_admin_at?: string | null
+          read_by_user_at?: string | null
+          sender_role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       trades: {
         Row: {
           asset_type: string

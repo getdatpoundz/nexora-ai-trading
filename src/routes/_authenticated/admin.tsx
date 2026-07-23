@@ -22,6 +22,7 @@ import {
   adminSetWithdrawalsEnabled,
 } from "@/lib/withdrawal.functions";
 import { Textarea } from "@/components/ui/textarea";
+import { AdminSupportPanel } from "@/components/admin/AdminSupportPanel";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminPage,
@@ -94,6 +95,8 @@ function AdminInner() {
         <CreateCustomerForm onCreated={() => qc.invalidateQueries({ queryKey: ["admin-customers"] })} />
 
         <WithdrawalsPanel />
+
+        <AdminSupportPanel />
 
         <div className="rounded-2xl border border-border bg-card">
           <div className="flex items-center justify-between border-b border-border p-4">
