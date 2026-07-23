@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, ShieldCheck, TrendingUp, Sparkles, Check, LineChart, Lock, Wallet, PiggyBank, BarChart3, Bot, Apple, Play } from "lucide-react";
+import { ArrowRight, ShieldCheck, TrendingUp, Sparkles, Check, LineChart, Lock, Wallet, PiggyBank, BarChart3, Bot, Apple, Play, Repeat, Gauge } from "lucide-react";
 import { useEffect, useState } from "react";
 import avanzaLogo from "@/assets/avanza.png";
 import nordnetLogo from "@/assets/nordnet.png";
 import { MarketTicker } from "@/components/landing/MarketTicker";
+import { getLevelByAmount } from "@/lib/investment-levels";
 
 export const Route = createFileRoute("/")({
   component: Landing,
