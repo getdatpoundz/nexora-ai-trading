@@ -53,10 +53,6 @@ function MarketsPage() {
   const botRunning = session?.status === "running";
 
   async function letBotTrade(asset: MarketAsset) {
-    if (asset.type !== "crypto") {
-      toast.error("Boten stödjer endast krypto för tillfället");
-      return;
-    }
     try {
       await startFn({ data: { allowed_assets: [asset.symbol], strategy: "ai_hybrid", aggressiveness: 5 } });
       toast.success(`Boten tradar nu ${asset.symbol}`, { description: "Öppna Trade (AI) för att följa live." });
