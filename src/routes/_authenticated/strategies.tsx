@@ -16,6 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { sek } from "@/lib/format";
 import { formatDistanceToNow } from "date-fns";
 import { sv } from "date-fns/locale";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export const Route = createFileRoute("/_authenticated/strategies")({
   component: StrategiesPage,
