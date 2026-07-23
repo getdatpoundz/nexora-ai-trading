@@ -70,7 +70,7 @@ export function AdminSupportPanel() {
       .map(([uid, msgs]) => ({
         userId: uid,
         latest: msgs[msgs.length - 1],
-        unread: msgs.filter((m) => m.sender_role === "user" && !m.read_by_admin_at_).length,
+        unread: msgs.filter((m) => m.sender_role === "user").length,
         msgs,
       }))
       .sort((a, b) => b.latest.created_at.localeCompare(a.latest.created_at));
