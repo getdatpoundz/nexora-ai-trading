@@ -106,7 +106,47 @@ function PortfolioPage() {
     return points;
   }, [trades, totalDeposited, balance]);
 
-  const recentTrades = useMemo(() => [...trades].slice(-8).reverse(), [trades]);
+  const recentPositions = useMemo(() => {
+    const sorted = [...trades].sort((a, b) => (a.executed_at < b.executed_at ? -1 : 1));
+    const open: Record<string, Trade[]> = {};
+    const closed: {
+      id: string;
+      symbol: string;
+      qty: number;
+      entry: number;
+      exit: number;
+      cost: number;
+      proceeds: number;
+      pnl: number;
+      multiplier: number;
+      opened_at: string;
+      closed_at: string;
+    }[] = [];
+    for (const t of sorted) {
+      if (t.side === "buy") {
+        (open[t.symbol] ||= []).push(t);
+      } else {
+        const b = open[t.symbol]?.shift();
+        if (!b) continue;
+        const cost = Number(b.total_sek);
+        const proceeds = Number(t.total_sek);
+        closed.push({
+          id: t.id,
+          symbol: t.symbol,
+          qty: Number(b.quantity),
+          entry: Number(b.price_sek),
+          exit: Number(t.price_sek),
+          cost,
+          proceeds,
+          pnl: proceeds - cost,
+          multiplier: cost > 0 ? proceeds / cost : 1,
+          opened_at: b.executed_at,
+          closed_at: t.executed_at,
+        });
+      }
+    }
+    return closed.slice(-8).reverse();
+  }, [trades]);
 
   return (
     <AppShell title="Min portfölj">
