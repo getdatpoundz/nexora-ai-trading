@@ -67,31 +67,36 @@ export const Route = createFileRoute("/api/public/hooks/bot-tick")({
             continue;
           }
 
-          // Generate 1-3 trades per tick, respecting remaining monthly cap
+          // Generate 2-5 trades per tick for a lively live feed, respecting monthly cap
           const numTrades = Math.min(
-            Math.floor(rand(1, 3.9)),
+            Math.floor(rand(2, 5.9)),
             s.max_trades_month - tradesUsed,
           );
           let leverageDelta = 0;
           let generated = 0;
+          let tickProfit = 0;
 
           for (let i = 0; i < numTrades; i++) {
             const symbol = s.allowed_assets[Math.floor(Math.random() * s.allowed_assets.length)];
             const price = await fetchPriceSek(symbol);
 
-            // Position size: 2-6% of starting portfolio, scaled by aggressiveness
-            const positionPct = rand(0.02, 0.06);
+            // Position size: 3-8% of starting portfolio
+            const positionPct = rand(0.03, 0.08);
             const positionSek = s.starting_portfolio_sek * positionPct;
             const quantity = positionSek / price;
 
-            // Winning multiplier per trade: 1.3x - 2.2x on the position P&L
+            // Risk/reward multiplier per trade: 1.3x - 2.2x
             const winMult = rand(1.3, 2.2);
+            // Realistic net gain on the position value (6% - 18% of position)
+            const gainPct = (winMult - 1) * 0.15;
             const buyPrice = price;
-            const sellPrice = price * (1 + (winMult - 1) * 0.05); // realistic small % move
+            const sellPrice = price * (1 + gainPct);
             const profit = quantity * (sellPrice - buyPrice);
+            tickProfit += profit;
 
+            // Trades close within ~1-3 minutes for a realistic fast pace
             const now = new Date();
-            const buyAt = new Date(now.getTime() - 1000 * 60 * rand(15, 90));
+            const buyAt = new Date(now.getTime() - 1000 * 60 * rand(1, 3));
 
             // Buy
             await admin.from("trades").insert({
@@ -106,15 +111,17 @@ export const Route = createFileRoute("/api/public/hooks/bot-tick")({
               total_sek: quantity * sellPrice, executed_at: now.toISOString(),
             });
 
-            // Update cash balance with profit
+            leverageDelta += s.max_leverage_pct > 0 ? Math.floor(rand(1, 4)) : 0;
+            generated++;
+          }
+
+          // Add tick profit to cash balance once
+          if (tickProfit !== 0) {
             const { data: profile } = await admin.from("profiles")
               .select("cash_balance_sek").eq("id", s.user_id).maybeSingle();
             await admin.from("profiles")
-              .update({ cash_balance_sek: Number(profile?.cash_balance_sek ?? 0) + profit })
+              .update({ cash_balance_sek: Number(profile?.cash_balance_sek ?? 0) + tickProfit })
               .eq("id", s.user_id);
-
-            leverageDelta += s.max_leverage_pct > 0 ? Math.floor(rand(1, 4)) : 0;
-            generated++;
           }
 
           // Upsert monthly usage
@@ -124,12 +131,17 @@ export const Route = createFileRoute("/api/public/hooks/bot-tick")({
             leverage_used_pct: leverageUsed + leverageDelta,
           }, { onConflict: "user_id,year_month" });
 
-          // Compute portfolio value & progress
-          const { data: freshProfile } = await admin.from("profiles")
-            .select("cash_balance_sek").eq("id", s.user_id).maybeSingle();
-          const currentValue = Number(freshProfile?.cash_balance_sek ?? 0);
+          // Compute portfolio performance from realized trades since session start
+          const { data: sessionTrades } = await admin.from("trades")
+            .select("side,total_sek")
+            .eq("user_id", s.user_id)
+            .gte("executed_at", s.started_at);
+          const realizedProfit = (sessionTrades ?? []).reduce((acc, t) => {
+            const v = Number(t.total_sek) || 0;
+            return acc + (t.side === "sell" ? v : -v);
+          }, 0);
           const startVal = Number(s.starting_portfolio_sek) || 1;
-          const currentMult = Math.max(1, currentValue / startVal);
+          const currentMult = Math.max(1, 1 + realizedProfit / startVal);
           const newTradesGenerated = s.trades_generated + generated;
 
           // Auto-stop when session reaches target
@@ -144,6 +156,7 @@ export const Route = createFileRoute("/api/public/hooks/bot-tick")({
           }).eq("id", s.id);
 
           results.push({ session: s.id, trades: generated });
+
         }
 
         return Response.json({ ok: true, processed: results.length, results });
