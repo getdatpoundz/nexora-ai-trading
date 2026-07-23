@@ -1,8 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, ShieldCheck, TrendingUp, Sparkles, Check, LineChart, Lock, Wallet, PiggyBank, BarChart3, Bot, Apple, Play } from "lucide-react";
-import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts";
-import { useEffect, useMemo, useState } from "react";
-import { generatePortfolioHistory } from "@/lib/demo-data";
+import { useEffect, useState } from "react";
 import avanzaLogo from "@/assets/avanza.png";
 import nordnetLogo from "@/assets/nordnet.png";
 import { MarketTicker } from "@/components/landing/MarketTicker";
