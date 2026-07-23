@@ -141,11 +141,7 @@ function Landing() {
         <div className="mx-auto max-w-7xl px-6 py-20 lg:py-28">
           <div className="grid gap-12 lg:grid-cols-[1.05fr_1fr] lg:items-center">
             <div>
-              <span className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
-                <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-                Livedata från marknaden · belopp i SEK
-              </span>
-              <h1 className="mt-6 font-display text-5xl font-bold leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl">
+              <h1 className="font-display text-5xl font-bold leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl">
                 AI-driven handel för alla <span className="text-primary">— kom igång på några minuter</span>
               </h1>
               <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
