@@ -251,20 +251,40 @@ function BotRulesPage() {
 
         {/* Assets */}
         <section className="rounded-2xl border border-border bg-card p-6">
-          <div className="mb-4 flex items-center gap-2">
-            <Coins className="h-4 w-4 text-primary" />
-            <h3 className="font-semibold">Tillgångar boten får handla</h3>
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <Coins className="h-4 w-4 text-primary" />
+              <h3 className="font-semibold">Tillgångar boten får handla</h3>
+            </div>
+            <div className="flex gap-2">
+              <button type="button" onClick={() => setConfig((c) => ({ ...c, preset: "anpassad", assets: [...AVAILABLE_ASSETS] }))}
+                className="rounded-md border border-border px-2.5 py-1 text-xs hover:bg-muted">Välj alla</button>
+              <button type="button" onClick={() => setConfig((c) => ({ ...c, preset: "anpassad", assets: [] }))}
+                className="rounded-md border border-border px-2.5 py-1 text-xs hover:bg-muted">Rensa</button>
+            </div>
           </div>
-          <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-5">
-            {AVAILABLE_ASSETS.map((a) => (
-              <label key={a} className={`flex cursor-pointer items-center gap-2 rounded-lg border p-3 text-sm transition ${config.assets.includes(a) ? "border-primary bg-primary/5" : "border-border hover:border-primary/40"}`}>
-                <Checkbox checked={config.assets.includes(a)} onCheckedChange={() => toggleAsset(a)} />
-                <span className="font-medium">{a}</span>
-              </label>
-            ))}
+          <div className="space-y-4">
+            {ASSET_GROUPS.map((g) => {
+              const items = MARKET_UNIVERSE.filter((m) => m.type === g.key);
+              if (items.length === 0) return null;
+              return (
+                <div key={g.key}>
+                  <div className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">{g.label}</div>
+                  <div className="grid gap-2 grid-cols-2 sm:grid-cols-3 md:grid-cols-5">
+                    {items.map((m) => (
+                      <label key={m.symbol} className={`flex cursor-pointer items-center gap-2 rounded-lg border p-2.5 text-sm transition ${config.assets.includes(m.symbol) ? "border-primary bg-primary/5" : "border-border hover:border-primary/40"}`}>
+                        <Checkbox checked={config.assets.includes(m.symbol)} onCheckedChange={() => toggleAsset(m.symbol)} />
+                        <span className="truncate font-medium">{m.symbol}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
           </div>
           {config.assets.length === 0 && <p className="mt-3 text-xs text-destructive">Välj minst en tillgång</p>}
         </section>
+
 
         {/* Risk rules */}
         <section className="rounded-2xl border border-border bg-card p-6">
