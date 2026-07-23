@@ -148,8 +148,13 @@ function PortfolioPage() {
             }
             tone={pnl >= 0 ? "success" : "warning"}
           />
-          <StatCard label="Antal trades" value={String(trades.length)} sub="Totalt genomförda" />
+          <StatCard
+            label="Avslutade positioner"
+            value={String(trades.filter((t) => t.side === "sell").length)}
+            sub="Köp + sälj räknas som en position"
+          />
         </div>
+
 
         <div className="rounded-2xl border border-border bg-card p-6">
           <div className="flex items-center justify-between">
