@@ -28,9 +28,14 @@ export const startBot = createServerFn({ method: "POST" })
     await supabase.from("bot_sessions").update({ status: "stopped", stopped_at: new Date().toISOString() })
       .eq("user_id", userId).in("status", ["running", "paused", "limit_reached"]);
 
-    // Portfolio starting value = cash + current holdings value (simplified: use cash + level amount as baseline)
-    const startingValue = Number(profile?.cash_balance_sek ?? 0) + (profile?.assigned_level_sek ?? level.amount);
+    // Baslinje = användarens faktiska aktiva kapital (samma tal som "Totalt värde" i portföljen).
+    // Fallback till tilldelad nivå om kontot inte är finansierat än.
+    const startingValue =
+      Number(profile?.cash_balance_sek ?? 0) > 0
+        ? Number(profile?.cash_balance_sek)
+        : Number(profile?.assigned_level_sek ?? level.amount);
     const targetTrades = Math.min(level.maxTradesPerMonth, Math.max(30, Math.floor(level.maxTradesPerMonth * 0.6)));
+
 
     const { data: session, error } = await supabase.from("bot_sessions").insert({
       user_id: userId,
