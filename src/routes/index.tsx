@@ -100,8 +100,6 @@ const formatSek = (n: number) => `${n.toLocaleString("sv-SE")} kr`;
 
 
 function Landing() {
-  const chartData = useMemo(() => generatePortfolioHistory(180), []);
-
   return (
     <div className="theme-nordnet min-h-screen">
       {/* Top ticker (twelvedata-stil, ovanför navigationen) */}
