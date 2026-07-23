@@ -95,7 +95,7 @@ function AuthBackground() {
             <TickerStrip
               items={row}
               reverse={i % 2 === 1}
-              className="py-3 border-y border-border/25 bg-card/35"
+              className="py-3 border-y border-border/25 bg-card/35 backdrop-blur-[2px]"
             />
           </div>
         ))}
