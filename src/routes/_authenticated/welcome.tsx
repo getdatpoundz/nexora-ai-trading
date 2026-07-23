@@ -29,8 +29,11 @@ function WelcomePage() {
 
   useEffect(() => {
     if (!data?.profile) return;
-    // Om redan krediterad → dashboard
-    if (data.latest_selection?.onramp_status === "funded" && data.profile.activated_at) {
+    const p = data.profile;
+    const funded = data.latest_selection?.onramp_status === "funded";
+    // Visa välkomstsidan endast vid första inlogget på nyskapade konton.
+    // Redan aktiverade, redan fundade, eller konton utan tilldelad investeringsnivå (t.ex. admin) → dashboard.
+    if (p.activated_at || funded || !p.assigned_level_sek) {
       navigate({ to: "/dashboard" });
     }
   }, [data, navigate]);
@@ -117,6 +120,13 @@ function WelcomePage() {
               Till min portfölj
             </Button>
           )}
+          <Button
+            variant="ghost"
+            className="w-full sm:w-auto"
+            onClick={() => navigate({ to: "/dashboard" })}
+          >
+            Hoppa över – gå till dashboard
+          </Button>
         </div>
       </div>
     </div>
