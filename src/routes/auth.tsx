@@ -51,15 +51,15 @@ const tickerRows = [
 ];
 
 function TickerStrip({ items, reverse = false, className = "" }: { items: typeof tickerRows[0]; reverse?: boolean; className?: string }) {
-  const doubled = [...items, ...items];
+  const doubled = [...items, ...items, ...items, ...items];
   return (
     <div className={`flex overflow-hidden whitespace-nowrap ${className}`}>
-      <div className={`flex animate-ticker ${reverse ? "animate-ticker-reverse" : ""} gap-8`}>
+      <div className={`flex animate-ticker ${reverse ? "animate-ticker-reverse" : ""} gap-10`}>
         {doubled.map((item, i) => (
-          <div key={i} className="flex items-center gap-2 text-sm">
-            <span className="font-semibold text-foreground/70">{item.symbol}</span>
-            <span className="text-foreground/90">{item.price}</span>
-            <span className={item.up ? "text-success" : "text-destructive"}>{item.change}</span>
+          <div key={i} className="flex items-center gap-2.5 text-[15px]">
+            <span className="font-semibold text-foreground/80">{item.symbol}</span>
+            <span className="text-foreground">{item.price}</span>
+            <span className={`font-medium ${item.up ? "text-success" : "text-destructive"}`}>{item.change}</span>
           </div>
         ))}
       </div>
@@ -68,26 +68,40 @@ function TickerStrip({ items, reverse = false, className = "" }: { items: typeof
 }
 
 function AuthBackground() {
+  const stripPositions = [
+    { top: "12%", left: "-10%", width: "120%" },
+    { top: "38%", left: "-5%", width: "115%" },
+    { top: "64%", left: "-15%", width: "130%" },
+  ];
+
   return (
     <div className="absolute inset-0 overflow-hidden bg-background">
       <div className="absolute inset-0 bg-[radial-gradient(70%_60%_at_20%_30%,oklch(0.68_0.13_210/0.10),transparent)]" />
       <div className="absolute inset-0 bg-[radial-gradient(60%_50%_at_80%_80%,oklch(0.55_0.13_200/0.08),transparent)]" />
 
-      <div
-        className="absolute -inset-[20%] flex flex-col justify-center gap-20"
-        style={{ transform: "rotate(-16deg) scale(1.25)" }}
-      >
+      <div className="absolute inset-0">
         {tickerRows.map((row, i) => (
-          <TickerStrip
+          <div
             key={i}
-            items={row}
-            reverse={i % 2 === 1}
-            className="py-2.5 border-y border-border/20 bg-card/30"
-          />
+            className="absolute"
+            style={{
+              top: stripPositions[i].top,
+              left: stripPositions[i].left,
+              width: stripPositions[i].width,
+              transform: `rotate(${-8 + i * 2}deg)`,
+              transformOrigin: "left center",
+            }}
+          >
+            <TickerStrip
+              items={row}
+              reverse={i % 2 === 1}
+              className="py-3 border-y border-border/25 bg-card/35"
+            />
+          </div>
         ))}
       </div>
 
-      <div className="absolute inset-0 bg-gradient-to-br from-background/55 via-background/25 to-background/65" />
+      <div className="absolute inset-0 bg-gradient-to-br from-background/50 via-background/20 to-background/60" />
     </div>
   );
 }
