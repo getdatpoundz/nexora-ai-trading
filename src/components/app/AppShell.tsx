@@ -2,7 +2,7 @@ import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
 import {
   Wallet, Brain, LineChart, ArrowLeftRight,
-  ArrowDownToLine, ArrowUpFromLine, LifeBuoy, Settings,
+  ArrowDownToLine, ArrowUpFromLine, LifeBuoy, Settings, SlidersHorizontal,
   Bell, Menu, X, LogOut, ShieldAlert, User as UserIcon, HelpCircle,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,18 +18,19 @@ import { BotStatusBanner } from "@/components/app/BotStatusBanner";
 import { VerificationBanner } from "@/components/app/VerificationBanner";
 
 const NAV = [
-  { to: "/portfolio", label: "Min portfölj", icon: Wallet },
+  { to: "/portfolio", label: "Översikt", icon: Wallet },
   { to: "/strategies", label: "Trade (AI)", icon: Brain },
   { to: "/markets", label: "Marknader", icon: LineChart },
   { to: "/transactions", label: "Transaktioner", icon: ArrowLeftRight },
   { to: "/deposit", label: "Sätt in", icon: ArrowDownToLine },
   { to: "/withdraw", label: "Ta ut", icon: ArrowUpFromLine },
+  { to: "/bot-rules", label: "Bot-regler", icon: SlidersHorizontal },
   { to: "/support", label: "Support", icon: LifeBuoy },
   { to: "/settings", label: "Inställningar", icon: Settings },
 ] as const;
 
 const MOBILE_NAV = [
-  { to: "/portfolio", label: "Portfölj", icon: Wallet },
+  { to: "/portfolio", label: "Översikt", icon: Wallet },
   { to: "/strategies", label: "Trade (AI)", icon: Brain },
   { to: "/markets", label: "Marknader", icon: LineChart },
   { to: "/transactions", label: "Historik", icon: ArrowLeftRight },
