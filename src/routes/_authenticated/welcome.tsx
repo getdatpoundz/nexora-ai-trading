@@ -120,6 +120,13 @@ function WelcomePage() {
               Till min portfölj
             </Button>
           )}
+          <Button
+            variant="ghost"
+            className="w-full sm:w-auto"
+            onClick={() => navigate({ to: "/dashboard" })}
+          >
+            Hoppa över – gå till dashboard
+          </Button>
         </div>
       </div>
     </div>
