@@ -179,7 +179,7 @@ function StrategiesPage() {
               </div>
               <Badge variant="outline" className="gap-1"><Radio className="h-3 w-3" /> Realtid</Badge>
             </div>
-            <TradingViewWidget symbol={tvSymbol} height={620} interval="15" />
+            <TradingViewWidget symbol={tvSymbol} height={chartH} interval="15" />
           </div>
 
           <div className="rounded-2xl border border-border bg-card p-4">
