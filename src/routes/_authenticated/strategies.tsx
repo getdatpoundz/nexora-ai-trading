@@ -43,6 +43,8 @@ type Position = {
 };
 
 function StrategiesPage() {
+  const isMobile = useIsMobile();
+  const chartH = isMobile ? 380 : 620;
   const { user } = useAuth();
   const { profile } = useProfile(user?.id);
   const { session } = useBotStatus(user?.id);
