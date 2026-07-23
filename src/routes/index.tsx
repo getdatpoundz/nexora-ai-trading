@@ -149,12 +149,12 @@ function Landing() {
                 Livedata från marknaden · belopp i SEK
               </span>
               <h1 className="mt-6 font-display text-5xl font-bold leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl">
-                Sveriges nya <span className="text-primary">AI-plattform</span> för kryptoinvesteringar.
+                AI-driven handel för alla <span className="text-primary">— kom igång på några minuter</span>
               </h1>
               <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
-                Nexora AI kombinerar automatiserade strategier, transparent risk och professionella verktyg.
-                Välj din investeringsnivå och låt AI:n sköta portföljen åt dig.
+                Nexora AI är en intelligent handelsbot som analyserar globala marknader dygnet runt — krypto, aktier, valuta och råvaror. Du väljer din risknivå och regler, sedan sköter boten handeln åt dig helt automatiskt.
               </p>
+
               <div className="mt-8 flex flex-wrap items-center gap-3">
                 <Link to="/auth" search={{ mode: "signup" }} className="inline-flex items-center gap-2 rounded-md bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground hover:opacity-90">
                   Öppna konto gratis <ArrowRight className="h-4 w-4" />
