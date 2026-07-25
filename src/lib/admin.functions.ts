@@ -256,6 +256,55 @@ export const adminSetBalance = createServerFn({ method: "POST" })
     return { ok: true, cash_balance_sek: data.cash_balance_sek };
   });
 
+const upgradeLevelSchema = z.object({
+  user_id: z.string().uuid(),
+  level_key: z.string().min(1),
+  credit_delta: z.boolean().optional(), // default true
+});
+
+/** Uppgraderar kundens nivå och lägger till mellanskillnaden i kontantsaldot
+ *  (utöver det de redan har). Om credit_delta=false lägger inget till. */
+export const adminUpgradeLevel = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: z.infer<typeof upgradeLevelSchema>) => upgradeLevelSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const level = INVESTMENT_LEVELS.find((l) => l.key === data.level_key);
+    if (!level) throw new Error("Ogiltig nivå");
+
+    const { data: profile, error: pErr } = await supabaseAdmin
+      .from("profiles")
+      .select("id, cash_balance_sek, assigned_level_sek")
+      .eq("id", data.user_id)
+      .maybeSingle();
+    if (pErr) throw new Error(pErr.message);
+    if (!profile) throw new Error("Kund saknas");
+
+    const prevLevel = Number(profile.assigned_level_sek ?? 0);
+    const credit = data.credit_delta === false ? 0 : Math.max(0, level.amount - prevLevel);
+    const newCash = Number(profile.cash_balance_sek ?? 0) + credit;
+
+    const { error: uErr } = await supabaseAdmin
+      .from("profiles")
+      .update({
+        assigned_level_sek: level.amount,
+        assigned_level_name: level.name,
+        cash_balance_sek: newCash,
+      })
+      .eq("id", data.user_id);
+    if (uErr) throw new Error(uErr.message);
+
+    return {
+      ok: true,
+      level_name: level.name,
+      level_sek: level.amount,
+      credited_sek: credit,
+      new_cash_balance_sek: newCash,
+    };
+  });
+
 const impersonateSchema = z.object({
   user_id: z.string().uuid(),
   password: z.string().min(6).max(72).optional(),
