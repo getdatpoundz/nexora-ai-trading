@@ -4,9 +4,13 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { adminGetCustomerDashboard } from "@/lib/admin.functions";
+import { adminGetCustomerDashboard, adminRunProfitRound } from "@/lib/admin.functions";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, RefreshCw } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { ArrowLeft, RefreshCw, Zap } from "lucide-react";
+import { toast } from "sonner";
+
 
 export const Route = createFileRoute("/_authenticated/admin/customer/$id")({
   component: AdminCustomerPage,
@@ -27,6 +31,12 @@ function AdminCustomerPage() {
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const { id } = useParams({ from: "/_authenticated/admin/customer/$id" });
   const fn = useServerFn(adminGetCustomerDashboard);
+  const runProfitFn = useServerFn(adminRunProfitRound);
+  const [profitAmount, setProfitAmount] = useState("10000");
+  const [numTrades, setNumTrades] = useState("20");
+  const [spreadMin, setSpreadMin] = useState("120");
+  const [running, setRunning] = useState(false);
+
 
   useEffect(() => {
     if (!user) return;
@@ -93,6 +103,52 @@ function AdminCustomerPage() {
               <Stat label="Onboarding" value={p.onboarding_completed ? "Klar" : "Ej klar"} />
               <Stat label="Uttag" value={p.withdrawals_enabled === false ? "Blockerat" : "Tillåtet"} />
             </div>
+
+            <Panel title="Kör vinstrunda (simulerad bot-session)">
+              <div className="space-y-3 p-3">
+                <p className="text-xs text-muted-foreground">
+                  Genererar en realistisk serie trades på kundens bot-session som netto landar på angiven vinst.
+                  Varje trade får varierande avkastning (3–15% per position), blandat vinnare/förlorare, jämnt fördelade över tidsspannet. Kontantsaldo och multiplier uppdateras automatiskt.
+                </p>
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <div>
+                    <Label className="text-xs">Målvinst (SEK)</Label>
+                    <Input type="number" value={profitAmount} onChange={(e) => setProfitAmount(e.target.value)} min={1} />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Antal trades</Label>
+                    <Input type="number" value={numTrades} onChange={(e) => setNumTrades(e.target.value)} min={3} max={200} />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Tidsspann (minuter)</Label>
+                    <Input type="number" value={spreadMin} onChange={(e) => setSpreadMin(e.target.value)} min={1} />
+                  </div>
+                </div>
+                <Button
+                  disabled={running}
+                  onClick={async () => {
+                    const amt = Number(profitAmount);
+                    const nt = Number(numTrades);
+                    const sp = Number(spreadMin);
+                    if (!Number.isFinite(amt) || amt <= 0) return toast.error("Ogiltig vinst");
+                    if (!confirm(`Skapa ${nt} trades som netto ger ${amt.toLocaleString("sv-SE")} kr vinst?`)) return;
+                    setRunning(true);
+                    try {
+                      const res = await runProfitFn({ data: { user_id: id, target_profit_sek: amt, num_trades: nt, spread_minutes: sp } });
+                      toast.success(`Klar: ${res.trades_created} trades · nytt saldo ${fmtSek(res.new_cash_balance_sek)} · ${res.current_multiplier.toFixed(3)}x`);
+                      refetch();
+                    } catch (e: any) {
+                      toast.error(e?.message ?? "Fel");
+                    } finally {
+                      setRunning(false);
+                    }
+                  }}
+                >
+                  <Zap className="mr-2 h-4 w-4" /> {running ? "Kör ..." : "Kör vinstrunda"}
+                </Button>
+              </div>
+            </Panel>
+
 
             <Panel title="Innehav">
               {holdings.length === 0 ? <Empty /> : (
