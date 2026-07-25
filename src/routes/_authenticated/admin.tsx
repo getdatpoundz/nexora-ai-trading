@@ -253,7 +253,7 @@ function CustomerRow({ customer }: { customer: any }) {
   const resetFn = useServerFn(adminResetPassword);
   const markFn = useServerFn(adminMarkFunded);
   const balanceFn = useServerFn(adminSetBalance);
-  const impersonateFn = useServerFn(adminImpersonate);
+  
   const setPwFn = useServerFn(adminSetPassword);
   const qc = useQueryClient();
   const [newPw, setNewPw] = useState<string | null>(null);
