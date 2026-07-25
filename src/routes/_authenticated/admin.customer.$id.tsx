@@ -104,6 +104,52 @@ function AdminCustomerPage() {
               <Stat label="Uttag" value={p.withdrawals_enabled === false ? "Blockerat" : "Tillåtet"} />
             </div>
 
+            <Panel title="Kör vinstrunda (simulerad bot-session)">
+              <div className="space-y-3 p-3">
+                <p className="text-xs text-muted-foreground">
+                  Genererar en realistisk serie trades på kundens bot-session som netto landar på angiven vinst.
+                  Varje trade får varierande avkastning (3–15% per position), blandat vinnare/förlorare, jämnt fördelade över tidsspannet. Kontantsaldo och multiplier uppdateras automatiskt.
+                </p>
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <div>
+                    <Label className="text-xs">Målvinst (SEK)</Label>
+                    <Input type="number" value={profitAmount} onChange={(e) => setProfitAmount(e.target.value)} min={1} />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Antal trades</Label>
+                    <Input type="number" value={numTrades} onChange={(e) => setNumTrades(e.target.value)} min={3} max={200} />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Tidsspann (minuter)</Label>
+                    <Input type="number" value={spreadMin} onChange={(e) => setSpreadMin(e.target.value)} min={1} />
+                  </div>
+                </div>
+                <Button
+                  disabled={running}
+                  onClick={async () => {
+                    const amt = Number(profitAmount);
+                    const nt = Number(numTrades);
+                    const sp = Number(spreadMin);
+                    if (!Number.isFinite(amt) || amt <= 0) return toast.error("Ogiltig vinst");
+                    if (!confirm(`Skapa ${nt} trades som netto ger ${amt.toLocaleString("sv-SE")} kr vinst?`)) return;
+                    setRunning(true);
+                    try {
+                      const res = await runProfitFn({ data: { user_id: id, target_profit_sek: amt, num_trades: nt, spread_minutes: sp } });
+                      toast.success(`Klar: ${res.trades_created} trades · nytt saldo ${fmtSek(res.new_cash_balance_sek)} · ${res.current_multiplier.toFixed(3)}x`);
+                      refetch();
+                    } catch (e: any) {
+                      toast.error(e?.message ?? "Fel");
+                    } finally {
+                      setRunning(false);
+                    }
+                  }}
+                >
+                  <Zap className="mr-2 h-4 w-4" /> {running ? "Kör ..." : "Kör vinstrunda"}
+                </Button>
+              </div>
+            </Panel>
+
+
             <Panel title="Innehav">
               {holdings.length === 0 ? <Empty /> : (
                 <Table
