@@ -11,6 +11,7 @@ import {
   adminMarkFunded,
   adminSetBalance,
   adminImpersonate,
+  adminSetPassword,
 } from "@/lib/admin.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
