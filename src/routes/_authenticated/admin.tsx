@@ -427,7 +427,7 @@ function CustomerRow({ customer }: { customer: any }) {
       <div className="flex flex-wrap items-end gap-2 rounded-xl border border-border/60 bg-muted/30 p-3">
         <div className="flex-1 min-w-[180px]">
           <Label className="text-[11px] uppercase tracking-wider text-muted-foreground">
-            Sätt lösenord (används även vid "Logga in som")
+            Sätt lösenord
           </Label>
           <Input
             type="text"
