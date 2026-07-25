@@ -10,6 +10,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
+import { Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   component: SettingsPage,
@@ -18,6 +20,34 @@ export const Route = createFileRoute("/_authenticated/settings")({
 function SettingsPage() {
   const { user } = useAuth();
   const { profile } = useProfile(user?.id);
+  const [currentPw, setCurrentPw] = useState("");
+  const [newPw, setNewPw] = useState("");
+  const [confirmPw, setConfirmPw] = useState("");
+  const [pwLoading, setPwLoading] = useState(false);
+
+  const handlePasswordChange = async () => {
+    if (!user?.email) return toast.error("Ingen e-post kopplad till kontot");
+    if (newPw.length < 8) return toast.error("Nytt lösenord måste vara minst 8 tecken");
+    if (newPw !== confirmPw) return toast.error("Lösenorden matchar inte");
+    setPwLoading(true);
+    try {
+      const { error: signInErr } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: currentPw,
+      });
+      if (signInErr) throw new Error("Nuvarande lösenord är felaktigt");
+      const { error } = await supabase.auth.updateUser({ password: newPw });
+      if (error) throw error;
+      toast.success("Lösenord uppdaterat");
+      setCurrentPw(""); setNewPw(""); setConfirmPw("");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Kunde inte uppdatera lösenordet");
+    } finally {
+      setPwLoading(false);
+    }
+  };
+
+
 
   return (
     <AppShell title="Inställningar">
@@ -54,11 +84,17 @@ function SettingsPage() {
             </div>
             <div className="rounded-lg border border-border p-4">
               <p className="font-semibold">Ändra lösenord</p>
+              <p className="text-xs text-muted-foreground mt-1">Uppdatera direkt här – ingen e-postbekräftelse krävs.</p>
               <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                <Input type="password" placeholder="Nuvarande lösenord" />
-                <Input type="password" placeholder="Nytt lösenord" />
+                <Input type="password" placeholder="Nuvarande lösenord" value={currentPw} onChange={(e) => setCurrentPw(e.target.value)} autoComplete="current-password" />
+                <div />
+                <Input type="password" placeholder="Nytt lösenord (min 8 tecken)" value={newPw} onChange={(e) => setNewPw(e.target.value)} autoComplete="new-password" />
+                <Input type="password" placeholder="Bekräfta nytt lösenord" value={confirmPw} onChange={(e) => setConfirmPw(e.target.value)} autoComplete="new-password" />
               </div>
-              <Button className="mt-3" onClick={() => toast.success("Lösenord uppdaterat")}>Uppdatera</Button>
+              <Button className="mt-3" onClick={handlePasswordChange} disabled={pwLoading || !currentPw || !newPw || !confirmPw}>
+                {pwLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Uppdatera lösenord
+              </Button>
             </div>
             <div className="rounded-lg border border-border p-4 text-sm">
               <p className="font-semibold">Senaste inloggning</p>
