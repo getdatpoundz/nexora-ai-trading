@@ -367,14 +367,6 @@ function CustomerRow({ customer }: { customer: any }) {
           <Button
             variant="outline"
             size="sm"
-            disabled={busy === "imp"}
-            onClick={impersonate}
-          >
-            {busy === "imp" ? <Loader2 className="h-3 w-3 animate-spin" /> : "Logga in som"}
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
             disabled={busy === "pw"}
             onClick={async () => {
               if (!confirm(`Återställ lösenordet för ${customer.email}?`)) return;
