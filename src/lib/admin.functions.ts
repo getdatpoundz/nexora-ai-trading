@@ -327,3 +327,208 @@ export const adminGetCustomerDashboard = createServerFn({ method: "POST" })
       withdrawals: withdrawals ?? [],
     };
   });
+
+// ---------------- Admin: kör en simulerad vinstrunda på kundens bot ----------------
+
+const profitRoundSchema = z.object({
+  user_id: z.string().uuid(),
+  target_profit_sek: z.number().min(1).max(50_000_000),
+  num_trades: z.number().int().min(3).max(200).optional(),
+  spread_minutes: z.number().int().min(1).max(60 * 24 * 30).optional(),
+  symbols: z.array(z.string()).optional(),
+});
+
+function rnd(min: number, max: number) {
+  return Math.random() * (max - min) + min;
+}
+
+function priceSekFor(symbol: string): number {
+  const asset = MARKET_UNIVERSE.find((a) => a.symbol === symbol);
+  const native = asset ? fallbackNativePrice(symbol) : 100;
+  const fx = asset ? fallbackFxToSek(asset.currency) : 10.55;
+  return native * fx;
+}
+
+function assetTypeFor(symbol: string): string {
+  return MARKET_UNIVERSE.find((a) => a.symbol === symbol)?.type ?? "crypto";
+}
+
+/**
+ * Genererar en realistisk serie med trades som tillsammans landar exakt på target_profit_sek.
+ * Varje trade får varierande avkastning (2%–15%), varierande storlek och realistisk timing.
+ * Uppdaterar även bot_session (skapar en om ingen aktiv finns), månadsanvändning
+ * och kundens kontantsaldo.
+ */
+export const adminRunProfitRound = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: z.infer<typeof profitRoundSchema>) => profitRoundSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // 1. Profil + nivå
+    const { data: profile, error: pErr } = await supabaseAdmin
+      .from("profiles")
+      .select("id, cash_balance_sek, assigned_level_sek, assigned_level_name")
+      .eq("id", data.user_id)
+      .maybeSingle();
+    if (pErr) throw new Error(pErr.message);
+    if (!profile) throw new Error("Kunden hittades inte");
+
+    const level = profile.assigned_level_name
+      ? INVESTMENT_LEVELS.find((l) => l.name === profile.assigned_level_name) ??
+        getLevelByAmount(profile.assigned_level_sek ?? undefined)
+      : getLevelByAmount(profile.assigned_level_sek ?? undefined);
+
+    // 2. Symboler (default: kryptolista)
+    const defaultSymbols = data.symbols?.length
+      ? data.symbols
+      : ["BTC", "ETH", "SOL", "XRP", "ADA", "DOGE"];
+
+    // 3. Antal trades: default rimlig andel av månadstaket, men aldrig fler än 60% kvar
+    const numTrades = data.num_trades
+      ?? Math.min(30, Math.max(8, Math.floor(level.maxTradesPerMonth * 0.15)));
+
+    // 4. Fördela vinsten över trades med varierande vikter
+    const weights = Array.from({ length: numTrades }, () => rnd(0.4, 1.6));
+    const wSum = weights.reduce((a, b) => a + b, 0);
+    // 82% vinnare, 18% förlorare (små) för realism – nettosumma = target
+    const winners = weights.map((w) => Math.random() > 0.18);
+    const rawShares = weights.map((w, i) => (winners[i] ? w : -w * rnd(0.15, 0.45)));
+    const rawSum = rawShares.reduce((a, b) => a + b, 0);
+    // Skala så nettot exakt = target_profit_sek
+    const scale = data.target_profit_sek / (rawSum || wSum);
+    const profits = rawShares.map((s) => s * scale);
+
+    // 5. Tidsspann
+    const spreadMinutes = data.spread_minutes ?? Math.max(30, numTrades * 3);
+    const now = Date.now();
+    const startMs = now - spreadMinutes * 60_000;
+
+    // 6. Aktiv (eller ny) session
+    const { data: existingSession } = await supabaseAdmin
+      .from("bot_sessions")
+      .select("*")
+      .eq("user_id", data.user_id)
+      .in("status", ["running", "paused", "limit_reached"])
+      .order("started_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    const holdingsValue = 0; // baseline nedan använder assigned_level
+    const cashBefore = Number(profile.cash_balance_sek ?? 0);
+    const assignedBaseline = Number(profile.assigned_level_sek ?? level.amount);
+    const startingValue = Math.max(cashBefore + holdingsValue, assignedBaseline, 10_000);
+
+    let session = existingSession;
+    if (!session) {
+      const { data: created, error: sErr } = await supabaseAdmin
+        .from("bot_sessions")
+        .insert({
+          user_id: data.user_id,
+          status: "running",
+          level_key: level.key,
+          max_trades_month: level.maxTradesPerMonth,
+          max_leverage_pct: level.maxLeveragePct,
+          allowed_assets: defaultSymbols,
+          strategy: "ai_hybrid",
+          aggressiveness: 5,
+          starting_portfolio_sek: startingValue,
+          target_multiplier: level.targetMultiplier,
+          current_multiplier: 1.0,
+          target_trades: Math.max(numTrades, Math.floor(level.maxTradesPerMonth * 0.6)),
+          started_at: new Date(startMs).toISOString(),
+        })
+        .select()
+        .single();
+      if (sErr) throw new Error(sErr.message);
+      session = created;
+    }
+
+    // 7. Bygg trade-par (buy → sell) för varje planerad vinst/förlust
+    const tradesToInsert: any[] = [];
+    for (let i = 0; i < numTrades; i++) {
+      const symbol = defaultSymbols[Math.floor(Math.random() * defaultSymbols.length)];
+      const price = priceSekFor(symbol);
+      const gainAbsPct = rnd(0.03, 0.15); // 3%–15% rörelse på position
+      const gainPct = profits[i] >= 0 ? gainAbsPct : -gainAbsPct;
+      // Position så att qty × price × gainPct = profits[i]
+      const positionSek = Math.max(200, Math.abs(profits[i]) / gainAbsPct);
+      const quantity = positionSek / price;
+      const buyPrice = price;
+      const sellPrice = price * (1 + gainPct);
+
+      // Tidpunkt jämnt fördelad över spannet + lite jitter
+      const slot = startMs + ((i + 0.5) / numTrades) * (now - startMs);
+      const jitter = rnd(-0.3, 0.3) * ((now - startMs) / numTrades);
+      const sellAt = new Date(slot + jitter);
+      const buyAt = new Date(sellAt.getTime() - rnd(1, 4) * 60_000);
+
+      tradesToInsert.push({
+        user_id: data.user_id,
+        symbol, asset_type: assetTypeFor(symbol), side: "buy",
+        quantity, price_sek: buyPrice, fee_sek: positionSek * 0.001,
+        total_sek: positionSek, executed_at: buyAt.toISOString(),
+      });
+      tradesToInsert.push({
+        user_id: data.user_id,
+        symbol, asset_type: assetTypeFor(symbol), side: "sell",
+        quantity, price_sek: sellPrice, fee_sek: quantity * sellPrice * 0.001,
+        total_sek: quantity * sellPrice, executed_at: sellAt.toISOString(),
+      });
+    }
+
+    // Sortera insert i tidsordning
+    tradesToInsert.sort((a, b) => (a.executed_at < b.executed_at ? -1 : 1));
+    const { error: tErr } = await supabaseAdmin.from("trades").insert(tradesToInsert);
+    if (tErr) throw new Error(tErr.message);
+
+    // 8. Uppdatera saldo
+    const newCash = cashBefore + data.target_profit_sek;
+    await supabaseAdmin.from("profiles")
+      .update({ cash_balance_sek: newCash })
+      .eq("id", data.user_id);
+
+    // 9. Uppdatera session (trades_generated + multiplier)
+    const newTradesGenerated = Number(session!.trades_generated ?? 0) + numTrades;
+    // Beräkna realiserad vinst från alla trades sedan session start för korrekt multiplier
+    const { data: allTrades } = await supabaseAdmin
+      .from("trades")
+      .select("side,total_sek")
+      .eq("user_id", data.user_id)
+      .gte("executed_at", session!.started_at);
+    const realizedProfit = (allTrades ?? []).reduce((acc, t) => {
+      const v = Number(t.total_sek) || 0;
+      return acc + (t.side === "sell" ? v : -v);
+    }, 0);
+    const sessionBase = Math.max(Number(session!.starting_portfolio_sek) || 0, assignedBaseline, 10_000);
+    const currentMult = Math.max(1, 1 + realizedProfit / sessionBase);
+
+    await supabaseAdmin.from("bot_sessions").update({
+      trades_generated: newTradesGenerated,
+      current_multiplier: currentMult,
+      last_tick_at: new Date().toISOString(),
+    }).eq("id", session!.id);
+
+    // 10. Månadsanvändning
+    const ym = currentYearMonth();
+    const { data: usage } = await supabaseAdmin.from("bot_monthly_usage")
+      .select("trades_count, leverage_used_pct")
+      .eq("user_id", data.user_id).eq("year_month", ym).maybeSingle();
+    await supabaseAdmin.from("bot_monthly_usage").upsert({
+      user_id: data.user_id,
+      year_month: ym,
+      trades_count: Number(usage?.trades_count ?? 0) + numTrades,
+      leverage_used_pct: Number(usage?.leverage_used_pct ?? 0),
+    }, { onConflict: "user_id,year_month" });
+
+    return {
+      ok: true,
+      trades_created: numTrades,
+      net_profit_sek: data.target_profit_sek,
+      new_cash_balance_sek: newCash,
+      current_multiplier: currentMult,
+      session_id: session!.id,
+    };
+  });
+
