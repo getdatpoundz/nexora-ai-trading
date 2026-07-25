@@ -34,6 +34,7 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedActivateRouteImport } from './routes/_authenticated/activate'
 import { Route as ApiPublicOnrampWebhookRouteImport } from './routes/api/public/onramp.webhook'
 import { Route as ApiPublicHooksBotTickRouteImport } from './routes/api/public/hooks/bot-tick'
+import { Route as AuthenticatedAdminCustomerIdRouteImport } from './routes/_authenticated/admin.customer.$id'
 
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
@@ -161,6 +162,12 @@ const ApiPublicHooksBotTickRoute = ApiPublicHooksBotTickRouteImport.update({
   path: '/api/public/hooks/bot-tick',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAdminCustomerIdRoute =
+  AuthenticatedAdminCustomerIdRouteImport.update({
+    id: '/customer/$id',
+    path: '/customer/$id',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -168,7 +175,7 @@ export interface FileRoutesByFullPath {
   '/dashboard2': typeof Dashboard2Route
   '/reset-password': typeof ResetPasswordRoute
   '/activate': typeof AuthenticatedActivateRoute
-  '/admin': typeof AuthenticatedAdminRoute
+  '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/bot-rules': typeof AuthenticatedBotRulesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/deposit': typeof AuthenticatedDepositRoute
@@ -185,6 +192,7 @@ export interface FileRoutesByFullPath {
   '/welcome': typeof AuthenticatedWelcomeRoute
   '/withdraw': typeof AuthenticatedWithdrawRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/admin/customer/$id': typeof AuthenticatedAdminCustomerIdRoute
   '/api/public/hooks/bot-tick': typeof ApiPublicHooksBotTickRoute
   '/api/public/onramp/webhook': typeof ApiPublicOnrampWebhookRoute
 }
@@ -194,7 +202,7 @@ export interface FileRoutesByTo {
   '/dashboard2': typeof Dashboard2Route
   '/reset-password': typeof ResetPasswordRoute
   '/activate': typeof AuthenticatedActivateRoute
-  '/admin': typeof AuthenticatedAdminRoute
+  '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/bot-rules': typeof AuthenticatedBotRulesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/deposit': typeof AuthenticatedDepositRoute
@@ -211,6 +219,7 @@ export interface FileRoutesByTo {
   '/welcome': typeof AuthenticatedWelcomeRoute
   '/withdraw': typeof AuthenticatedWithdrawRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/admin/customer/$id': typeof AuthenticatedAdminCustomerIdRoute
   '/api/public/hooks/bot-tick': typeof ApiPublicHooksBotTickRoute
   '/api/public/onramp/webhook': typeof ApiPublicOnrampWebhookRoute
 }
@@ -222,7 +231,7 @@ export interface FileRoutesById {
   '/dashboard2': typeof Dashboard2Route
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/activate': typeof AuthenticatedActivateRoute
-  '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/bot-rules': typeof AuthenticatedBotRulesRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/deposit': typeof AuthenticatedDepositRoute
@@ -239,6 +248,7 @@ export interface FileRoutesById {
   '/_authenticated/welcome': typeof AuthenticatedWelcomeRoute
   '/_authenticated/withdraw': typeof AuthenticatedWithdrawRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/_authenticated/admin/customer/$id': typeof AuthenticatedAdminCustomerIdRoute
   '/api/public/hooks/bot-tick': typeof ApiPublicHooksBotTickRoute
   '/api/public/onramp/webhook': typeof ApiPublicOnrampWebhookRoute
 }
@@ -267,6 +277,7 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/withdraw'
     | '/auth/callback'
+    | '/admin/customer/$id'
     | '/api/public/hooks/bot-tick'
     | '/api/public/onramp/webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -293,6 +304,7 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/withdraw'
     | '/auth/callback'
+    | '/admin/customer/$id'
     | '/api/public/hooks/bot-tick'
     | '/api/public/onramp/webhook'
   id:
@@ -320,6 +332,7 @@ export interface FileRouteTypes {
     | '/_authenticated/welcome'
     | '/_authenticated/withdraw'
     | '/auth/callback'
+    | '/_authenticated/admin/customer/$id'
     | '/api/public/hooks/bot-tick'
     | '/api/public/onramp/webhook'
   fileRoutesById: FileRoutesById
@@ -511,12 +524,30 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksBotTickRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin/customer/$id': {
+      id: '/_authenticated/admin/customer/$id'
+      path: '/customer/$id'
+      fullPath: '/admin/customer/$id'
+      preLoaderRoute: typeof AuthenticatedAdminCustomerIdRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
   }
 }
 
+interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminCustomerIdRoute: typeof AuthenticatedAdminCustomerIdRoute
+}
+
+const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminCustomerIdRoute: AuthenticatedAdminCustomerIdRoute,
+}
+
+const AuthenticatedAdminRouteWithChildren =
+  AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
+
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedActivateRoute: typeof AuthenticatedActivateRoute
-  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedBotRulesRoute: typeof AuthenticatedBotRulesRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedDepositRoute: typeof AuthenticatedDepositRoute
@@ -536,7 +567,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedActivateRoute: AuthenticatedActivateRoute,
-  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedBotRulesRoute: AuthenticatedBotRulesRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedDepositRoute: AuthenticatedDepositRoute,
