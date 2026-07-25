@@ -31,6 +31,12 @@ function AdminCustomerPage() {
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const { id } = useParams({ from: "/_authenticated/admin/customer/$id" });
   const fn = useServerFn(adminGetCustomerDashboard);
+  const runProfitFn = useServerFn(adminRunProfitRound);
+  const [profitAmount, setProfitAmount] = useState("10000");
+  const [numTrades, setNumTrades] = useState("20");
+  const [spreadMin, setSpreadMin] = useState("120");
+  const [running, setRunning] = useState(false);
+
 
   useEffect(() => {
     if (!user) return;
