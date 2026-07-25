@@ -432,6 +432,25 @@ function CustomerRow({ customer }: { customer: any }) {
         </Button>
       </div>
 
+      <div className="flex flex-wrap items-end gap-2 rounded-xl border border-border/60 bg-muted/30 p-3">
+        <div className="flex-1 min-w-[180px]">
+          <Label className="text-[11px] uppercase tracking-wider text-muted-foreground">
+            Sätt lösenord (används även vid "Logga in som")
+          </Label>
+          <Input
+            type="text"
+            value={customPw}
+            onChange={(e) => setCustomPw(e.target.value)}
+            placeholder="Lämna tomt för admin12345!"
+            className="mt-1 font-mono"
+            autoComplete="off"
+          />
+        </div>
+        <Button size="sm" variant="outline" disabled={busy === "setpw"} onClick={savePassword}>
+          {busy === "setpw" ? <Loader2 className="h-3 w-3 animate-spin" /> : "Spara lösenord"}
+        </Button>
+      </div>
+
       {newPw && (
         <div className="w-full space-y-2">
           <div>
