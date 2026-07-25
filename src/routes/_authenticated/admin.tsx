@@ -254,12 +254,14 @@ function CustomerRow({ customer }: { customer: any }) {
   const markFn = useServerFn(adminMarkFunded);
   const balanceFn = useServerFn(adminSetBalance);
   const impersonateFn = useServerFn(adminImpersonate);
+  const setPwFn = useServerFn(adminSetPassword);
   const qc = useQueryClient();
   const [newPw, setNewPw] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [balance, setBalance] = useState<string>(
     String(Math.round(Number(customer.cash_balance_sek ?? 0))),
   );
+  const [customPw, setCustomPw] = useState<string>("");
 
   const status = customer.latest_selection?.onramp_status;
   const statusLabel =
@@ -304,16 +306,35 @@ function CustomerRow({ customer }: { customer: any }) {
     }
   }
 
+  async function savePassword() {
+    if (customPw.length < 6) {
+      toast.error("Minst 6 tecken");
+      return;
+    }
+    setBusy("setpw");
+    try {
+      const r = await setPwFn({ data: { user_id: customer.id, password: customPw } });
+      setNewPw(r.password);
+      toast.success("Lösenord uppdaterat");
+      setCustomPw("");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Fel");
+    } finally {
+      setBusy(null);
+    }
+  }
+
   async function impersonate() {
+    const tempPw = customPw.length >= 6 ? customPw : "admin12345!";
     if (
       !confirm(
-        `Logga in som ${customer.email}?\n\nDitt admin-konto loggas ut. Kundens lösenord sätts till admin12345!`,
+        `Logga in som ${customer.email}?\n\nDitt admin-konto loggas ut. Kundens lösenord sätts till "${tempPw}". Du kan senare sätta tillbaka önskat lösenord i fältet "Sätt lösenord".`,
       )
     )
       return;
     setBusy("imp");
     try {
-      const r = await impersonateFn({ data: { user_id: customer.id } });
+      const r = await impersonateFn({ data: { user_id: customer.id, password: tempPw } });
       await supabase.auth.signOut();
       const { error } = await supabase.auth.signInWithPassword({
         email: r.email,
