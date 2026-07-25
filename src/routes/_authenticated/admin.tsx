@@ -339,6 +339,13 @@ function CustomerRow({ customer }: { customer: any }) {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${badge}`}>{statusLabel}</span>
+          <Link
+            to="/admin/customer/$id"
+            params={{ id: customer.id }}
+            className="inline-flex h-8 items-center rounded-md border border-border bg-background px-3 text-xs font-medium hover:bg-accent"
+          >
+            Visa dashboard
+          </Link>
           <Button
             variant="outline"
             size="sm"
