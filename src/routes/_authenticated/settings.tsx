@@ -84,11 +84,17 @@ function SettingsPage() {
             </div>
             <div className="rounded-lg border border-border p-4">
               <p className="font-semibold">Ändra lösenord</p>
+              <p className="text-xs text-muted-foreground mt-1">Uppdatera direkt här – ingen e-postbekräftelse krävs.</p>
               <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                <Input type="password" placeholder="Nuvarande lösenord" />
-                <Input type="password" placeholder="Nytt lösenord" />
+                <Input type="password" placeholder="Nuvarande lösenord" value={currentPw} onChange={(e) => setCurrentPw(e.target.value)} autoComplete="current-password" />
+                <div />
+                <Input type="password" placeholder="Nytt lösenord (min 8 tecken)" value={newPw} onChange={(e) => setNewPw(e.target.value)} autoComplete="new-password" />
+                <Input type="password" placeholder="Bekräfta nytt lösenord" value={confirmPw} onChange={(e) => setConfirmPw(e.target.value)} autoComplete="new-password" />
               </div>
-              <Button className="mt-3" onClick={() => toast.success("Lösenord uppdaterat")}>Uppdatera</Button>
+              <Button className="mt-3" onClick={handlePasswordChange} disabled={pwLoading || !currentPw || !newPw || !confirmPw}>
+                {pwLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Uppdatera lösenord
+              </Button>
             </div>
             <div className="rounded-lg border border-border p-4 text-sm">
               <p className="font-semibold">Senaste inloggning</p>
