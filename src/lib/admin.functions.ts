@@ -253,9 +253,12 @@ export const adminSetBalance = createServerFn({ method: "POST" })
     return { ok: true, cash_balance_sek: data.cash_balance_sek };
   });
 
-const impersonateSchema = z.object({ user_id: z.string().uuid() });
+const impersonateSchema = z.object({
+  user_id: z.string().uuid(),
+  password: z.string().min(6).max(72).optional(),
+});
 
-/** Sätter kundens lösenord till ett känt admin-lösenord så att admin
+/** Sätter kundens lösenord (default admin12345!) så att admin
  *  kan logga in direkt som kunden. Returnerar e-post + lösenord. */
 export const adminImpersonate = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -263,7 +266,7 @@ export const adminImpersonate = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const password = "admin12345!";
+    const password = data.password && data.password.length >= 6 ? data.password : "admin12345!";
     const { data: updated, error } = await supabaseAdmin.auth.admin.updateUserById(
       data.user_id,
       { password, email_confirm: true },
@@ -272,4 +275,24 @@ export const adminImpersonate = createServerFn({ method: "POST" })
     const email = updated.user?.email;
     if (!email) throw new Error("Kunden saknar e-post");
     return { email, password };
+  });
+
+const setPasswordSchema = z.object({
+  user_id: z.string().uuid(),
+  password: z.string().min(6).max(72),
+});
+
+/** Sätter kundens lösenord till valfritt värde utan att logga in som kunden. */
+export const adminSetPassword = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: z.infer<typeof setPasswordSchema>) => setPasswordSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: updated, error } = await supabaseAdmin.auth.admin.updateUserById(
+      data.user_id,
+      { password: data.password, email_confirm: true },
+    );
+    if (error) throw new Error(error.message);
+    return { email: updated.user?.email ?? "", password: data.password };
   });
