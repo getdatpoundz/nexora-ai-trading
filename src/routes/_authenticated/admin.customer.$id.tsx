@@ -34,10 +34,14 @@ function AdminCustomerPage() {
   const { id } = useParams({ from: "/_authenticated/admin/customer/$id" });
   const fn = useServerFn(adminGetCustomerDashboard);
   const runProfitFn = useServerFn(adminRunProfitRound);
+  const upgradeFn = useServerFn(adminUpgradeLevel);
   const [profitAmount, setProfitAmount] = useState("10000");
   const [numTrades, setNumTrades] = useState("20");
   const [spreadMin, setSpreadMin] = useState("120");
   const [running, setRunning] = useState(false);
+  const [newLevelKey, setNewLevelKey] = useState<string>("");
+  const [creditDelta, setCreditDelta] = useState(true);
+  const [upgrading, setUpgrading] = useState(false);
 
 
   useEffect(() => {
