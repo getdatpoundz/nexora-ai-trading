@@ -30,8 +30,8 @@ import { Route as AuthenticatedDocumentsRouteImport } from './routes/_authentica
 import { Route as AuthenticatedDepositRouteImport } from './routes/_authenticated/deposit'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedBotRulesRouteImport } from './routes/_authenticated/bot-rules'
-import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedActivateRouteImport } from './routes/_authenticated/activate'
+import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as ApiPublicOnrampWebhookRouteImport } from './routes/api/public/onramp.webhook'
 import { Route as ApiPublicHooksBotTickRouteImport } from './routes/api/public/hooks/bot-tick'
 import { Route as AuthenticatedAdminCustomerIdRouteImport } from './routes/_authenticated/admin.customer.$id'
@@ -142,14 +142,14 @@ const AuthenticatedBotRulesRoute = AuthenticatedBotRulesRouteImport.update({
   path: '/bot-rules',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
 const AuthenticatedActivateRoute = AuthenticatedActivateRouteImport.update({
   id: '/activate',
   path: '/activate',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const ApiPublicOnrampWebhookRoute = ApiPublicOnrampWebhookRouteImport.update({
@@ -164,9 +164,9 @@ const ApiPublicHooksBotTickRoute = ApiPublicHooksBotTickRouteImport.update({
 } as any)
 const AuthenticatedAdminCustomerIdRoute =
   AuthenticatedAdminCustomerIdRouteImport.update({
-    id: '/customer/$id',
-    path: '/customer/$id',
-    getParentRoute: () => AuthenticatedAdminRoute,
+    id: '/admin/customer/$id',
+    path: '/admin/customer/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -175,7 +175,6 @@ export interface FileRoutesByFullPath {
   '/dashboard2': typeof Dashboard2Route
   '/reset-password': typeof ResetPasswordRoute
   '/activate': typeof AuthenticatedActivateRoute
-  '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/bot-rules': typeof AuthenticatedBotRulesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/deposit': typeof AuthenticatedDepositRoute
@@ -192,6 +191,7 @@ export interface FileRoutesByFullPath {
   '/welcome': typeof AuthenticatedWelcomeRoute
   '/withdraw': typeof AuthenticatedWithdrawRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/admin/': typeof AuthenticatedAdminIndexRoute
   '/admin/customer/$id': typeof AuthenticatedAdminCustomerIdRoute
   '/api/public/hooks/bot-tick': typeof ApiPublicHooksBotTickRoute
   '/api/public/onramp/webhook': typeof ApiPublicOnrampWebhookRoute
@@ -202,7 +202,6 @@ export interface FileRoutesByTo {
   '/dashboard2': typeof Dashboard2Route
   '/reset-password': typeof ResetPasswordRoute
   '/activate': typeof AuthenticatedActivateRoute
-  '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/bot-rules': typeof AuthenticatedBotRulesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/deposit': typeof AuthenticatedDepositRoute
@@ -219,6 +218,7 @@ export interface FileRoutesByTo {
   '/welcome': typeof AuthenticatedWelcomeRoute
   '/withdraw': typeof AuthenticatedWithdrawRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/admin': typeof AuthenticatedAdminIndexRoute
   '/admin/customer/$id': typeof AuthenticatedAdminCustomerIdRoute
   '/api/public/hooks/bot-tick': typeof ApiPublicHooksBotTickRoute
   '/api/public/onramp/webhook': typeof ApiPublicOnrampWebhookRoute
@@ -231,7 +231,6 @@ export interface FileRoutesById {
   '/dashboard2': typeof Dashboard2Route
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/activate': typeof AuthenticatedActivateRoute
-  '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/bot-rules': typeof AuthenticatedBotRulesRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/deposit': typeof AuthenticatedDepositRoute
@@ -248,6 +247,7 @@ export interface FileRoutesById {
   '/_authenticated/welcome': typeof AuthenticatedWelcomeRoute
   '/_authenticated/withdraw': typeof AuthenticatedWithdrawRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/admin/customer/$id': typeof AuthenticatedAdminCustomerIdRoute
   '/api/public/hooks/bot-tick': typeof ApiPublicHooksBotTickRoute
   '/api/public/onramp/webhook': typeof ApiPublicOnrampWebhookRoute
@@ -260,7 +260,6 @@ export interface FileRouteTypes {
     | '/dashboard2'
     | '/reset-password'
     | '/activate'
-    | '/admin'
     | '/bot-rules'
     | '/dashboard'
     | '/deposit'
@@ -277,6 +276,7 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/withdraw'
     | '/auth/callback'
+    | '/admin/'
     | '/admin/customer/$id'
     | '/api/public/hooks/bot-tick'
     | '/api/public/onramp/webhook'
@@ -287,7 +287,6 @@ export interface FileRouteTypes {
     | '/dashboard2'
     | '/reset-password'
     | '/activate'
-    | '/admin'
     | '/bot-rules'
     | '/dashboard'
     | '/deposit'
@@ -304,6 +303,7 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/withdraw'
     | '/auth/callback'
+    | '/admin'
     | '/admin/customer/$id'
     | '/api/public/hooks/bot-tick'
     | '/api/public/onramp/webhook'
@@ -315,7 +315,6 @@ export interface FileRouteTypes {
     | '/dashboard2'
     | '/reset-password'
     | '/_authenticated/activate'
-    | '/_authenticated/admin'
     | '/_authenticated/bot-rules'
     | '/_authenticated/dashboard'
     | '/_authenticated/deposit'
@@ -332,6 +331,7 @@ export interface FileRouteTypes {
     | '/_authenticated/welcome'
     | '/_authenticated/withdraw'
     | '/auth/callback'
+    | '/_authenticated/admin/'
     | '/_authenticated/admin/customer/$id'
     | '/api/public/hooks/bot-tick'
     | '/api/public/onramp/webhook'
@@ -496,18 +496,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedBotRulesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/admin': {
-      id: '/_authenticated/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AuthenticatedAdminRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/activate': {
       id: '/_authenticated/activate'
       path: '/activate'
       fullPath: '/activate'
       preLoaderRoute: typeof AuthenticatedActivateRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/': {
+      id: '/_authenticated/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/api/public/onramp/webhook': {
@@ -526,28 +526,16 @@ declare module '@tanstack/react-router' {
     }
     '/_authenticated/admin/customer/$id': {
       id: '/_authenticated/admin/customer/$id'
-      path: '/customer/$id'
+      path: '/admin/customer/$id'
       fullPath: '/admin/customer/$id'
       preLoaderRoute: typeof AuthenticatedAdminCustomerIdRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
+      parentRoute: typeof AuthenticatedRouteRoute
     }
   }
 }
 
-interface AuthenticatedAdminRouteChildren {
-  AuthenticatedAdminCustomerIdRoute: typeof AuthenticatedAdminCustomerIdRoute
-}
-
-const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
-  AuthenticatedAdminCustomerIdRoute: AuthenticatedAdminCustomerIdRoute,
-}
-
-const AuthenticatedAdminRouteWithChildren =
-  AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
-
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedActivateRoute: typeof AuthenticatedActivateRoute
-  AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedBotRulesRoute: typeof AuthenticatedBotRulesRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedDepositRoute: typeof AuthenticatedDepositRoute
@@ -563,11 +551,12 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedTransactionsRoute: typeof AuthenticatedTransactionsRoute
   AuthenticatedWelcomeRoute: typeof AuthenticatedWelcomeRoute
   AuthenticatedWithdrawRoute: typeof AuthenticatedWithdrawRoute
+  AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
+  AuthenticatedAdminCustomerIdRoute: typeof AuthenticatedAdminCustomerIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedActivateRoute: AuthenticatedActivateRoute,
-  AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedBotRulesRoute: AuthenticatedBotRulesRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedDepositRoute: AuthenticatedDepositRoute,
@@ -583,6 +572,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedTransactionsRoute: AuthenticatedTransactionsRoute,
   AuthenticatedWelcomeRoute: AuthenticatedWelcomeRoute,
   AuthenticatedWithdrawRoute: AuthenticatedWithdrawRoute,
+  AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
+  AuthenticatedAdminCustomerIdRoute: AuthenticatedAdminCustomerIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -610,3 +601,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
