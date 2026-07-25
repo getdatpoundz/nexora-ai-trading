@@ -251,9 +251,14 @@ function CredRow({ label, value, mono }: { label: string; value: string; mono?: 
 function CustomerRow({ customer }: { customer: any }) {
   const resetFn = useServerFn(adminResetPassword);
   const markFn = useServerFn(adminMarkFunded);
+  const balanceFn = useServerFn(adminSetBalance);
+  const impersonateFn = useServerFn(adminImpersonate);
   const qc = useQueryClient();
   const [newPw, setNewPw] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
+  const [balance, setBalance] = useState<string>(
+    String(Math.round(Number(customer.cash_balance_sek ?? 0))),
+  );
 
   const status = customer.latest_selection?.onramp_status;
   const statusLabel =
@@ -280,61 +285,133 @@ function CustomerRow({ customer }: { customer: any }) {
 
   const authUrl = typeof window !== "undefined" ? `${window.location.origin}/auth` : "/auth";
 
+  async function saveBalance() {
+    const n = Number(balance.replace(/\s/g, "").replace(",", "."));
+    if (!Number.isFinite(n) || n < 0) {
+      toast.error("Ogiltigt belopp");
+      return;
+    }
+    setBusy("bal");
+    try {
+      await balanceFn({ data: { user_id: customer.id, cash_balance_sek: n } });
+      toast.success("Saldo uppdaterat");
+      qc.invalidateQueries({ queryKey: ["admin-customers"] });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Fel");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function impersonate() {
+    if (
+      !confirm(
+        `Logga in som ${customer.email}?\n\nDitt admin-konto loggas ut. Kundens lösenord sätts till admin12345!`,
+      )
+    )
+      return;
+    setBusy("imp");
+    try {
+      const r = await impersonateFn({ data: { user_id: customer.id } });
+      await supabase.auth.signOut();
+      const { error } = await supabase.auth.signInWithPassword({
+        email: r.email,
+        password: r.password,
+      });
+      if (error) throw error;
+      toast.success(`Inloggad som ${r.email}`);
+      window.location.href = "/dashboard";
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Fel");
+      setBusy(null);
+    }
+  }
+
   return (
-    <div className="flex flex-col gap-2 p-4 md:flex-row md:items-center md:justify-between">
-      <div className="min-w-0">
-        <p className="truncate font-medium">
-          {customer.first_name} {customer.last_name}{" "}
-          <span className="text-xs text-muted-foreground">· {customer.email}</span>
-        </p>
-        <p className="mt-1 text-xs text-muted-foreground">
-          Nivå: <span className="font-medium text-foreground">{customer.assigned_level_name ?? "–"} ({fmtSek(customer.assigned_level_sek)})</span>
-          {" · "}Saldo: <span className="font-medium text-foreground">{fmtSek(customer.cash_balance_sek)}</span>
-        </p>
-      </div>
-      <div className="flex items-center gap-2">
-        <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${badge}`}>{statusLabel}</span>
-        <Button
-          variant="outline"
-          size="sm"
-          disabled={busy === "pw"}
-          onClick={async () => {
-            if (!confirm(`Återställ lösenordet för ${customer.email}?`)) return;
-            setBusy("pw");
-            try {
-              const r = await resetFn({ data: { email: customer.email } });
-              setNewPw(r.password);
-              toast.success("Nytt lösenord genererat");
-            } catch (e) {
-              toast.error(e instanceof Error ? e.message : "Fel");
-            } finally { setBusy(null); }
-          }}
-        >
-          {busy === "pw" ? <Loader2 className="h-3 w-3 animate-spin" /> : <><KeyRound className="mr-1 h-3 w-3" /> Nytt lösenord</>}
-        </Button>
-        {status !== "funded" && !customer.activated_at && (
+    <div className="flex flex-col gap-3 p-4">
+      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+        <div className="min-w-0">
+          <p className="truncate font-medium">
+            {customer.first_name} {customer.last_name}{" "}
+            <span className="text-xs text-muted-foreground">· {customer.email}</span>
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Nivå: <span className="font-medium text-foreground">{customer.assigned_level_name ?? "–"} ({fmtSek(customer.assigned_level_sek)})</span>
+            {" · "}Saldo: <span className="font-medium text-foreground">{fmtSek(customer.cash_balance_sek)}</span>
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${badge}`}>{statusLabel}</span>
           <Button
             variant="outline"
             size="sm"
-            disabled={busy === "fund" || !customer.assigned_level_sek}
+            disabled={busy === "imp"}
+            onClick={impersonate}
+          >
+            {busy === "imp" ? <Loader2 className="h-3 w-3 animate-spin" /> : "Logga in som"}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={busy === "pw"}
             onClick={async () => {
-              if (!confirm(`Kreditera ${fmtSek(customer.assigned_level_sek)} manuellt?`)) return;
-              setBusy("fund");
+              if (!confirm(`Återställ lösenordet för ${customer.email}?`)) return;
+              setBusy("pw");
               try {
-                await markFn({ data: { user_id: customer.id } });
-                toast.success("Kund krediterad");
-                qc.invalidateQueries({ queryKey: ["admin-customers"] });
+                const r = await resetFn({ data: { email: customer.email } });
+                setNewPw(r.password);
+                toast.success("Nytt lösenord genererat");
               } catch (e) {
                 toast.error(e instanceof Error ? e.message : "Fel");
               } finally { setBusy(null); }
             }}
           >
-            {busy === "fund" ? <Loader2 className="h-3 w-3 animate-spin" /> : <><CheckCircle2 className="mr-1 h-3 w-3" /> Kreditera</>}
+            {busy === "pw" ? <Loader2 className="h-3 w-3 animate-spin" /> : <><KeyRound className="mr-1 h-3 w-3" /> Nytt lösenord</>}
           </Button>
-        )}
+          {status !== "funded" && !customer.activated_at && (
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={busy === "fund" || !customer.assigned_level_sek}
+              onClick={async () => {
+                if (!confirm(`Kreditera ${fmtSek(customer.assigned_level_sek)} manuellt?`)) return;
+                setBusy("fund");
+                try {
+                  await markFn({ data: { user_id: customer.id } });
+                  toast.success("Kund krediterad");
+                  qc.invalidateQueries({ queryKey: ["admin-customers"] });
+                } catch (e) {
+                  toast.error(e instanceof Error ? e.message : "Fel");
+                } finally { setBusy(null); }
+              }}
+            >
+              {busy === "fund" ? <Loader2 className="h-3 w-3 animate-spin" /> : <><CheckCircle2 className="mr-1 h-3 w-3" /> Kreditera</>}
+            </Button>
+          )}
+        </div>
       </div>
+
+      <div className="flex flex-wrap items-end gap-2 rounded-xl border border-border/60 bg-muted/30 p-3">
+        <div className="flex-1 min-w-[180px]">
+          <Label className="text-[11px] uppercase tracking-wider text-muted-foreground">
+            Redigera saldo (SEK)
+          </Label>
+          <Input
+            type="number"
+            min={0}
+            step={100}
+            value={balance}
+            onChange={(e) => setBalance(e.target.value)}
+            className="mt-1 font-mono"
+          />
+        </div>
+        <Button size="sm" disabled={busy === "bal"} onClick={saveBalance}>
+          {busy === "bal" ? <Loader2 className="h-3 w-3 animate-spin" /> : "Spara saldo"}
+        </Button>
+      </div>
+
       {newPw && (
-        <div className="w-full space-y-2 md:mt-2">
+        <div className="w-full space-y-2">
           <div>
             <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Inloggningssida</p>
             <div className="mt-1 flex gap-2">
