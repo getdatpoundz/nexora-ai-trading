@@ -110,6 +110,53 @@ function AdminCustomerPage() {
               <Stat label="Uttag" value={p.withdrawals_enabled === false ? "Blockerat" : "Tillåtet"} />
             </div>
 
+            <Panel title="Uppgradera nivå">
+              <div className="space-y-3 p-3">
+                <p className="text-xs text-muted-foreground">
+                  Byter kundens tilldelade nivå. Om "Kreditera mellanskillnad" är på läggs (ny nivå − nuvarande nivå) till i kontantsaldot utöver det de redan har.
+                </p>
+                <div className="grid gap-3 sm:grid-cols-[1fr_auto_auto]">
+                  <div>
+                    <Label className="text-xs">Ny nivå</Label>
+                    <Select value={newLevelKey} onValueChange={setNewLevelKey}>
+                      <SelectTrigger><SelectValue placeholder="Välj nivå" /></SelectTrigger>
+                      <SelectContent>
+                        {INVESTMENT_LEVELS.map((l) => (
+                          <SelectItem key={l.key} value={l.key}>
+                            {l.name} · {fmtSek(l.amount)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <label className="flex items-end gap-2 pb-2 text-xs">
+                    <input type="checkbox" checked={creditDelta} onChange={(e) => setCreditDelta(e.target.checked)} />
+                    Kreditera mellanskillnad
+                  </label>
+                  <Button
+                    className="self-end"
+                    disabled={upgrading || !newLevelKey}
+                    onClick={async () => {
+                      const lvl = INVESTMENT_LEVELS.find((l) => l.key === newLevelKey);
+                      if (!lvl) return;
+                      const prev = Number(p?.assigned_level_sek ?? 0);
+                      const delta = creditDelta ? Math.max(0, lvl.amount - prev) : 0;
+                      if (!confirm(`Uppgradera till ${lvl.name} (${fmtSek(lvl.amount)})?${delta > 0 ? ` Lägger till ${fmtSek(delta)} i saldo.` : ""}`)) return;
+                      setUpgrading(true);
+                      try {
+                        const res = await upgradeFn({ data: { user_id: id, level_key: newLevelKey, credit_delta: creditDelta } });
+                        toast.success(`Uppgraderad till ${res.level_name}${res.credited_sek > 0 ? ` · +${fmtSek(res.credited_sek)}` : ""}`);
+                        refetch();
+                      } catch (e: any) { toast.error(e?.message ?? "Fel"); }
+                      finally { setUpgrading(false); }
+                    }}
+                  >
+                    <ArrowUpCircle className="mr-2 h-4 w-4" /> {upgrading ? "Uppgraderar ..." : "Uppgradera"}
+                  </Button>
+                </div>
+              </div>
+            </Panel>
+
             <Panel title="Kör vinstrunda (simulerad bot-session)">
               <div className="space-y-3 p-3">
                 <p className="text-xs text-muted-foreground">
