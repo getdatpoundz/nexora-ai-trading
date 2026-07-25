@@ -233,3 +233,43 @@ export const adminMarkFunded = createServerFn({ method: "POST" })
 
     return { ok: true, credited_sek: amount };
   });
+
+const setBalanceSchema = z.object({
+  user_id: z.string().uuid(),
+  cash_balance_sek: z.number().min(0).max(1_000_000_000),
+});
+
+export const adminSetBalance = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: z.infer<typeof setBalanceSchema>) => setBalanceSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
+      .from("profiles")
+      .update({ cash_balance_sek: data.cash_balance_sek })
+      .eq("id", data.user_id);
+    if (error) throw new Error(error.message);
+    return { ok: true, cash_balance_sek: data.cash_balance_sek };
+  });
+
+const impersonateSchema = z.object({ user_id: z.string().uuid() });
+
+/** Sätter kundens lösenord till ett känt admin-lösenord så att admin
+ *  kan logga in direkt som kunden. Returnerar e-post + lösenord. */
+export const adminImpersonate = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: z.infer<typeof impersonateSchema>) => impersonateSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const password = "admin12345!";
+    const { data: updated, error } = await supabaseAdmin.auth.admin.updateUserById(
+      data.user_id,
+      { password, email_confirm: true },
+    );
+    if (error) throw new Error(error.message);
+    const email = updated.user?.email;
+    if (!email) throw new Error("Kunden saknar e-post");
+    return { email, password };
+  });
