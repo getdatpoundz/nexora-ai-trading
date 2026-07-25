@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as Dashboard2RouteImport } from './routes/dashboard2'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
@@ -34,6 +35,11 @@ import { Route as AuthenticatedActivateRouteImport } from './routes/_authenticat
 import { Route as ApiPublicOnrampWebhookRouteImport } from './routes/api/public/onramp.webhook'
 import { Route as ApiPublicHooksBotTickRouteImport } from './routes/api/public/hooks/bot-tick'
 
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const Dashboard2Route = Dashboard2RouteImport.update({
   id: '/dashboard2',
   path: '/dashboard2',
@@ -160,6 +166,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
   '/dashboard2': typeof Dashboard2Route
+  '/reset-password': typeof ResetPasswordRoute
   '/activate': typeof AuthenticatedActivateRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/bot-rules': typeof AuthenticatedBotRulesRoute
@@ -185,6 +192,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
   '/dashboard2': typeof Dashboard2Route
+  '/reset-password': typeof ResetPasswordRoute
   '/activate': typeof AuthenticatedActivateRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/bot-rules': typeof AuthenticatedBotRulesRoute
@@ -212,6 +220,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
   '/dashboard2': typeof Dashboard2Route
+  '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/activate': typeof AuthenticatedActivateRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/bot-rules': typeof AuthenticatedBotRulesRoute
@@ -239,6 +248,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/dashboard2'
+    | '/reset-password'
     | '/activate'
     | '/admin'
     | '/bot-rules'
@@ -264,6 +274,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/dashboard2'
+    | '/reset-password'
     | '/activate'
     | '/admin'
     | '/bot-rules'
@@ -290,6 +301,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/dashboard2'
+    | '/reset-password'
     | '/_authenticated/activate'
     | '/_authenticated/admin'
     | '/_authenticated/bot-rules'
@@ -317,12 +329,20 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRouteWithChildren
   Dashboard2Route: typeof Dashboard2Route
+  ResetPasswordRoute: typeof ResetPasswordRoute
   ApiPublicHooksBotTickRoute: typeof ApiPublicHooksBotTickRoute
   ApiPublicOnrampWebhookRoute: typeof ApiPublicOnrampWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard2': {
       id: '/dashboard2'
       path: '/dashboard2'
@@ -552,19 +572,10 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRouteWithChildren,
   Dashboard2Route: Dashboard2Route,
+  ResetPasswordRoute: ResetPasswordRoute,
   ApiPublicHooksBotTickRoute: ApiPublicHooksBotTickRoute,
   ApiPublicOnrampWebhookRoute: ApiPublicOnrampWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
