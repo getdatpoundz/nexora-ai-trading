@@ -20,6 +20,34 @@ export const Route = createFileRoute("/_authenticated/settings")({
 function SettingsPage() {
   const { user } = useAuth();
   const { profile } = useProfile(user?.id);
+  const [currentPw, setCurrentPw] = useState("");
+  const [newPw, setNewPw] = useState("");
+  const [confirmPw, setConfirmPw] = useState("");
+  const [pwLoading, setPwLoading] = useState(false);
+
+  const handlePasswordChange = async () => {
+    if (!user?.email) return toast.error("Ingen e-post kopplad till kontot");
+    if (newPw.length < 8) return toast.error("Nytt lösenord måste vara minst 8 tecken");
+    if (newPw !== confirmPw) return toast.error("Lösenorden matchar inte");
+    setPwLoading(true);
+    try {
+      const { error: signInErr } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: currentPw,
+      });
+      if (signInErr) throw new Error("Nuvarande lösenord är felaktigt");
+      const { error } = await supabase.auth.updateUser({ password: newPw });
+      if (error) throw error;
+      toast.success("Lösenord uppdaterat");
+      setCurrentPw(""); setNewPw(""); setConfirmPw("");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Kunde inte uppdatera lösenordet");
+    } finally {
+      setPwLoading(false);
+    }
+  };
+
+
 
   return (
     <AppShell title="Inställningar">
