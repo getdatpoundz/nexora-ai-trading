@@ -296,3 +296,31 @@ export const adminSetPassword = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { email: updated.user?.email ?? "", password: data.password };
   });
+
+const getDashboardSchema = z.object({ user_id: z.string().uuid() });
+
+export const adminGetCustomerDashboard = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: z.infer<typeof getDashboardSchema>) => getDashboardSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const [{ data: profile }, { data: holdings }, { data: trades }, { data: bot }, { data: selections }, { data: withdrawals }] = await Promise.all([
+      supabaseAdmin.from("profiles").select("*").eq("id", data.user_id).maybeSingle(),
+      supabaseAdmin.from("portfolio_holdings").select("*").eq("user_id", data.user_id),
+      supabaseAdmin.from("trades").select("*").eq("user_id", data.user_id).order("executed_at", { ascending: false }).limit(30),
+      supabaseAdmin.from("bot_sessions").select("*").eq("user_id", data.user_id).order("created_at", { ascending: false }).limit(5),
+      supabaseAdmin.from("investment_selections").select("*").eq("user_id", data.user_id).order("created_at", { ascending: false }).limit(5),
+      supabaseAdmin.from("withdrawal_requests").select("*").eq("user_id", data.user_id).order("created_at", { ascending: false }).limit(10),
+    ]);
+
+    return {
+      profile: profile ?? null,
+      holdings: holdings ?? [],
+      trades: trades ?? [],
+      bot_sessions: bot ?? [],
+      selections: selections ?? [],
+      withdrawals: withdrawals ?? [],
+    };
+  });
