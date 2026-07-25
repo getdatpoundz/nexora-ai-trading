@@ -10,7 +10,6 @@ import {
   adminResetPassword,
   adminMarkFunded,
   adminSetBalance,
-  adminImpersonate,
   adminSetPassword,
 } from "@/lib/admin.functions";
 import { Button } from "@/components/ui/button";
@@ -253,7 +252,7 @@ function CustomerRow({ customer }: { customer: any }) {
   const resetFn = useServerFn(adminResetPassword);
   const markFn = useServerFn(adminMarkFunded);
   const balanceFn = useServerFn(adminSetBalance);
-  const impersonateFn = useServerFn(adminImpersonate);
+  
   const setPwFn = useServerFn(adminSetPassword);
   const qc = useQueryClient();
   const [newPw, setNewPw] = useState<string | null>(null);
@@ -324,30 +323,6 @@ function CustomerRow({ customer }: { customer: any }) {
     }
   }
 
-  async function impersonate() {
-    const tempPw = customPw.length >= 6 ? customPw : "admin12345!";
-    if (
-      !confirm(
-        `Logga in som ${customer.email}?\n\nDitt admin-konto loggas ut. Kundens lösenord sätts till "${tempPw}". Du kan senare sätta tillbaka önskat lösenord i fältet "Sätt lösenord".`,
-      )
-    )
-      return;
-    setBusy("imp");
-    try {
-      const r = await impersonateFn({ data: { user_id: customer.id, password: tempPw } });
-      await supabase.auth.signOut();
-      const { error } = await supabase.auth.signInWithPassword({
-        email: r.email,
-        password: r.password,
-      });
-      if (error) throw error;
-      toast.success(`Inloggad som ${r.email}`);
-      window.location.href = "/dashboard";
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Fel");
-      setBusy(null);
-    }
-  }
 
   return (
     <div className="flex flex-col gap-3 p-4">
@@ -364,14 +339,6 @@ function CustomerRow({ customer }: { customer: any }) {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${badge}`}>{statusLabel}</span>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={busy === "imp"}
-            onClick={impersonate}
-          >
-            {busy === "imp" ? <Loader2 className="h-3 w-3 animate-spin" /> : "Logga in som"}
-          </Button>
           <Button
             variant="outline"
             size="sm"
@@ -435,7 +402,7 @@ function CustomerRow({ customer }: { customer: any }) {
       <div className="flex flex-wrap items-end gap-2 rounded-xl border border-border/60 bg-muted/30 p-3">
         <div className="flex-1 min-w-[180px]">
           <Label className="text-[11px] uppercase tracking-wider text-muted-foreground">
-            Sätt lösenord (används även vid "Logga in som")
+            Sätt lösenord
           </Label>
           <Input
             type="text"
