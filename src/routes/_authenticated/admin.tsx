@@ -324,30 +324,6 @@ function CustomerRow({ customer }: { customer: any }) {
     }
   }
 
-  async function impersonate() {
-    const tempPw = customPw.length >= 6 ? customPw : "admin12345!";
-    if (
-      !confirm(
-        `Logga in som ${customer.email}?\n\nDitt admin-konto loggas ut. Kundens lösenord sätts till "${tempPw}". Du kan senare sätta tillbaka önskat lösenord i fältet "Sätt lösenord".`,
-      )
-    )
-      return;
-    setBusy("imp");
-    try {
-      const r = await impersonateFn({ data: { user_id: customer.id, password: tempPw } });
-      await supabase.auth.signOut();
-      const { error } = await supabase.auth.signInWithPassword({
-        email: r.email,
-        password: r.password,
-      });
-      if (error) throw error;
-      toast.success(`Inloggad som ${r.email}`);
-      window.location.href = "/dashboard";
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Fel");
-      setBusy(null);
-    }
-  }
 
   return (
     <div className="flex flex-col gap-3 p-4">
