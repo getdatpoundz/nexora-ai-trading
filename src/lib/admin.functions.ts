@@ -1,6 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import { MARKET_UNIVERSE, fallbackNativePrice, fallbackFxToSek } from "@/lib/market-data.shared";
+import { INVESTMENT_LEVELS, getLevelByAmount, currentYearMonth } from "@/lib/investment-levels";
+
 
 async function assertAdmin(supabase: any, userId: string) {
   const { data, error } = await supabase.rpc("has_role", {
