@@ -4,9 +4,13 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { adminGetCustomerDashboard } from "@/lib/admin.functions";
+import { adminGetCustomerDashboard, adminRunProfitRound } from "@/lib/admin.functions";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, RefreshCw } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { ArrowLeft, RefreshCw, Zap } from "lucide-react";
+import { toast } from "sonner";
+
 
 export const Route = createFileRoute("/_authenticated/admin/customer/$id")({
   component: AdminCustomerPage,
