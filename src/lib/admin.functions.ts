@@ -315,6 +315,14 @@ export const adminUpgradeLevel = createServerFn({ method: "POST" })
         .in("id", activeSessions.map((s) => s.id));
     }
 
+    // Nollställ månadsanvändning (trades + hävstång) för aktuell månad
+    await supabaseAdmin
+      .from("bot_monthly_usage")
+      .upsert(
+        { user_id: data.user_id, year_month: currentYearMonth(), trades_count: 0, leverage_used_pct: 0 },
+        { onConflict: "user_id,year_month" },
+      );
+
     return {
       ok: true,
       level_name: level.name,
