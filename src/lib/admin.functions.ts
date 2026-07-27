@@ -296,6 +296,25 @@ export const adminUpgradeLevel = createServerFn({ method: "POST" })
       .eq("id", data.user_id);
     if (uErr) throw new Error(uErr.message);
 
+    // Uppdatera aktiva bot-sessioner till nya nivåns tak och släpp ev. limit_reached
+    const { data: activeSessions } = await supabaseAdmin
+      .from("bot_sessions")
+      .select("id")
+      .eq("user_id", data.user_id)
+      .in("status", ["running", "paused", "limit_reached"]);
+    if (activeSessions?.length) {
+      await supabaseAdmin
+        .from("bot_sessions")
+        .update({
+          level_key: level.key,
+          max_trades_month: level.maxTradesPerMonth,
+          max_leverage_pct: level.maxLeveragePct,
+          target_multiplier: level.targetMultiplier,
+          status: "running",
+        })
+        .in("id", activeSessions.map((s) => s.id));
+    }
+
     return {
       ok: true,
       level_name: level.name,
