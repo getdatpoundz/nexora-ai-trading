@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { currentYearMonth } from "@/lib/investment-levels";
+import { currentYearMonth, getLevelByAmount, INVESTMENT_LEVELS } from "@/lib/investment-levels";
 
 export type BotSession = {
   id: string;
@@ -35,15 +35,55 @@ export function useBotStatus(userId: string | undefined) {
 
     async function load() {
       const ym = currentYearMonth();
-      const [{ data: sessions }, { data: u }] = await Promise.all([
+      const [{ data: sessions }, { data: u }, { data: profile }] = await Promise.all([
         supabase.from("bot_sessions").select("*").eq("user_id", userId as string)
           .in("status", ["running", "paused", "limit_reached"]).order("started_at", { ascending: false }).limit(1),
         supabase.from("bot_monthly_usage").select("trades_count, leverage_used_pct")
           .eq("user_id", userId as string).eq("year_month", ym).maybeSingle(),
+        supabase.from("profiles").select("assigned_level_sek, assigned_level_name").eq("id", userId as string).maybeSingle(),
       ]);
       if (cancelled) return;
-      setSession((sessions?.[0] as BotSession | undefined) ?? null);
-      setUsage(u ?? { trades_count: 0, leverage_used_pct: 0 });
+      const monthlyUsage = u ?? { trades_count: 0, leverage_used_pct: 0 };
+      const currentLevel = profile?.assigned_level_name
+        ? INVESTMENT_LEVELS.find((level) => level.name === profile.assigned_level_name) ?? getLevelByAmount(profile.assigned_level_sek)
+        : getLevelByAmount(profile?.assigned_level_sek);
+      const rawSession = (sessions?.[0] as BotSession | undefined) ?? null;
+      const syncedSession = rawSession
+        ? {
+            ...rawSession,
+            level_key: currentLevel.key,
+            max_trades_month: currentLevel.maxTradesPerMonth,
+            max_leverage_pct: currentLevel.maxLeveragePct,
+            target_multiplier: currentLevel.targetMultiplier,
+          }
+        : null;
+
+      if (syncedSession) {
+        const isWithinTradeLimit = monthlyUsage.trades_count < syncedSession.max_trades_month;
+        const isWithinLeverageLimit = syncedSession.max_leverage_pct <= 0 || monthlyUsage.leverage_used_pct < syncedSession.max_leverage_pct;
+        const nextStatus = syncedSession.status === "limit_reached" && isWithinTradeLimit && isWithinLeverageLimit
+          ? "running"
+          : syncedSession.status;
+        if (
+          rawSession.level_key !== syncedSession.level_key ||
+          rawSession.max_trades_month !== syncedSession.max_trades_month ||
+          rawSession.max_leverage_pct !== syncedSession.max_leverage_pct ||
+          rawSession.target_multiplier !== syncedSession.target_multiplier ||
+          rawSession.status !== nextStatus
+        ) {
+          supabase.from("bot_sessions").update({
+            level_key: syncedSession.level_key,
+            max_trades_month: syncedSession.max_trades_month,
+            max_leverage_pct: syncedSession.max_leverage_pct,
+            target_multiplier: syncedSession.target_multiplier,
+            status: nextStatus,
+          }).eq("id", rawSession.id).then(() => undefined);
+        }
+        syncedSession.status = nextStatus;
+      }
+
+      setSession(syncedSession);
+      setUsage(monthlyUsage);
       setLoading(false);
     }
     load();
