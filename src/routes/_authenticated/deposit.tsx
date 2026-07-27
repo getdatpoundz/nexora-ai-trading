@@ -25,13 +25,13 @@ type Level = {
 const LEVELS: Level[] = [
   { key: "START", name: "Start", amount: 2500, maxTradesPerMonth: 20, maxLeveragePct: 0 },
   { key: "BAS", name: "Bas", amount: 5000, maxTradesPerMonth: 40, maxLeveragePct: 0 },
-  { key: "PLUS", name: "Plus", amount: 10000, maxTradesPerMonth: 60, maxLeveragePct: 25 },
-  { key: "ADVANCED", name: "Advanced", amount: 25000, maxTradesPerMonth: 100, maxLeveragePct: 50 },
-  { key: "PREMIUM", name: "Premium", amount: 50000, maxTradesPerMonth: 150, maxLeveragePct: 100 },
-  { key: "PRIVATE", name: "Private", amount: 100000, maxTradesPerMonth: 200, maxLeveragePct: 150 },
-  { key: "PRIVATE_PLUS", name: "Private Plus", amount: 250000, maxTradesPerMonth: 300, maxLeveragePct: 200 },
-  { key: "WEALTH", name: "Wealth", amount: 500000, maxTradesPerMonth: 500, maxLeveragePct: 300 },
-  { key: "WEALTH_ONE", name: "Wealth One", amount: 1000000, maxTradesPerMonth: 1000, maxLeveragePct: 500 },
+  { key: "PLUS", name: "Plus", amount: 10000, maxTradesPerMonth: 60, maxLeveragePct: 0 },
+  { key: "ADVANCED", name: "Advanced", amount: 25000, maxTradesPerMonth: 100, maxLeveragePct: 0 },
+  { key: "PREMIUM", name: "Premium", amount: 50000, maxTradesPerMonth: 150, maxLeveragePct: 0 },
+  { key: "PRIVATE", name: "Private", amount: 100000, maxTradesPerMonth: 200, maxLeveragePct: 0 },
+  { key: "PRIVATE_PLUS", name: "Private Plus", amount: 250000, maxTradesPerMonth: 300, maxLeveragePct: 0 },
+  { key: "WEALTH", name: "Wealth", amount: 500000, maxTradesPerMonth: 500, maxLeveragePct: 0 },
+  { key: "WEALTH_ONE", name: "Wealth One", amount: 1000000, maxTradesPerMonth: 1000, maxLeveragePct: 0 },
 ];
 
 type Mode = null | "upgrade" | "topup";
