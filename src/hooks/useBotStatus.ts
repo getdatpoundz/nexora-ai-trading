@@ -53,15 +53,14 @@ export function useBotStatus(userId: string | undefined) {
             ...rawSession,
             level_key: currentLevel.key,
             max_trades_month: currentLevel.maxTradesPerMonth,
-            max_leverage_pct: currentLevel.maxLeveragePct,
+            max_leverage_pct: 0,
             target_multiplier: currentLevel.targetMultiplier,
           }
         : null;
 
       if (rawSession && syncedSession) {
         const isWithinTradeLimit = monthlyUsage.trades_count < syncedSession.max_trades_month;
-        const isWithinLeverageLimit = syncedSession.max_leverage_pct <= 0 || monthlyUsage.leverage_used_pct < syncedSession.max_leverage_pct;
-        const nextStatus = syncedSession.status === "limit_reached" && isWithinTradeLimit && isWithinLeverageLimit
+        const nextStatus = syncedSession.status === "limit_reached" && isWithinTradeLimit
           ? "running"
           : syncedSession.status;
         if (
@@ -83,7 +82,7 @@ export function useBotStatus(userId: string | undefined) {
       }
 
       setSession(syncedSession);
-      setUsage(monthlyUsage);
+      setUsage({ ...monthlyUsage, leverage_used_pct: 0 });
       setLoading(false);
     }
     load();
