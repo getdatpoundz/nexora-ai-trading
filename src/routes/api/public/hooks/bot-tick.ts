@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
+import { getLevelByAmount, INVESTMENT_LEVELS } from "@/lib/investment-levels";
 import { MARKET_UNIVERSE, fallbackNativePrice, fallbackFxToSek } from "@/lib/market-data.shared";
 
 function ymUTC(d = new Date()): string {
@@ -49,15 +50,29 @@ export const Route = createFileRoute("/api/public/hooks/bot-tick")({
           auth: { autoRefreshToken: false, persistSession: false },
         });
 
-        // Fetch all active sessions
+        // Fetch active sessions, plus stale limit sessions that may have been unlocked by a level upgrade.
         const { data: sessions, error: sessErr } = await admin
-          .from("bot_sessions").select("*").eq("status", "running").limit(200);
+          .from("bot_sessions").select("*").in("status", ["running", "limit_reached"]).limit(200);
         if (sessErr) return new Response(JSON.stringify({ error: sessErr.message }), { status: 500 });
 
         const ym = ymUTC();
         const results: Array<{ session: string; trades: number; note?: string }> = [];
 
         for (const s of sessions ?? []) {
+          const { data: profile } = await admin.from("profiles")
+            .select("assigned_level_sek, assigned_level_name")
+            .eq("id", s.user_id)
+            .maybeSingle();
+          const level = profile?.assigned_level_name
+            ? INVESTMENT_LEVELS.find((l) => l.name === profile.assigned_level_name) ?? getLevelByAmount(profile.assigned_level_sek)
+            : getLevelByAmount(profile?.assigned_level_sek);
+          const sessionLimits = {
+            level_key: level.key,
+            max_trades_month: level.maxTradesPerMonth,
+            max_leverage_pct: level.maxLeveragePct,
+            target_multiplier: level.targetMultiplier,
+          };
+
           // Get/create monthly usage
           const { data: usage } = await admin.from("bot_monthly_usage")
             .select("*").eq("user_id", s.user_id).eq("year_month", ym).maybeSingle();
@@ -65,9 +80,9 @@ export const Route = createFileRoute("/api/public/hooks/bot-tick")({
           const tradesUsed = usage?.trades_count ?? 0;
           const leverageUsed = usage?.leverage_used_pct ?? 0;
 
-          if (tradesUsed >= s.max_trades_month ||
-              (s.max_leverage_pct > 0 && leverageUsed >= s.max_leverage_pct)) {
-            await admin.from("bot_sessions").update({ status: "limit_reached" }).eq("id", s.id);
+          if (tradesUsed >= sessionLimits.max_trades_month ||
+              (sessionLimits.max_leverage_pct > 0 && leverageUsed >= sessionLimits.max_leverage_pct)) {
+            await admin.from("bot_sessions").update({ ...sessionLimits, status: "limit_reached" }).eq("id", s.id);
             results.push({ session: s.id, trades: 0, note: "limit_reached" });
             continue;
           }
@@ -75,7 +90,7 @@ export const Route = createFileRoute("/api/public/hooks/bot-tick")({
           // Generate 2-5 trades per tick for a lively live feed, respecting monthly cap
           const numTrades = Math.min(
             Math.floor(rand(2, 5.9)),
-            s.max_trades_month - tradesUsed,
+            sessionLimits.max_trades_month - tradesUsed,
           );
           let leverageDelta = 0;
           let generated = 0;
@@ -116,7 +131,7 @@ export const Route = createFileRoute("/api/public/hooks/bot-tick")({
               total_sek: quantity * sellPrice, executed_at: now.toISOString(),
             });
 
-            leverageDelta += s.max_leverage_pct > 0 ? Math.floor(rand(1, 4)) : 0;
+            leverageDelta += sessionLimits.max_leverage_pct > 0 ? Math.floor(rand(1, 4)) : 0;
             generated++;
           }
 
@@ -155,9 +170,10 @@ export const Route = createFileRoute("/api/public/hooks/bot-tick")({
           const newTradesGenerated = s.trades_generated + generated;
 
           // Auto-stop when session reaches target
-          const shouldFinish = newTradesGenerated >= s.target_trades || currentMult >= s.target_multiplier;
+          const shouldFinish = newTradesGenerated >= s.target_trades || currentMult >= sessionLimits.target_multiplier;
 
           await admin.from("bot_sessions").update({
+            ...sessionLimits,
             trades_generated: newTradesGenerated,
             current_multiplier: currentMult,
             last_tick_at: new Date().toISOString(),
