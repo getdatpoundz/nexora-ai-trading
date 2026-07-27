@@ -58,7 +58,7 @@ export function useBotStatus(userId: string | undefined) {
           }
         : null;
 
-      if (syncedSession) {
+      if (rawSession && syncedSession) {
         const isWithinTradeLimit = monthlyUsage.trades_count < syncedSession.max_trades_month;
         const isWithinLeverageLimit = syncedSession.max_leverage_pct <= 0 || monthlyUsage.leverage_used_pct < syncedSession.max_leverage_pct;
         const nextStatus = syncedSession.status === "limit_reached" && isWithinTradeLimit && isWithinLeverageLimit
