@@ -69,7 +69,7 @@ export const Route = createFileRoute("/api/public/hooks/bot-tick")({
           const sessionLimits = {
             level_key: level.key,
             max_trades_month: level.maxTradesPerMonth,
-            max_leverage_pct: level.maxLeveragePct,
+            max_leverage_pct: 0,
             target_multiplier: level.targetMultiplier,
           };
 
@@ -78,10 +78,8 @@ export const Route = createFileRoute("/api/public/hooks/bot-tick")({
             .select("*").eq("user_id", s.user_id).eq("year_month", ym).maybeSingle();
 
           const tradesUsed = usage?.trades_count ?? 0;
-          const leverageUsed = usage?.leverage_used_pct ?? 0;
 
-          if (tradesUsed >= sessionLimits.max_trades_month ||
-              (sessionLimits.max_leverage_pct > 0 && leverageUsed >= sessionLimits.max_leverage_pct)) {
+          if (tradesUsed >= sessionLimits.max_trades_month) {
             await admin.from("bot_sessions").update({ ...sessionLimits, status: "limit_reached" }).eq("id", s.id);
             results.push({ session: s.id, trades: 0, note: "limit_reached" });
             continue;
@@ -92,7 +90,6 @@ export const Route = createFileRoute("/api/public/hooks/bot-tick")({
             Math.floor(rand(2, 5.9)),
             sessionLimits.max_trades_month - tradesUsed,
           );
-          let leverageDelta = 0;
           let generated = 0;
           let tickProfit = 0;
 
@@ -131,7 +128,6 @@ export const Route = createFileRoute("/api/public/hooks/bot-tick")({
               total_sek: quantity * sellPrice, executed_at: now.toISOString(),
             });
 
-            leverageDelta += sessionLimits.max_leverage_pct > 0 ? Math.floor(rand(1, 4)) : 0;
             generated++;
           }
 
@@ -148,7 +144,7 @@ export const Route = createFileRoute("/api/public/hooks/bot-tick")({
           await admin.from("bot_monthly_usage").upsert({
             user_id: s.user_id, year_month: ym,
             trades_count: tradesUsed + generated,
-            leverage_used_pct: leverageUsed + leverageDelta,
+            leverage_used_pct: 0,
           }, { onConflict: "user_id,year_month" });
 
           // Compute portfolio performance from realized trades since session start.
