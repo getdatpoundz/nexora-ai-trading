@@ -77,9 +77,10 @@ function WithdrawPage() {
       setCheckStep(CHECKS.length);
 
       if (needsVerification(amt)) {
-        setVerification({ amount: amt, required: Math.max(portfolioValue, amt) });
+        setVerification({ amount: amt, required: Math.round(portfolioValue) });
         return;
       }
+
 
       await createFn({ data: { amount_sek: amt, btc_address: address.trim() } });
       toast.success("Uttagsförfrågan skickad. Väntar på godkännande.");
