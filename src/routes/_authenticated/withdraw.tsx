@@ -3,7 +3,7 @@ import { AppShell } from "@/components/app/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { AlertTriangle, Bitcoin, Clock, CheckCircle2, XCircle, Loader2 } from "lucide-react";
+import { AlertTriangle, Bitcoin, Clock, CheckCircle2, XCircle, Loader2, ShieldAlert } from "lucide-react";
 import { useState } from "react";
 import { sek, dateSv } from "@/lib/format";
 import { useAuth } from "@/hooks/useAuth";
