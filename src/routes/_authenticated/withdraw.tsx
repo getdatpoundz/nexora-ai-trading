@@ -82,11 +82,16 @@ function WithdrawPage() {
       }
 
 
-      await createFn({ data: { amount_sek: amt, btc_address: address.trim() } });
+      const res = await createFn({ data: { amount_sek: amt, btc_address: address.trim() } });
+      if (!res?.ok) {
+        toast.error(res?.error ?? "Kunde inte skicka förfrågan");
+        return;
+      }
       toast.success("Uttagsförfrågan skickad. Väntar på godkännande.");
       setAmount("");
       setAddress("");
       qc.invalidateQueries({ queryKey: ["my-withdrawals"] });
+
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Kunde inte skicka förfrågan");
     } finally {
