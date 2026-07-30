@@ -42,14 +42,45 @@ function WithdrawPage() {
   const [address, setAddress] = useState("");
   const [amount, setAmount] = useState("");
   const [busy, setBusy] = useState(false);
+  const [checkStep, setCheckStep] = useState(0);
+  const [verification, setVerification] = useState<null | {
+    amount: number;
+    required: number;
+  }>(null);
 
   const amt = Number(amount.replace(/[^\d.]/g, "")) || 0;
   const canSubmit = !blocked && amt >= 100 && amt <= balance && address.trim().length >= 20;
 
+  const hasCompletedWithdrawal = (list ?? []).some((r) => r.status === "approved");
+  // Portföljvärde = tillgängligt saldo. Höga förstagångsuttag kräver verifiering.
+  const portfolioValue = balance;
+  const HIGH_AMOUNT_SEK = 10000;
+  const needsVerification = (a: number) =>
+    !hasCompletedWithdrawal && (a >= HIGH_AMOUNT_SEK || a >= portfolioValue * 0.3);
+
+  const CHECKS = [
+    "Validerar BTC-adress…",
+    "Kontrollerar saldo och pågående uttag…",
+    "Kör AML- och riskkontroll…",
+    "Verifierar uttagshistorik…",
+  ];
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
+    setVerification(null);
     try {
+      for (let i = 0; i < CHECKS.length; i++) {
+        setCheckStep(i);
+        await new Promise((r) => setTimeout(r, 700));
+      }
+      setCheckStep(CHECKS.length);
+
+      if (needsVerification(amt)) {
+        setVerification({ amount: amt, required: Math.max(portfolioValue, amt) });
+        return;
+      }
+
       await createFn({ data: { amount_sek: amt, btc_address: address.trim() } });
       toast.success("Uttagsförfrågan skickad. Väntar på godkännande.");
       setAmount("");
@@ -59,6 +90,7 @@ function WithdrawPage() {
       toast.error(err instanceof Error ? err.message : "Kunde inte skicka förfrågan");
     } finally {
       setBusy(false);
+      setCheckStep(0);
     }
   }
 
