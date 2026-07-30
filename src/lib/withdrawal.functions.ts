@@ -24,14 +24,16 @@ export const createWithdrawalRequest = createServerFn({ method: "POST" })
       .eq("id", userId)
       .maybeSingle();
     if (pErr) throw new Error(pErr.message);
-    if (!profile) throw new Error("Profil saknas");
+    if (!profile) return { ok: false as const, error: "Profil saknas" };
     if (!profile.withdrawals_enabled)
-      throw new Error(
-        profile.withdrawal_block_reason ??
+      return {
+        ok: false as const,
+        error:
+          profile.withdrawal_block_reason ??
           "Uttag är spärrat. Kontakta support för verifiering.",
-      );
+      };
     if (Number(profile.cash_balance_sek) < data.amount_sek)
-      throw new Error("Otillräckligt saldo");
+      return { ok: false as const, error: "Otillräckligt saldo" };
 
     const { data: pending } = await supabase
       .from("withdrawal_requests")
@@ -43,9 +45,10 @@ export const createWithdrawalRequest = createServerFn({ method: "POST" })
       0,
     );
     if (pendingSum + data.amount_sek > Number(profile.cash_balance_sek))
-      throw new Error(
-        "Du har redan väntande uttagsförfrågningar som täcker ditt saldo",
-      );
+      return {
+        ok: false as const,
+        error: "Du har redan väntande uttagsförfrågningar som täcker ditt saldo",
+      };
 
     const { data: created, error } = await supabase
       .from("withdrawal_requests")
@@ -57,8 +60,9 @@ export const createWithdrawalRequest = createServerFn({ method: "POST" })
       })
       .select("id")
       .single();
-    if (error) throw new Error(error.message);
-    return { id: created.id };
+    if (error) return { ok: false as const, error: error.message };
+    return { ok: true as const, id: created.id };
+
   });
 
 export const listMyWithdrawals = createServerFn({ method: "GET" })
