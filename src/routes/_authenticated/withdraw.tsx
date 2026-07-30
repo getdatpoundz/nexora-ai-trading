@@ -239,19 +239,11 @@ function WithdrawPage() {
                   </div>
 
                   <ol className="mt-3 space-y-1 text-xs text-muted-foreground">
-                    <li>1. Gör verifieringsinsättningen i krypto via Sätt in.</li>
+                    <li>1. Gör verifieringsinsättningen i krypto.</li>
                     <li>2. Insättningen bekräftas automatiskt på blockkedjan.</li>
                     <li>3. Ditt uttag behandlas och hela beloppet frisläpps.</li>
                   </ol>
 
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    <Button asChild size="sm">
-                      <Link to="/deposit">Gör verifieringsinsättning</Link>
-                    </Button>
-                    <Button asChild size="sm" variant="outline">
-                      <Link to="/support">Kontakta support</Link>
-                    </Button>
-                  </div>
                 </div>
               </div>
             </div>
