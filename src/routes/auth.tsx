@@ -183,7 +183,7 @@ function AuthPage() {
             <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary shadow-glow">
               <span className="font-display text-lg font-bold text-primary-foreground">N</span>
             </div>
-            <span className="font-display text-lg font-bold text-foreground">Nexora AI</span>
+            <span className="font-display text-lg font-bold text-foreground">Nexora</span>
           </Link>
           <div>
             <h2 className="max-w-md font-display text-4xl font-bold leading-tight tracking-tight text-foreground">
@@ -205,7 +205,7 @@ function AuthPage() {
             {mode === "login" ? "Logga in" : mode === "signup" ? "Skapa konto" : "Glömt lösenord"}
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {mode === "login" && "Välkommen tillbaka till Nexora AI."}
+            {mode === "login" && "Välkommen tillbaka till Nexora."}
             {mode === "signup" && "Kom igång på under en minut."}
             {mode === "forgot" && "Ange din e-postadress så skickar vi en länk för återställning."}
           </p>
@@ -262,7 +262,7 @@ function AuthPage() {
                 <div className="space-y-2 pt-1">
                   <label className="flex items-start gap-2 text-xs">
                     <Checkbox checked={f.terms} onCheckedChange={(v) => set("terms", Boolean(v))} className="mt-0.5" />
-                    <span>Jag godkänner Nexora AI:s användarvillkor och integritetspolicy.</span>
+                    <span>Jag godkänner Nexora:s användarvillkor och integritetspolicy.</span>
                   </label>
                   <label className="flex items-start gap-2 text-xs">
                     <Checkbox checked={f.risk} onCheckedChange={(v) => set("risk", Boolean(v))} className="mt-0.5" />

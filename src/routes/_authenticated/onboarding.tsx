@@ -99,7 +99,7 @@ function OnboardingPage() {
               onCheckedChange={(v) => set("terms_accepted", Boolean(v))}
               className="mt-0.5"
             />
-            <span>Jag godkänner Nexora AI:s användarvillkor och integritetspolicy.</span>
+            <span>Jag godkänner Nexora:s användarvillkor och integritetspolicy.</span>
           </label>
           <label className="flex items-start gap-2 text-xs">
             <Checkbox

@@ -15,9 +15,9 @@ import { TrendingUp, Wallet, Sparkles, ArrowUpRight } from "lucide-react";
 export const Route = createFileRoute("/dashboard2")({
   head: () => ({
     meta: [
-      { title: "Översikt Pro — Nexora AI" },
+      { title: "Översikt Pro — Nexora" },
       { name: "description", content: "Din AI-drivna portfölj med vinstdrivna trades." },
-      { property: "og:title", content: "Översikt Pro — Nexora AI" },
+      { property: "og:title", content: "Översikt Pro — Nexora" },
       { property: "og:description", content: "Din AI-drivna portfölj med vinstdrivna trades." },
     ],
   }),

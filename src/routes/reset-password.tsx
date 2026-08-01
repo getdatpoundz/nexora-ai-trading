@@ -11,10 +11,10 @@ export const Route = createFileRoute("/reset-password")({
   component: ResetPasswordPage,
   head: () => ({
     meta: [
-      { title: "Återställ lösenord · Nexora AI" },
-      { name: "description", content: "Ange ett nytt lösenord för ditt Nexora AI-konto." },
-      { property: "og:title", content: "Återställ lösenord · Nexora AI" },
-      { property: "og:description", content: "Ange ett nytt lösenord för ditt Nexora AI-konto." },
+      { title: "Återställ lösenord · Nexora" },
+      { name: "description", content: "Ange ett nytt lösenord för ditt Nexora-konto." },
+      { property: "og:title", content: "Återställ lösenord · Nexora" },
+      { property: "og:description", content: "Ange ett nytt lösenord för ditt Nexora-konto." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -71,7 +71,7 @@ function ResetPasswordPage() {
       <div className="w-full max-w-md rounded-2xl border border-border bg-card p-8 shadow-sm">
         <h1 className="text-2xl font-bold tracking-tight">Sätt nytt lösenord</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Välj ett nytt lösenord för ditt Nexora AI-konto.
+          Välj ett nytt lösenord för ditt Nexora-konto.
         </p>
 
         {checking ? (

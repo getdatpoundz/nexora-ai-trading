@@ -113,7 +113,7 @@ function Landing() {
             <div className="grid h-9 w-9 place-items-center rounded-lg bg-primary">
               <span className="font-display text-lg font-bold text-primary-foreground">N</span>
             </div>
-            <span className="font-display text-lg font-bold tracking-tight">Nexora AI</span>
+            <span className="font-display text-lg font-bold tracking-tight">Nexora</span>
             
           </div>
           <nav className="hidden items-center gap-8 text-sm font-medium text-muted-foreground md:flex">
@@ -145,7 +145,7 @@ function Landing() {
                 AI-driven handel för alla <span className="text-primary">— kom igång på några minuter</span>
               </h1>
               <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
-                Nexora AI är en intelligent handelsbot som analyserar globala marknader dygnet runt — krypto, aktier, valuta och råvaror. Du väljer din risknivå och regler, sedan sköter boten handeln åt dig helt automatiskt.
+                Nexora är en intelligent handelsbot som analyserar globala marknader dygnet runt — krypto, aktier, valuta och råvaror. Du väljer din risknivå och regler, sedan sköter boten handeln åt dig helt automatiskt.
               </p>
 
               <div className="mt-8 flex flex-wrap items-center gap-3">
@@ -178,22 +178,22 @@ function Landing() {
 
       <PartnersSection />
 
-      {/* Vad är Nexora AI */}
+      {/* Vad är Nexora */}
       <section id="om" className="border-b border-border">
         <div className="mx-auto max-w-7xl px-6 py-20 lg:py-28">
           <div className="grid gap-12 lg:grid-cols-[1fr_1.15fr] lg:items-center">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-primary">Om Nexora AI</p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-primary">Om Nexora</p>
               <h2 className="mt-3 font-display text-4xl font-bold tracking-tight sm:text-5xl">
                 Ett nytt sätt att handla på finansmarknaderna.
               </h2>
               <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
-                Nexora AI är en AI-driven tradingbot skapad för alla som vill delta i marknaderna –
+                Nexora är en AI-driven tradingbot skapad för alla som vill delta i marknaderna –
                 oavsett om du är nybörjare eller erfaren trader. Systemet arbetar dygnet runt och
                 analyserar globala finansmarknader inklusive kryptovalutor, valutor, aktier och råvaror.
               </p>
               <p className="mt-4 text-base leading-relaxed text-muted-foreground">
-                Traditionell handel kan kännas överväldigande. Nexora AI tar bort komplexiteten så att
+                Traditionell handel kan kännas överväldigande. Nexora tar bort komplexiteten så att
                 du kan investera lugnt och effektivt – med intelligenta algoritmer, blixtsnabb exekvering
                 och en användarupplevelse som fungerar även medan du sover.
               </p>
@@ -369,7 +369,7 @@ function Landing() {
           <div className="mx-auto max-w-3xl text-center">
             <p className="text-xs font-semibold uppercase tracking-wider text-primary">Så fungerar det</p>
             <h2 className="mt-3 font-display text-4xl font-bold tracking-tight sm:text-5xl">
-              Så fungerar Nexora AI
+              Så fungerar Nexora
             </h2>
             <p className="mt-4 text-lg text-muted-foreground">
               Inga komplicerade installationer eller tekniska förkunskaper krävs. Det intuitiva
@@ -392,7 +392,7 @@ function Landing() {
               {
                 step: "03",
                 title: "Konfigurera din bot",
-                desc: "Föredrar du en hands-off-approach? Låt Nexora AI handla åt dig. Vill du ha mer kontroll? Justera parametrar och sätt egna regler.",
+                desc: "Föredrar du en hands-off-approach? Låt Nexora handla åt dig. Vill du ha mer kontroll? Justera parametrar och sätt egna regler.",
               },
               {
                 step: "04",
@@ -427,7 +427,7 @@ function Landing() {
               Avancerad AI som aldrig sover
             </h2>
             <p className="mt-4 text-lg text-muted-foreground">
-              Bakom kulisserna drivs Nexora AI av modern artificiell intelligens och sofistikerade
+              Bakom kulisserna drivs Nexora av modern artificiell intelligens och sofistikerade
               maskininlärningsmodeller som bearbetar enorma datamängder på sekunder – något ingen
               människa kan göra ensam.
             </p>
@@ -450,17 +450,17 @@ function Landing() {
         </div>
       </section>
 
-      {/* Varför Nexora AI */}
+      {/* Varför Nexora */}
       <section id="varfor" className="border-b border-border">
         <div className="mx-auto max-w-7xl px-6 py-20 lg:py-24">
           <div className="grid gap-12 lg:grid-cols-[1fr_1.2fr] lg:items-start">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-primary">Varför Nexora AI</p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-primary">Varför Nexora</p>
               <h2 className="mt-3 font-display text-4xl font-bold tracking-tight sm:text-5xl">
                 Transparens, kontroll och support – dygnet runt.
               </h2>
               <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
-                Nexora AI växer varje dag och har redan hjälpt tusentals användare i Sverige att uppnå
+                Nexora växer varje dag och har redan hjälpt tusentals användare i Sverige att uppnå
                 mer konsekventa resultat, minska känslostyrda misstag och frigöra tid för det som
                 betyder mest.
               </p>
@@ -520,7 +520,7 @@ function Landing() {
             <p className="text-xs font-semibold uppercase tracking-wider text-primary">Säkerhet</p>
             <h2 className="mt-3 font-display text-4xl font-bold tracking-tight">Byggt för svenska sparare.</h2>
             <p className="mt-4 text-muted-foreground">
-              Nexora AI följer nordiska best practices: stark autentisering, kryptering och tydlig separation
+              Nexora följer nordiska best practices: stark autentisering, kryptering och tydlig separation
               mellan användardata och drift.
             </p>
             <ul className="mt-6 space-y-3 text-sm">
@@ -578,7 +578,7 @@ function Landing() {
                 Håll koll på portföljen direkt från mobilen
               </h2>
               <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
-                Snart lanserar vi Nexora AI som app – följ dina AI-strategier, se innehav, sätt in och
+                Snart lanserar vi Nexora som app – följ dina AI-strategier, se innehav, sätt in och
                 handla direkt från fickan. Släpps under 2026 för iOS och Android.
               </p>
 
@@ -664,7 +664,7 @@ function Landing() {
       <section className="border-b border-border">
         <div className="mx-auto max-w-4xl px-6 py-20 text-center lg:py-24">
           <h2 className="font-display text-4xl font-bold tracking-tight sm:text-5xl">
-            Redo att testa <span className="text-primary">Nexora AI</span>?
+            Redo att testa <span className="text-primary">Nexora</span>?
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-lg text-muted-foreground">
             Skapa ett konto på under en minut och kom igång med AI-driven kryptohandel.
@@ -687,7 +687,7 @@ function Landing() {
               <div className="grid h-8 w-8 place-items-center rounded-lg bg-primary">
                 <span className="font-display text-sm font-bold text-primary-foreground">N</span>
               </div>
-              <span className="font-display font-bold">Nexora AI</span>
+              <span className="font-display font-bold">Nexora</span>
             </div>
             <div className="flex gap-6 text-sm text-muted-foreground">
               <a href="#nivaer" className="hover:text-foreground">Nivåer</a>
@@ -701,7 +701,7 @@ function Landing() {
             förlora hela det investerade kapitalet. Historisk eller simulerad utveckling är ingen
             garanti för framtida resultat.
           </p>
-          <p className="mt-4 text-center text-xs text-muted-foreground">© {new Date().getFullYear()} Nexora AI</p>
+          <p className="mt-4 text-center text-xs text-muted-foreground">© {new Date().getFullYear()} Nexora</p>
         </div>
       </footer>
     </div>
