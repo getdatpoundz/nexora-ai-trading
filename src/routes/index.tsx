@@ -5,6 +5,7 @@ import avanzaLogo from "@/assets/avanza.png";
 import nordnetLogo from "@/assets/nordnet.png";
 import { MarketTicker } from "@/components/landing/MarketTicker";
 import { getLevelByAmount } from "@/lib/investment-levels";
+import markLight from "@/assets/nexora-mark-light.png.asset.json";
 
 export const Route = createFileRoute("/")({
   component: Landing,
