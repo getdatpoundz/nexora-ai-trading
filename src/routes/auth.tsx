@@ -3,106 +3,59 @@ import { useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, ArrowLeft } from "lucide-react";
 
 const searchSchema = z.object({ mode: z.enum(["login", "signup", "forgot"]).optional() });
 
 export const Route = createFileRoute("/auth")({
   validateSearch: searchSchema,
   component: AuthPage,
+  head: () => ({
+    meta: [
+      { title: "Nexora – Logga in" },
+      { name: "description", content: "Logga in eller skapa konto på Nexora." },
+      { property: "og:title", content: "Nexora – Logga in" },
+      { property: "og:description", content: "Logga in eller skapa konto på Nexora." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
 });
 
-const tickerRows = [
-  [
-    { symbol: "ETH", price: "37 980", change: "-0.95%", up: false },
-    { symbol: "SOL", price: "1 878", change: "-0.82%", up: false },
-    { symbol: "XRP", price: "30,60", change: "-0.70%", up: false },
-    { symbol: "DOGE", price: "2,3210", change: "-0.33%", up: false },
-    { symbol: "AAPL", price: "2 384", change: "-0.34%", up: false },
-    { symbol: "TSLA", price: "3 482", change: "-0.12%", up: false },
-    { symbol: "BTC", price: "1 247 500", change: "+4.20%", up: true },
-    { symbol: "BNB", price: "6 120", change: "+1.15%", up: true },
-  ],
-  [
-    { symbol: "NVDA", price: "12 840", change: "+2.10%", up: true },
-    { symbol: "MSFT", price: "4 560", change: "+0.45%", up: true },
-    { symbol: "GOOGL", price: "18 220", change: "-0.18%", up: false },
-    { symbol: "AMZN", price: "3 910", change: "+0.72%", up: true },
-    { symbol: "META", price: "6 780", change: "-0.55%", up: false },
-    { symbol: "AMD", price: "1 450", change: "+1.30%", up: true },
-    { symbol: "COIN", price: "2 180", change: "-1.05%", up: false },
-    { symbol: "MSTR", price: "8 940", change: "+3.25%", up: true },
-  ],
-  [
-    { symbol: "EUR/SEK", price: "11,52", change: "+0.08%", up: true },
-    { symbol: "USD/SEK", price: "10,68", change: "-0.12%", up: false },
-    { symbol: "GBP/SEK", price: "13,84", change: "+0.05%", up: true },
-    { symbol: "GOLD", price: "2 450", change: "+0.62%", up: true },
-    { symbol: "SILVER", price: "28,40", change: "-0.30%", up: false },
-    { symbol: "OIL", price: "82,50", change: "+1.10%", up: true },
-    { symbol: "SP500", price: "5 890", change: "+0.25%", up: true },
-    { symbol: "OMXS30", price: "2 640", change: "-0.15%", up: false },
-  ],
-];
-
-function TickerStrip({ items, reverse = false, className = "" }: { items: typeof tickerRows[0]; reverse?: boolean; className?: string }) {
-  const doubled = [...items, ...items, ...items, ...items];
+function Field({
+  id, label, type = "text", value, onChange, placeholder, required,
+}: {
+  id: string; label: string; type?: string; value: string;
+  onChange: (v: string) => void; placeholder?: string; required?: boolean;
+}) {
   return (
-    <div className={`flex overflow-hidden whitespace-nowrap ${className}`}>
-      <div className={`flex animate-ticker ${reverse ? "animate-ticker-reverse" : ""} gap-10`}>
-        {doubled.map((item, i) => (
-          <div key={i} className="flex items-center gap-2.5 text-[15px]">
-            <span className="font-semibold text-foreground/80">{item.symbol}</span>
-            <span className="text-foreground">{item.price}</span>
-            <span className={`font-medium ${item.up ? "text-success" : "text-destructive"}`}>{item.change}</span>
-          </div>
-        ))}
-      </div>
+    <div>
+      <label htmlFor={id} className="mb-1.5 block text-xs font-medium text-[var(--v2-muted)]">{label}</label>
+      <input
+        id={id} type={type} required={required} value={value} placeholder={placeholder}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full rounded-xl border border-[var(--v2-line)] bg-[var(--v2-card)] px-4 py-3 text-sm text-[var(--v2-fg)] placeholder:text-[var(--v2-muted)]/50 outline-none transition focus:border-[var(--v2-accent)]"
+      />
     </div>
   );
 }
 
-function AuthBackground() {
-  const stripPositions = [
-    { top: "12%", left: "-10%", width: "120%" },
-    { top: "38%", left: "-5%", width: "115%" },
-    { top: "64%", left: "-15%", width: "130%" },
-  ];
-
+function Check({ checked, onChange, children }: { checked: boolean; onChange: (v: boolean) => void; children: React.ReactNode }) {
   return (
-    <div className="absolute inset-0 overflow-hidden bg-background">
-      <div className="absolute inset-0 bg-[radial-gradient(70%_60%_at_20%_30%,oklch(0.68_0.13_210/0.10),transparent)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(60%_50%_at_80%_80%,oklch(0.55_0.13_200/0.08),transparent)]" />
-
-      <div className="absolute inset-0">
-        {tickerRows.map((row, i) => (
-          <div
-            key={i}
-            className="absolute"
-            style={{
-              top: stripPositions[i].top,
-              left: stripPositions[i].left,
-              width: stripPositions[i].width,
-              transform: `rotate(${-8 + i * 2}deg)`,
-              transformOrigin: "left center",
-            }}
-          >
-            <TickerStrip
-              items={row}
-              reverse={i % 2 === 1}
-              className="py-3 border-y border-border/25 bg-card/35 backdrop-blur-[2px]"
-            />
-          </div>
-        ))}
-      </div>
-
-      <div className="absolute inset-0 bg-gradient-to-br from-background/50 via-background/20 to-background/60" />
-    </div>
+    <label className="flex items-start gap-2.5 text-xs leading-relaxed text-[var(--v2-muted)]">
+      <button
+        type="button"
+        onClick={() => onChange(!checked)}
+        className={`mt-0.5 grid h-4.5 w-4.5 shrink-0 place-items-center rounded-md border transition ${
+          checked ? "border-[var(--v2-accent)] bg-[var(--v2-accent)]" : "border-[var(--v2-line)] bg-transparent"
+        }`}
+        aria-pressed={checked}
+      >
+        {checked && <svg viewBox="0 0 12 12" className="h-3 w-3 text-[var(--v2-on-accent)]" fill="none" stroke="currentColor" strokeWidth={2}><path d="M2.5 6.5l2.5 2.5 4.5-5" strokeLinecap="round" strokeLinejoin="round" /></svg>}
+      </button>
+      <span>{children}</span>
+    </label>
   );
 }
 
@@ -134,7 +87,6 @@ function AuthPage() {
         const { error } = await supabase.auth.signInWithPassword({ email: f.email, password: f.password });
         if (error) throw error;
         toast.success("Välkommen tillbaka");
-        // Kolla profilstatus – första inlogget (ej aktiverat + har tilldelad nivå) → /welcome, annars dashboard
         const { data: { user } } = await supabase.auth.getUser();
         let goWelcome = false;
         if (user) {
@@ -147,9 +99,9 @@ function AuthPage() {
         }
         navigate({ to: goWelcome ? "/welcome" : "/dashboard" });
       } else if (mode === "signup") {
-        if (!f.terms || !f.risk) { toast.error("Du måste godkänna villkoren och bekräfta riskinformationen"); return; }
-        if (f.password.length < 8) { toast.error("Lösenordet måste vara minst 8 tecken"); return; }
-        if (f.password !== f.confirm) { toast.error("Lösenorden matchar inte"); return; }
+        if (!f.terms || !f.risk) { toast.error("Du måste godkänna villkoren och bekräfta riskinformationen"); setLoading(false); return; }
+        if (f.password.length < 8) { toast.error("Lösenordet måste vara minst 8 tecken"); setLoading(false); return; }
+        if (f.password !== f.confirm) { toast.error("Lösenorden matchar inte"); setLoading(false); return; }
         const { error } = await supabase.auth.signUp({
           email: f.email, password: f.password,
           options: {
@@ -174,119 +126,122 @@ function AuthPage() {
     }
   };
 
+  const title = mode === "login" ? "Logga in" : mode === "signup" ? "Skapa konto" : "Glömt lösenord";
+  const subtitle =
+    mode === "login" ? "Välkommen tillbaka till Nexora."
+    : mode === "signup" ? "Kom igång på under en minut."
+    : "Ange din e-post så skickar vi en länk.";
+
   return (
-    <div className="theme-nordnet grid min-h-screen lg:grid-cols-2">
-      <div className="relative hidden overflow-hidden lg:block">
-        <AuthBackground />
-        <div className="relative z-10 flex h-full flex-col justify-between p-12">
-          <Link to="/" className="flex items-center gap-2.5">
-            <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary shadow-glow">
-              <span className="font-display text-lg font-bold text-primary-foreground">N</span>
-            </div>
-            <span className="font-display text-lg font-bold text-foreground">Nexora</span>
-          </Link>
-          <div>
-            <h2 className="max-w-md font-display text-4xl font-bold leading-tight tracking-tight text-foreground">
-              Din <span className="text-gradient-brand">AI-drivna</span> kryptoplattform.
-            </h2>
-            <p className="mt-4 max-w-md text-sm text-muted-foreground">
-              Din inloggning är krypterad och skyddad.
-            </p>
+    <div className="v2-scope min-h-svh bg-[var(--v2-bg)] text-[var(--v2-fg)]">
+      <div className="relative mx-auto min-h-svh w-full max-w-[430px] overflow-hidden px-6 pb-10 pt-12">
+        {/* Glow rings */}
+        <div aria-hidden className="v2-enter__ring v2-enter__ring--1 pointer-events-none absolute -right-40 -top-32 h-[24rem] w-[24rem] rounded-full border-[3rem] border-[var(--v2-ring1)] opacity-90 blur-[1px]" />
+        <div aria-hidden className="v2-enter__ring v2-enter__ring--2 pointer-events-none absolute -left-48 top-44 h-[28rem] w-[28rem] rounded-full border-[4rem] border-[var(--v2-ring2)] opacity-70" />
+        <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[var(--v2-bg)] via-[var(--v2-bg)]/60 to-transparent" />
+
+        <div className="relative">
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            {mode === "login" ? (
+              <Link to="/v2" className="grid h-10 w-10 place-items-center rounded-xl bg-[var(--v2-card)] text-[var(--v2-muted)]">
+                <ArrowLeft className="h-4.5 w-4.5" />
+              </Link>
+            ) : (
+              <button onClick={() => setMode("login")} className="grid h-10 w-10 place-items-center rounded-xl bg-[var(--v2-card)] text-[var(--v2-muted)]">
+                <ArrowLeft className="h-4.5 w-4.5" />
+              </button>
+            )}
+            <Link to="/v2" className="grid h-10 w-10 place-items-center rounded-2xl bg-[var(--v2-accent)] shadow-[0_10px_30px_-10px_var(--v2-accent)]">
+              <span className="font-display text-lg font-bold text-[var(--v2-on-accent)]">N</span>
+            </Link>
           </div>
-          <p className="max-w-md text-xs text-muted-foreground">
-            Handel med kryptotillgångar innebär hög risk. Du kan förlora hela det investerade kapitalet.
-          </p>
-        </div>
-      </div>
 
-      <div className="flex items-center justify-center p-6 sm:p-12">
-        <div className="w-full max-w-md">
-          <h1 className="text-2xl font-bold tracking-tight">
-            {mode === "login" ? "Logga in" : mode === "signup" ? "Skapa konto" : "Glömt lösenord"}
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {mode === "login" && "Välkommen tillbaka till Nexora."}
-            {mode === "signup" && "Kom igång på under en minut."}
-            {mode === "forgot" && "Ange din e-postadress så skickar vi en länk för återställning."}
-          </p>
+          {/* Title */}
+          <div className="mt-12">
+            <h1 className="v2-enter__item font-display text-[2rem] font-semibold leading-tight tracking-tight" style={{ animationDelay: "0.2s" }}>{title}</h1>
+            <p className="v2-enter__item mt-2 text-sm text-[var(--v2-muted)]" style={{ animationDelay: "0.32s" }}>{subtitle}</p>
+          </div>
 
+          {/* Google */}
           {mode !== "forgot" && (
-            <>
-              <Button variant="outline" className="mt-6 w-full" onClick={signInGoogle} disabled={loading}>
+            <div className="v2-enter__item mt-7" style={{ animationDelay: "0.44s" }}>
+              <button
+                onClick={signInGoogle}
+                disabled={loading}
+                className="flex w-full items-center justify-center gap-3 rounded-xl border border-[var(--v2-line)] bg-[var(--v2-card)] py-3.5 text-sm font-semibold text-[var(--v2-fg)] transition active:scale-[0.98] disabled:opacity-60"
+              >
+                <svg className="h-4 w-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
                 Fortsätt med Google
-              </Button>
-              <div className="my-4 flex items-center gap-3">
-                <div className="h-px flex-1 bg-border" />
-                <span className="text-xs text-muted-foreground">eller med e-post</span>
-                <div className="h-px flex-1 bg-border" />
+              </button>
+              <div className="my-5 flex items-center gap-3">
+                <div className="h-px flex-1 bg-[var(--v2-line)]" />
+                <span className="text-xs text-[var(--v2-muted)]">eller med e-post</span>
+                <div className="h-px flex-1 bg-[var(--v2-line)]" />
               </div>
-            </>
+            </div>
           )}
 
-          <form onSubmit={submit} className="space-y-3">
+          {/* Form */}
+          <form onSubmit={submit} className="space-y-3.5">
             {mode === "signup" && (
-              <>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <Label htmlFor="first_name">Förnamn</Label>
-                    <Input id="first_name" required value={f.first_name} onChange={(e) => set("first_name", e.target.value)} />
-                  </div>
-                  <div>
-                    <Label htmlFor="last_name">Efternamn</Label>
-                    <Input id="last_name" required value={f.last_name} onChange={(e) => set("last_name", e.target.value)} />
-                  </div>
-                </div>
-                <div>
-                  <Label htmlFor="phone">Telefonnummer</Label>
-                  <Input id="phone" type="tel" value={f.phone} onChange={(e) => set("phone", e.target.value)} placeholder="+46 ..." />
-                </div>
-              </>
+              <div className="v2-enter__item grid grid-cols-2 gap-3" style={{ animationDelay: "0.5s" }}>
+                <Field id="first_name" label="Förnamn" required value={f.first_name} onChange={(v) => set("first_name", v)} />
+                <Field id="last_name" label="Efternamn" required value={f.last_name} onChange={(v) => set("last_name", v)} />
+              </div>
             )}
-            <div>
-              <Label htmlFor="email">E-postadress</Label>
-              <Input id="email" type="email" required value={f.email} onChange={(e) => set("email", e.target.value)} />
+            {mode === "signup" && (
+              <div className="v2-enter__item" style={{ animationDelay: "0.56s" }}>
+                <Field id="phone" label="Telefonnummer" type="tel" value={f.phone} onChange={(v) => set("phone", v)} placeholder="+46 ..." />
+              </div>
+            )}
+            <div className="v2-enter__item" style={{ animationDelay: "0.6s" }}>
+              <Field id="email" label="E-postadress" type="email" required value={f.email} onChange={(v) => set("email", v)} />
             </div>
             {mode !== "forgot" && (
-              <div>
-                <Label htmlFor="password">Lösenord</Label>
-                <Input id="password" type="password" required minLength={8} value={f.password} onChange={(e) => set("password", e.target.value)} />
-                {mode === "signup" && <p className="mt-1 text-[11px] text-muted-foreground">Minst 8 tecken.</p>}
+              <div className="v2-enter__item" style={{ animationDelay: "0.66s" }}>
+                <Field id="password" label="Lösenord" type="password" required value={f.password} onChange={(v) => set("password", v)} />
+                {mode === "signup" && <p className="mt-1 text-[11px] text-[var(--v2-muted)]">Minst 8 tecken.</p>}
               </div>
             )}
             {mode === "signup" && (
               <>
-                <div>
-                  <Label htmlFor="confirm">Bekräfta lösenord</Label>
-                  <Input id="confirm" type="password" required value={f.confirm} onChange={(e) => set("confirm", e.target.value)} />
+                <div className="v2-enter__item" style={{ animationDelay: "0.72s" }}>
+                  <Field id="confirm" label="Bekräfta lösenord" type="password" required value={f.confirm} onChange={(v) => set("confirm", v)} />
                 </div>
-                <div className="space-y-2 pt-1">
-                  <label className="flex items-start gap-2 text-xs">
-                    <Checkbox checked={f.terms} onCheckedChange={(v) => set("terms", Boolean(v))} className="mt-0.5" />
-                    <span>Jag godkänner Nexora:s användarvillkor och integritetspolicy.</span>
-                  </label>
-                  <label className="flex items-start gap-2 text-xs">
-                    <Checkbox checked={f.risk} onCheckedChange={(v) => set("risk", Boolean(v))} className="mt-0.5" />
-                    <span>Jag har läst riskinformationen och förstår att jag kan förlora hela det investerade kapitalet.</span>
-                  </label>
+                <div className="v2-enter__item space-y-2.5 pt-1" style={{ animationDelay: "0.78s" }}>
+                  <Check checked={f.terms} onChange={(v) => set("terms", v)}>Jag godkänner Nexora:s användarvillkor och integritetspolicy.</Check>
+                  <Check checked={f.risk} onChange={(v) => set("risk", v)}>Jag har läst riskinformationen och förstår att jag kan förlora hela det investerade kapitalet.</Check>
                 </div>
               </>
             )}
-            <Button type="submit" className="mt-2 w-full bg-primary text-primary-foreground hover:opacity-90" disabled={loading}>
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="v2-enter__item mt-2 flex w-full items-center justify-center gap-2 rounded-full bg-[var(--v2-accent)] py-3.5 text-sm font-semibold text-[var(--v2-on-accent)] shadow-[0_10px_30px_-8px_var(--v2-accent)] transition active:scale-[0.97] disabled:opacity-60"
+              style={{ animationDelay: "0.84s" }}
+            >
+              {loading && <Loader2 className="h-4 w-4 animate-spin" />}
               {mode === "login" ? "Logga in" : mode === "signup" ? "Skapa konto" : "Skicka återställningslänk"}
-            </Button>
+            </button>
           </form>
 
-          <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
+          {/* Footer links */}
+          <div className="v2-enter__item mt-5 flex items-center justify-between text-xs text-[var(--v2-muted)]" style={{ animationDelay: "0.9s" }}>
             {mode === "login" ? (
               <>
-                <button onClick={() => setMode("forgot")} className="hover:text-foreground">Glömt lösenord?</button>
-                <button onClick={() => setMode("signup")} className="hover:text-foreground">Skapa konto</button>
+                <button onClick={() => setMode("forgot")} className="font-medium text-[var(--v2-accent)]">Glömt lösenord?</button>
+                <button onClick={() => setMode("signup")} className="font-medium text-[var(--v2-accent)]">Skapa konto</button>
               </>
             ) : (
-              <button onClick={() => setMode("login")} className="hover:text-foreground">← Tillbaka till inloggning</button>
+              <button onClick={() => setMode("login")} className="font-medium text-[var(--v2-accent)]">Tillbaka till inloggning</button>
             )}
           </div>
+
+          <p className="v2-enter__item mt-8 text-[11px] leading-relaxed text-[var(--v2-muted)]/70" style={{ animationDelay: "0.96s" }}>
+            Handel med kryptotillgångar innebär hög risk. Du kan förlora hela det investerade kapitalet.
+          </p>
         </div>
       </div>
     </div>
