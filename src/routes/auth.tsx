@@ -88,18 +88,7 @@ function AuthPage() {
         const { error } = await supabase.auth.signInWithPassword({ email: f.email, password: f.password });
         if (error) throw error;
         toast.success("Välkommen tillbaka");
-        const { data: { user } } = await supabase.auth.getUser();
-        let goWelcome = false;
-        if (user) {
-          const { data: prof } = await supabase
-            .from("profiles")
-            .select("activated_at, assigned_level_sek")
-            .eq("id", user.id)
-            .maybeSingle();
-          if (prof && !prof.activated_at && prof.assigned_level_sek) goWelcome = true;
-        }
-        if (goWelcome) navigate({ to: "/welcome" });
-        else navigate({ to: "/v2", search: { view: "portfolio" } });
+        navigate({ to: "/v2", search: { view: "portfolio" } });
       } else if (mode === "signup") {
         if (!f.terms || !f.risk) { toast.error("Du måste godkänna villkoren och bekräfta riskinformationen"); setLoading(false); return; }
         if (f.password.length < 8) { toast.error("Lösenordet måste vara minst 8 tecken"); setLoading(false); return; }

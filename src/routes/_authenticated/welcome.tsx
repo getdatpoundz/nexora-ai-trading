@@ -107,7 +107,7 @@ function WelcomePage() {
           {hasLevel && !needsKyc && data?.latest_selection?.onramp_status !== "funded" && (
             <Button
               className="w-full bg-primary text-primary-foreground hover:opacity-90 sm:w-auto"
-              onClick={() => navigate({ to: "/activate" })}
+              onClick={() => navigate({ to: "/activate", search: {} })}
             >
               Aktivera med Bitcoin
             </Button>
