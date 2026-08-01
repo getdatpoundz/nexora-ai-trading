@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { AreaChart, Area, ResponsiveContainer, Tooltip, YAxis } from "recharts";
 import { sek, num } from "@/lib/format";
 import {
@@ -55,51 +55,37 @@ function V2Page() {
 }
 
 function Landing({ onStart }: { onStart: () => void }) {
-  const [intro, setIntro] = useState(true);
-
-  useEffect(() => {
-    const t = setTimeout(() => setIntro(false), 2200);
-    return () => clearTimeout(t);
-  }, []);
-
   return (
-    <section className="relative flex min-h-svh flex-col justify-end overflow-hidden px-6 pb-10 pt-16">
-      {/* Intro-överlägg (Wise-stil) */}
+    <section className="v2-enter relative flex min-h-svh flex-col justify-end overflow-hidden px-6 pb-10 pt-16">
       <div
         aria-hidden
-        className={`v2-intro absolute inset-0 z-50 grid place-items-center bg-[var(--v2-bg)] ${
-          intro ? "v2-intro--in" : "v2-intro--out"
-        }`}
-      >
-        <div className="v2-intro__logo">
-          <div className="grid h-16 w-16 place-items-center rounded-2xl bg-[var(--v2-accent)] shadow-[0_20px_50px_-12px_var(--v2-accent)]">
-            <span className="font-display text-3xl font-bold text-[var(--v2-on-accent)]">N</span>
-          </div>
-          <span className="v2-intro__ring" />
-          <span className="v2-intro__ring v2-intro__ring--2" />
-        </div>
-      </div>
-
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -right-40 -top-32 h-[26rem] w-[26rem] rounded-full border-[3.5rem] border-[var(--v2-ring1)] opacity-90 blur-[1px]"
+        className="v2-enter__ring v2-enter__ring--1 pointer-events-none absolute -right-40 -top-32 h-[26rem] w-[26rem] rounded-full border-[3.5rem] border-[var(--v2-ring1)] opacity-90 blur-[1px]"
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute -left-48 top-40 h-[30rem] w-[30rem] rounded-full border-[4rem] border-[var(--v2-ring2)] opacity-70"
+        className="v2-enter__ring v2-enter__ring--2 pointer-events-none absolute -left-48 top-40 h-[30rem] w-[30rem] rounded-full border-[4rem] border-[var(--v2-ring2)] opacity-70"
       />
       <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[var(--v2-bg)] via-[var(--v2-bg)]/60 to-transparent" />
 
-      <div className={`relative ${intro ? "" : "v2-reveal"}`}>
-        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[var(--v2-accent)]">Nexora</p>
+      {/* Brandmärke som ritar in sig (Wise-stil) */}
+      <div className="v2-enter__logo pointer-events-none absolute left-1/2 top-20 -translate-x-1/2">
+        <div className="grid h-14 w-14 place-items-center rounded-2xl bg-[var(--v2-accent)] shadow-[0_16px_40px_-10px_var(--v2-accent)]">
+          <span className="font-display text-2xl font-bold text-[var(--v2-on-accent)]">N</span>
+        </div>
+      </div>
+
+      <div className="relative">
+        <p className="v2-enter__item text-xs font-semibold uppercase tracking-[0.3em] text-[var(--v2-accent)]" style={{ animationDelay: "0.35s" }}>Nexora</p>
         <h1 className="mt-4 font-display text-[2.6rem] font-semibold leading-[1.05] tracking-tight">
-          Det bästa<br />sättet att<br />investera
+          <span className="v2-enter__item block" style={{ animationDelay: "0.45s" }}>Det bästa</span>
+          <span className="v2-enter__item block" style={{ animationDelay: "0.55s" }}>sättet att</span>
+          <span className="v2-enter__item block" style={{ animationDelay: "0.65s" }}>investera</span>
         </h1>
-        <p className="mt-4 max-w-[19rem] text-sm leading-relaxed text-[var(--v2-muted)]">
+        <p className="v2-enter__item mt-4 max-w-[19rem] text-sm leading-relaxed text-[var(--v2-muted)]" style={{ animationDelay: "0.78s" }}>
           AI-driven kryptohandel i mobilen. Följ din portfölj, sätt in och ta ut – allt på ett ställe.
         </p>
 
-        <div className="mt-10 flex items-center justify-between gap-4">
+        <div className="v2-enter__item mt-10 flex items-center justify-between gap-4" style={{ animationDelay: "0.92s" }}>
           <div className="flex items-center gap-2" aria-hidden>
             <span className="h-1.5 w-6 rounded-full bg-[var(--v2-accent)]" />
             <span className="h-1.5 w-1.5 rounded-full bg-[var(--v2-line)]" />
