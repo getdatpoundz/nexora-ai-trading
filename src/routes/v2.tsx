@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { AreaChart, Area, ResponsiveContainer, Tooltip, YAxis } from "recharts";
 import { sek, num } from "@/lib/format";
@@ -10,6 +10,9 @@ import markLight from "@/assets/nexora-mark-light.png.asset.json";
 
 
 export const Route = createFileRoute("/v2")({
+  validateSearch: (s: Record<string, unknown>): { view?: "portfolio" } => ({
+    view: s['view'] === "portfolio" ? "portfolio" : undefined,
+  }),
   component: V2Page,
   head: () => ({
     meta: [
@@ -41,10 +44,14 @@ const POSITIONS = [
 ];
 
 function V2Page() {
+  const { view } = Route.useSearch();
+  const navigate = useNavigate();
   return (
     <div className="v2-scope min-h-svh bg-[var(--v2-bg)] text-[var(--v2-fg)]">
       <div className="mx-auto min-h-svh w-full max-w-[430px] overflow-hidden">
-        <Landing />
+        {view === "portfolio"
+          ? <Portfolio onBack={() => navigate({ to: "/v2", search: {} })} />
+          : <Landing />}
       </div>
     </div>
   );

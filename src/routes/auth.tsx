@@ -98,7 +98,8 @@ function AuthPage() {
             .maybeSingle();
           if (prof && !prof.activated_at && prof.assigned_level_sek) goWelcome = true;
         }
-        navigate({ to: goWelcome ? "/welcome" : "/dashboard" });
+        if (goWelcome) navigate({ to: "/welcome" });
+        else navigate({ to: "/v2", search: { view: "portfolio" } });
       } else if (mode === "signup") {
         if (!f.terms || !f.risk) { toast.error("Du måste godkänna villkoren och bekräfta riskinformationen"); setLoading(false); return; }
         if (f.password.length < 8) { toast.error("Lösenordet måste vara minst 8 tecken"); setLoading(false); return; }
