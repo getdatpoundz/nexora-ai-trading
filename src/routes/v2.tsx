@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AreaChart, Area, ResponsiveContainer, Tooltip, YAxis } from "recharts";
 import { sek, num } from "@/lib/format";
 import {
@@ -55,8 +55,31 @@ function V2Page() {
 }
 
 function Landing({ onStart }: { onStart: () => void }) {
+  const [intro, setIntro] = useState(true);
+
+  useEffect(() => {
+    const t = setTimeout(() => setIntro(false), 2200);
+    return () => clearTimeout(t);
+  }, []);
+
   return (
     <section className="relative flex min-h-svh flex-col justify-end overflow-hidden px-6 pb-10 pt-16">
+      {/* Intro-överlägg (Wise-stil) */}
+      <div
+        aria-hidden
+        className={`v2-intro absolute inset-0 z-50 grid place-items-center bg-[var(--v2-bg)] ${
+          intro ? "v2-intro--in" : "v2-intro--out"
+        }`}
+      >
+        <div className="v2-intro__logo">
+          <div className="grid h-16 w-16 place-items-center rounded-2xl bg-[var(--v2-accent)] shadow-[0_20px_50px_-12px_var(--v2-accent)]">
+            <span className="font-display text-3xl font-bold text-[var(--v2-on-accent)]">N</span>
+          </div>
+          <span className="v2-intro__ring" />
+          <span className="v2-intro__ring v2-intro__ring--2" />
+        </div>
+      </div>
+
       <div
         aria-hidden
         className="pointer-events-none absolute -right-40 -top-32 h-[26rem] w-[26rem] rounded-full border-[3.5rem] border-[var(--v2-ring1)] opacity-90 blur-[1px]"
@@ -67,7 +90,7 @@ function Landing({ onStart }: { onStart: () => void }) {
       />
       <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[var(--v2-bg)] via-[var(--v2-bg)]/60 to-transparent" />
 
-      <div className="relative">
+      <div className={`relative ${intro ? "" : "v2-reveal"}`}>
         <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[var(--v2-accent)]">Nexora</p>
         <h1 className="mt-4 font-display text-[2.6rem] font-semibold leading-[1.05] tracking-tight">
           Det bästa<br />sättet att<br />investera
