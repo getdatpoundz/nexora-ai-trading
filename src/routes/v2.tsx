@@ -39,22 +39,16 @@ const POSITIONS = [
 ];
 
 function V2Page() {
-  const [view, setView] = useState<"landing" | "portfolio">("landing");
-
   return (
     <div className="v2-scope min-h-svh bg-[var(--v2-bg)] text-[var(--v2-fg)]">
       <div className="mx-auto min-h-svh w-full max-w-[430px] overflow-hidden">
-        {view === "landing" ? (
-          <Landing onStart={() => setView("portfolio")} />
-        ) : (
-          <Portfolio onBack={() => setView("landing")} />
-        )}
+        <Landing />
       </div>
     </div>
   );
 }
 
-function Landing({ onStart }: { onStart: () => void }) {
+function Landing() {
   return (
     <section className="v2-enter relative flex min-h-svh flex-col justify-end overflow-hidden px-6 pb-10 pt-16">
       <div
