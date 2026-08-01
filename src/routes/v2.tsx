@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AreaChart, Area, ResponsiveContainer, Tooltip, YAxis } from "recharts";
 import { sek, num } from "@/lib/format";
 import {
