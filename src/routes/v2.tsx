@@ -10,6 +10,9 @@ import markLight from "@/assets/nexora-mark-light.png.asset.json";
 
 
 export const Route = createFileRoute("/v2")({
+  validateSearch: (s: Record<string, unknown>): { view?: "portfolio" } => ({
+    view: s['view'] === "portfolio" ? "portfolio" : undefined,
+  }),
   component: V2Page,
   head: () => ({
     meta: [
