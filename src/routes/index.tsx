@@ -101,8 +101,32 @@ const formatSek = (n: number) => `${n.toLocaleString("sv-SE")} kr`;
 
 
 function Landing() {
+  const [intro, setIntro] = useState(true);
+
+  useEffect(() => {
+    const t = setTimeout(() => setIntro(false), 1900);
+    return () => clearTimeout(t);
+  }, []);
+
   return (
     <div className="theme-nordnet min-h-screen">
+      {/* Entré-transition (Wise-stil) */}
+      <div
+        aria-hidden
+        className={`ls-intro fixed inset-0 z-[100] grid place-items-center bg-background ${
+          intro ? "ls-intro--in" : "ls-intro--out"
+        }`}
+      >
+        <div className="ls-intro__mark">
+          <div className="grid h-16 w-16 place-items-center rounded-2xl bg-primary shadow-[0_20px_50px_-12px_oklch(0.68_0.13_210)]">
+            <span className="font-display text-3xl font-bold text-primary-foreground">N</span>
+          </div>
+          <span className="ls-intro__ring" />
+          <span className="ls-intro__ring ls-intro__ring--2" />
+        </div>
+      </div>
+
+      <div className={intro ? "ls-hidden" : "ls-reveal"}>
       {/* Top ticker (twelvedata-stil, ovanför navigationen) */}
       <MarketTicker />
 
