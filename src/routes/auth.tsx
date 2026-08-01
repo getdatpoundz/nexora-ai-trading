@@ -153,8 +153,9 @@ function AuthPage() {
               </button>
             )}
             <Link to="/v2" className="grid h-10 w-10 place-items-center rounded-2xl bg-[var(--v2-accent)] shadow-[0_10px_30px_-10px_var(--v2-accent)]">
-              <span className="font-display text-lg font-bold text-[var(--v2-on-accent)]">N</span>
+              <img src={markLight.url} alt="Nexora" className="h-5 w-5 object-contain" />
             </Link>
+
           </div>
 
           {/* Title */}
