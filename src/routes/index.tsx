@@ -728,6 +728,7 @@ function Landing() {
           <p className="mt-4 text-center text-xs text-muted-foreground">© {new Date().getFullYear()} Nexora</p>
         </div>
       </footer>
+      </div>
     </div>
   );
 }
