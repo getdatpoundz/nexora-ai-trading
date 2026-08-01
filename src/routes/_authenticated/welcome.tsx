@@ -55,7 +55,7 @@ function WelcomePage() {
       <div className="rounded-2xl border border-border bg-card p-8 shadow-sm">
         <div className="flex items-center gap-2 text-primary">
           <Sparkles className="h-5 w-5" />
-          <span className="text-xs font-semibold uppercase tracking-wider">Välkommen till Nexora AI</span>
+          <span className="text-xs font-semibold uppercase tracking-wider">Välkommen till Nexora</span>
         </div>
         <h1 className="mt-3 font-display text-3xl font-bold tracking-tight">
           Hej {p?.first_name ?? ""}, ditt konto är förberett

@@ -11,9 +11,9 @@ export const Route = createFileRoute("/v2")({
   component: V2Page,
   head: () => ({
     meta: [
-      { title: "Nexora AI v2 – Mobil portföljapp" },
-      { name: "description", content: "Nexora AI v2: en mobilanpassad app-vy med portföljvärde, utveckling och snabb insättning eller uttag." },
-      { property: "og:title", content: "Nexora AI v2 – Mobil portföljapp" },
+      { title: "Nexora v2 – Mobil portföljapp" },
+      { name: "description", content: "Nexora v2: en mobilanpassad app-vy med portföljvärde, utveckling och snabb insättning eller uttag." },
+      { property: "og:title", content: "Nexora v2 – Mobil portföljapp" },
       { property: "og:description", content: "Mobilanpassad app-vy med portföljvärde, utveckling och snabba uttag." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -68,7 +68,7 @@ function Landing({ onStart }: { onStart: () => void }) {
       <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[var(--v2-bg)] via-[var(--v2-bg)]/60 to-transparent" />
 
       <div className="relative">
-        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[var(--v2-accent)]">Nexora AI</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[var(--v2-accent)]">Nexora</p>
         <h1 className="mt-4 font-display text-[2.6rem] font-semibold leading-[1.05] tracking-tight">
           Det bästa<br />sättet att<br />investera
         </h1>
@@ -203,7 +203,7 @@ function Portfolio({ onBack }: { onBack: () => void }) {
               </span>
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold">{p.name}</p>
-                <p className="truncate text-xs text-[var(--v2-muted)]">{p.symbol} · Nexora AI</p>
+                <p className="truncate text-xs text-[var(--v2-muted)]">{p.symbol} · Nexora</p>
               </div>
               <div className="shrink-0 text-right">
                 <p className="text-sm font-semibold tabular-nums">{sek(p.value)}</p>
