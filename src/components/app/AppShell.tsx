@@ -1,4 +1,5 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
+import markLight from "@/assets/nexora-mark-light.png.asset.json";
 import { useState, type ReactNode } from "react";
 import {
   Wallet, Brain, LineChart, ArrowLeftRight,
@@ -41,7 +42,7 @@ function Logo({ small = false }: { small?: boolean }) {
   return (
     <div className="flex items-center gap-2">
       <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl gradient-brand glow-brand">
-        <span className="text-lg font-black text-primary-foreground">N</span>
+        <img src={markLight.url} alt="Nexora" className="h-5 w-5 object-contain" />
       </div>
       {!small && (
         <div className="flex flex-col leading-none">
