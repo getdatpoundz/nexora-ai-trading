@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { AreaChart, Area, ResponsiveContainer, Tooltip, YAxis } from "recharts";
 import { sek, num } from "@/lib/format";
@@ -39,22 +39,16 @@ const POSITIONS = [
 ];
 
 function V2Page() {
-  const [view, setView] = useState<"landing" | "portfolio">("landing");
-
   return (
     <div className="v2-scope min-h-svh bg-[var(--v2-bg)] text-[var(--v2-fg)]">
       <div className="mx-auto min-h-svh w-full max-w-[430px] overflow-hidden">
-        {view === "landing" ? (
-          <Landing onStart={() => setView("portfolio")} />
-        ) : (
-          <Portfolio onBack={() => setView("landing")} />
-        )}
+        <Landing />
       </div>
     </div>
   );
 }
 
-function Landing({ onStart }: { onStart: () => void }) {
+function Landing() {
   return (
     <section className="v2-enter relative flex min-h-svh flex-col justify-end overflow-hidden px-6 pb-10 pt-16">
       <div
@@ -85,18 +79,21 @@ function Landing({ onStart }: { onStart: () => void }) {
           AI-driven kryptohandel i mobilen. Följ din portfölj, sätt in och ta ut – allt på ett ställe.
         </p>
 
-        <div className="v2-enter__item mt-10 flex items-center justify-between gap-4" style={{ animationDelay: "0.92s" }}>
-          <div className="flex items-center gap-2" aria-hidden>
-            <span className="h-1.5 w-6 rounded-full bg-[var(--v2-accent)]" />
-            <span className="h-1.5 w-1.5 rounded-full bg-[var(--v2-line)]" />
-            <span className="h-1.5 w-1.5 rounded-full bg-[var(--v2-line)]" />
-          </div>
-          <button
-            onClick={onStart}
-            className="rounded-full bg-[var(--v2-accent)] px-7 py-3.5 text-sm font-semibold text-[var(--v2-on-accent)] shadow-[0_10px_30px_-8px_var(--v2-accent)] transition active:scale-[0.97]"
+        <div className="v2-enter__item mt-10 flex flex-col gap-3" style={{ animationDelay: "0.92s" }}>
+          <Link
+            to="/auth"
+            search={{ mode: "login" }}
+            className="rounded-full bg-[var(--v2-accent)] px-7 py-3.5 text-center text-sm font-semibold text-[var(--v2-on-accent)] shadow-[0_10px_30px_-8px_var(--v2-accent)] transition active:scale-[0.97]"
           >
-            Kom igång
-          </button>
+            Logga in
+          </Link>
+          <Link
+            to="/auth"
+            search={{ mode: "signup" }}
+            className="rounded-full border border-[var(--v2-line)] bg-[var(--v2-card)] px-7 py-3.5 text-center text-sm font-semibold text-[var(--v2-fg)] transition active:scale-[0.97]"
+          >
+            Skapa konto
+          </Link>
         </div>
       </div>
     </section>
