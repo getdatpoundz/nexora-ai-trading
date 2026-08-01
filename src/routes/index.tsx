@@ -5,6 +5,7 @@ import avanzaLogo from "@/assets/avanza.png";
 import nordnetLogo from "@/assets/nordnet.png";
 import { MarketTicker } from "@/components/landing/MarketTicker";
 import { getLevelByAmount } from "@/lib/investment-levels";
+import markLight from "@/assets/nexora-mark-light.png.asset.json";
 
 export const Route = createFileRoute("/")({
   component: Landing,
@@ -119,8 +120,9 @@ function Landing() {
       >
         <div className="ls-intro__mark">
           <div className="grid h-16 w-16 place-items-center rounded-2xl bg-primary shadow-[0_20px_50px_-12px_oklch(0.68_0.13_210)]">
-            <span className="font-display text-3xl font-bold text-primary-foreground">N</span>
+            <img src={markLight.url} alt="Nexora" className="h-8 w-8 object-contain" />
           </div>
+
           <span className="ls-intro__ring" />
           <span className="ls-intro__ring ls-intro__ring--2" />
         </div>
@@ -135,8 +137,9 @@ function Landing() {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-2.5">
             <div className="grid h-9 w-9 place-items-center rounded-lg bg-primary">
-              <span className="font-display text-lg font-bold text-primary-foreground">N</span>
+              <img src={markLight.url} alt="Nexora" className="h-5 w-5 object-contain" />
             </div>
+
             <span className="font-display text-lg font-bold tracking-tight">Nexora</span>
             
           </div>
@@ -709,8 +712,9 @@ function Landing() {
           <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border pb-6">
             <div className="flex items-center gap-2.5">
               <div className="grid h-8 w-8 place-items-center rounded-lg bg-primary">
-                <span className="font-display text-sm font-bold text-primary-foreground">N</span>
+                <img src={markLight.url} alt="Nexora" className="h-4 w-4 object-contain" />
               </div>
+
               <span className="font-display font-bold">Nexora</span>
             </div>
             <div className="flex gap-6 text-sm text-muted-foreground">

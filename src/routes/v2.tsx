@@ -6,6 +6,8 @@ import {
   Menu, Bell, Home, FileText, Grid2X2, User, ArrowDownToLine,
   ArrowUpFromLine, ArrowUpRight, ArrowDownRight, Plus,
 } from "lucide-react";
+import markLight from "@/assets/nexora-mark-light.png.asset.json";
+
 
 export const Route = createFileRoute("/v2")({
   component: V2Page,
@@ -64,8 +66,9 @@ function Landing() {
       {/* Brandmärke som ritar in sig (Wise-stil) */}
       <div className="v2-enter__logo pointer-events-none absolute left-1/2 top-20 -translate-x-1/2">
         <div className="grid h-14 w-14 place-items-center rounded-2xl bg-[var(--v2-accent)] shadow-[0_16px_40px_-10px_var(--v2-accent)]">
-          <span className="font-display text-2xl font-bold text-[var(--v2-on-accent)]">N</span>
+          <img src={markLight.url} alt="Nexora" className="h-7 w-7 object-contain" />
         </div>
+
       </div>
 
       <div className="relative">
