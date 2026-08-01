@@ -44,10 +44,14 @@ const POSITIONS = [
 ];
 
 function V2Page() {
+  const { view } = Route.useSearch();
+  const navigate = useNavigate();
   return (
     <div className="v2-scope min-h-svh bg-[var(--v2-bg)] text-[var(--v2-fg)]">
       <div className="mx-auto min-h-svh w-full max-w-[430px] overflow-hidden">
-        <Landing />
+        {view === "portfolio"
+          ? <Portfolio onBack={() => navigate({ to: "/v2", search: {} })} />
+          : <Landing />}
       </div>
     </div>
   );
