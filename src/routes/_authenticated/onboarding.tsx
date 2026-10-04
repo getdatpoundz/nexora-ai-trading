@@ -47,7 +47,7 @@ function OnboardingPage() {
         },
       });
       toast.success("Verifiering klar");
-      navigate({ to: "/activate", search: {} });
+      navigate({ to: "/activate", search: { amount: undefined } });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Något gick fel");
     } finally {
