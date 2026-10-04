@@ -14,7 +14,6 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as Dashboard2RouteImport } from './routes/dashboard2'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as V2RouteImport } from './routes/v2'
 import { Route as AuthenticatedActivateRouteImport } from './routes/_authenticated/activate'
 import { Route as AuthenticatedBotRulesRouteImport } from './routes/_authenticated/bot-rules'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
@@ -59,11 +58,6 @@ const Dashboard2Route = Dashboard2RouteImport.update({
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const V2Route = V2RouteImport.update({
-  id: '/v2',
-  path: '/v2',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedActivateRoute = AuthenticatedActivateRouteImport.update({
@@ -180,7 +174,6 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRouteWithChildren
   '/dashboard2': typeof Dashboard2Route
   '/reset-password': typeof ResetPasswordRoute
-  '/v2': typeof V2Route
   '/activate': typeof AuthenticatedActivateRoute
   '/bot-rules': typeof AuthenticatedBotRulesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -208,7 +201,6 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRouteWithChildren
   '/dashboard2': typeof Dashboard2Route
   '/reset-password': typeof ResetPasswordRoute
-  '/v2': typeof V2Route
   '/activate': typeof AuthenticatedActivateRoute
   '/bot-rules': typeof AuthenticatedBotRulesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -238,7 +230,6 @@ export interface FileRoutesById {
   '/auth': typeof AuthRouteWithChildren
   '/dashboard2': typeof Dashboard2Route
   '/reset-password': typeof ResetPasswordRoute
-  '/v2': typeof V2Route
   '/_authenticated/activate': typeof AuthenticatedActivateRoute
   '/_authenticated/bot-rules': typeof AuthenticatedBotRulesRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
@@ -268,7 +259,6 @@ export interface FileRouteTypes {
     | '/auth'
     | '/dashboard2'
     | '/reset-password'
-    | '/v2'
     | '/activate'
     | '/bot-rules'
     | '/dashboard'
@@ -296,7 +286,6 @@ export interface FileRouteTypes {
     | '/auth'
     | '/dashboard2'
     | '/reset-password'
-    | '/v2'
     | '/activate'
     | '/bot-rules'
     | '/dashboard'
@@ -325,7 +314,6 @@ export interface FileRouteTypes {
     | '/auth'
     | '/dashboard2'
     | '/reset-password'
-    | '/v2'
     | '/_authenticated/activate'
     | '/_authenticated/bot-rules'
     | '/_authenticated/dashboard'
@@ -355,7 +343,6 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRouteWithChildren
   Dashboard2Route: typeof Dashboard2Route
   ResetPasswordRoute: typeof ResetPasswordRoute
-  V2Route: typeof V2Route
   ApiPublicHooksBotTickRoute: typeof ApiPublicHooksBotTickRoute
   ApiPublicOnrampWebhookRoute: typeof ApiPublicOnrampWebhookRoute
 }
@@ -395,13 +382,6 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/v2': {
-      id: '/v2'
-      path: '/v2'
-      fullPath: '/v2'
-      preLoaderRoute: typeof V2RouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/activate': {
@@ -615,7 +595,6 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRouteWithChildren,
   Dashboard2Route: Dashboard2Route,
   ResetPasswordRoute: ResetPasswordRoute,
-  V2Route: V2Route,
   ApiPublicHooksBotTickRoute: ApiPublicHooksBotTickRoute,
   ApiPublicOnrampWebhookRoute: ApiPublicOnrampWebhookRoute,
 }
