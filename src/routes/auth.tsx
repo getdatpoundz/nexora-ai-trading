@@ -135,7 +135,7 @@ function AuthPage() {
           {/* Header */}
           <div className="flex items-center justify-between">
             {mode === "login" ? (
-              <Link to="/v2" className="grid h-10 w-10 place-items-center rounded-xl bg-[var(--v2-card)] text-[var(--v2-muted)]">
+              <Link to="/" className="grid h-10 w-10 place-items-center rounded-xl bg-[var(--v2-card)] text-[var(--v2-muted)]">
                 <ArrowLeft className="h-4.5 w-4.5" />
               </Link>
             ) : (
@@ -143,7 +143,7 @@ function AuthPage() {
                 <ArrowLeft className="h-4.5 w-4.5" />
               </button>
             )}
-            <Link to="/v2" className="grid h-10 w-10 place-items-center rounded-2xl bg-[var(--v2-accent)] shadow-[0_10px_30px_-10px_var(--v2-accent)]">
+            <Link to="/" className="grid h-10 w-10 place-items-center rounded-2xl bg-[var(--v2-accent)] shadow-[0_10px_30px_-10px_var(--v2-accent)]">
               <img src={markLight.url} alt="Nexora" className="h-5 w-5 object-contain" />
             </Link>
 
