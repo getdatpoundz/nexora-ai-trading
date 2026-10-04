@@ -27,7 +27,7 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/activate")({
   validateSearch: (s: Record<string, unknown>) => ({
-    amount: typeof s.amount === "number" ? s.amount : s.amount ? Number(s.amount) : undefined,
+    amount: (typeof s.amount === "number" ? s.amount : s.amount ? Number(s.amount) : undefined) as number | undefined,
   }),
   component: ActivatePage,
 });
